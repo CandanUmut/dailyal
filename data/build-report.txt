@@ -1,4 +1,4 @@
 alignment problems: 0
 
-items 4855, with meaning 538
-Açık Kuran words 2896/77429
+items 4855, with meaning 3271
+Açık Kuran words 39625/77429
