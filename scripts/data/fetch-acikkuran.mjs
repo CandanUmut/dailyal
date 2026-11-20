@@ -53,8 +53,11 @@ for (const a of AUTHORS) {
   console.log('translation done', a);
 }
 
+// Optional priority order, e.g. FIRST=1,78-114 fetches those surahs before the rest.
+const first = (process.env.FIRST || '').split(',').filter(Boolean).flatMap((x) => { const [a, b] = x.split('-').map(Number); return b ? Array.from({ length: b - a + 1 }, (_, i) => a + i) : [a]; });
+const order = [...first.map((n) => surahs.find((s) => s.id === n)).filter(Boolean), ...surahs.filter((s) => !first.includes(s.id))];
 let n = 0;
-for (const s of surahs) {
+for (const s of order) {
   const dir = join(RAW, 'words', String(s.id)); await mkdir(dir, { recursive: true });
   for (let v = 1; v <= s.verse_count; v++) if (await save(join(dir, `${v}.json`), `/surahs/${s.id}/verses/${v}/words`)) n++;
   console.log(`surah ${s.id} done (${n} fetched this run)`);
