@@ -17,5 +17,6 @@ Things that are not verified yet. Nothing here goes into the app until it is clo
 | G11 | A source for passage themes and context, beyond the metadata | Find one before Phase 4 |
 | G12 | Which Diyanet edition is Açık Kuran's author 11 | Ask Açık Kuran, or compare with the published editions |
 | G13 | Who wrote Açık Kuran's word meanings, and how they were checked | Ask Açık Kuran |
-| G14 | Learning-method citations marked *(verify)* in PLAN.md §2 | Research phase R0 |
+| G14 | ~~Learning-method citations~~ **Closed**: checked in `research/learning.md` | — |
 | G15 | Short meanings of prefixes and pronouns (`src/scripts/cardview.ts`: PREFIX_MEAN, PERSON) are written from knowledge | Check against how Açık Kuran renders words that carry them, and against the corpus tagset; write `docs/research/particles.md` |
+| G16 | No study found on teaching Arabic roots to adult learners (does it speed vocabulary growth?) | Keep watching; measure in our own data |

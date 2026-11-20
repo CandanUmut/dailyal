@@ -6,7 +6,7 @@
 |---|---|---|
 | 0 | Design brief, content plan, sources and licence check, phone mockup | **Done, waiting for Umut's review** (draft PR) |
 | Plan | `docs/PLAN.md`, reviewed by the critic (`docs/reviews/plan-review.md`) | **Done**; review decisions in PLAN §5b |
-| R0 | Learning-method sources (`docs/research/learning.md`) | In progress (research agent) |
+| R0 | Learning-method sources (`docs/research/learning.md`) | **Done**; PLAN §2 rewritten from it. Two behaviour changes are waiting for Umut (see below) |
 | 1 | Foundation: data pipeline, app (Today, Placement, Words, Listen, Surahs, Library), EN/TR, offline, tests | **Built, tests pass**; waiting for the full Açık Kuran download, then the Phase 1 critic review |
 | 2–6 | See `docs/PLAN.md` §5 | Not started |
 
@@ -25,3 +25,5 @@ Each phase ends with phone-size screenshots, test results and a PR.
 - **2026-11-20**: Umut: use Açık Kuran (open source, has APIs); open the branch; plan the whole app with a critic; work phase by phase, with a critic using the app after each phase; work until usage runs out and continue on a schedule. Done: Açık Kuran key saved as a network secret (never in the repo); `main` created; draft PR #1; a scheduled task continues the work every 5 hours.
 - **2026-11-20**: Unchanged Quranic Arabic Corpus v0.4 file found (checksum matches its repository's Git LFS record), so no e-mail was needed.
 - **2026-11-20**: Tanzil and the corpus align word for word in all 6,236 verses once 4 known two-token joins (بَعْدَ مَا, إِلْ يَاسِينَ) are handled. The Basmala is stored per surah, because 95 and 97 spell it بِّسْمِ.
+- **2026-11-20**: R0 found that growing review gaps do not beat equal gaps in the long term. The doubling is kept only as a design choice (fewer misses while learning), and is now labelled that way.
+- **Waiting for Umut** (these would change how the app behaves): (1) in Listen, hear the verse once **without** the text before seeing it (predict, then check); (2) switch reciters on later re-listens, to vary the conditions.

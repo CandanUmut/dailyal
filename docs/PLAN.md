@@ -13,21 +13,23 @@ We measure it, honestly:
 
 ## 2. Learning methods we rely on (and why)
 
-Every method here needs a source before the app claims it. Items marked *(verify)* are checked in research phase R0 and listed in `docs/research/learning.md`.
+Every method here needs a source before the app claims it. R0 checked them (2026-11-20); the details and the depth of reading (mostly abstracts) are in `docs/research/learning.md`.
 
-| Method | What it means here | Evidence *(verify)* |
+| Method | What it means here | Evidence (checked in `research/learning.md`) |
 |---|---|---|
-| **Frequency first** | Teach the lemmas that cover the most running words first | Nation 2006 *(verify)* and our own count (`frequency.md`) |
-| **Retrieval practice** | Try to recall the meaning *before* seeing it, every time | Karpicke & Roediger 2008 (vocabulary) *(verify)* |
-| **Spacing** | Reviews spread over days. The doubling gaps (1, 2, 4, 8, 16 …) are Uu's design choice; the evidence for that exact schedule is mixed | Cepeda et al. 2006 for spacing itself *(verify)* |
-| **Comprehensible input** | Listen to passages where you already know about 95% or more of the words, so the rest can be followed | Coverage thresholds: 95–98% for reading (Laufer 1989; Hu & Nation 2000), 90–95% for listening (van Zeeland & Schmitt 2013) |
-| **Narrow, repeated listening** | Hear the same passage several times across days, then related passages | Repeated listening helps L2 listening comprehension *(verify)* |
-| **Word parts on the fly** | Arabic joins و، فَ، بِ، لِ، كَ، ال and pronoun endings to words. Hearing them quickly is a separate skill, so it gets its own drills | Corpus: most frequent "lemmas" are these parts (`frequency.md`) |
-| **Roots and patterns** | Group words by root, and learn what verb forms and noun patterns add | Morphological awareness supports Arabic vocabulary *(verify)* |
-| **Dual coding** | Sound + Arabic text + meaning together, then take the text away step by step | Mayer, Paivio *(verify)* |
-| **Desirable difficulty** | Aim for a 5–15% miss rate (as in Uu). This is a design choice, not a research number | Bjork *(verify)* |
-| **Context before detail** | Before a passage: what kind of surah, where it sits, the translators' own wording (sourced only). After: the detail | Chang & Read 2006: topic information helped L2 listening more than vocabulary preview *(verified by the critic, abstract)* |
-| **Chunks** | Learn the most repeated multi-word phrases (وَٱللَّهُ غَفُورٌ رَّحِيمٌ …) as units | Formulaic-language research *(verify)* |
+| **Frequency first** | Teach the items that cover the most running words first | Our own count (`frequency.md`). Nation 2006 gives vocabulary sizes, not a teaching order |
+| **Retrieval practice** | Try to recall the meaning *before* seeing it, every time | Karpicke & Roediger 2008 (verified) |
+| **Spacing** | Reviews spread over days. We double the gaps (1, 2, 4, 8 …) for fewer misses while learning | Spacing helps (Cepeda et al. 2006). Growing gaps do **not** beat equal gaps in the long term (Karpicke & Roediger 2007; Kang et al. 2014; Latimier et al. 2021) |
+| **Comprehensible input** | Listen to verses where you know about 95% or more of the words | 95% is a **target, not a threshold**: understanding rises steadily with coverage (Schmitt et al. 2011). The data is English (van Zeeland & Schmitt 2013) |
+| **Repeated listening** | Hear a verse more than once in a session, and again on later days | Within one sitting: Chang & Read 2006. Across days: our design choice |
+| **Word parts on the fly** | Hearing و، فَ، بِ، لِ، ال and pronoun endings quickly is a separate skill, with its own drills | They are the most frequent items in our count |
+| **Roots and patterns** | Group words by root | Learners process Arabic by root (Freynik et al. 2017). That teaching roots speeds vocabulary growth is **untested** (G16) |
+| **Audio with text, then without** | Hear with the text, then hear without it | Speech + text beats speech alone (Adesope & Nesbit 2012); captions help L2 listening (Montero Perez et al. 2013). Fading the text is our design choice |
+| **Desirable difficulty** | Aim for a 5–15% miss rate | General idea: Bjork & Bjork 2011. The 5–15% is ours |
+| **Chunks** | Learn the most repeated phrases as units | Conklin & Schmitt 2008; Yeldham 2020 (listening). English data |
+| **Context before detail** | Before a passage: what kind of surah, and where it sits (sourced only) | Chang & Read 2006: topic information helped L2 listening most, vocabulary preview least |
+| **Learning to listen** | Predict, listen, check, listen again | Vandergrift & Tafaghodtari 2010 |
+| **Honest self-check** | Compare "how much did you follow" with the listening check | People misjudge their own learning (Ross 1998; Karpicke & Roediger 2008) |
 
 ## 3. What the finished app does
 
