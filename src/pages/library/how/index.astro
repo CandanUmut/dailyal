@@ -1,0 +1,29 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { u } from '../../../lib/url';
+---
+<Base title="How it works" tab="library">
+  <a class="back" href={u('library/')}>‹ Library / Kitaplık</a>
+  <article class="prose l-en">
+    <h1 class="h1">How this program works</h1>
+    <p>The goal: when a passage is recited, you follow what it says as you hear it.</p>
+    <h2>Most frequent first</h2>
+    <p>The Quran has 77,429 words, built from about 4,800 dictionary forms, prefixes and pronouns. A small number of them appears everywhere. If you know the 300 most frequent, every part of about 74% of the words in the Quran is known to you; with 1,000, about 89%. These counts come from the Quranic Arabic Corpus, and the method is in the project's research notes.</p>
+    <p>Knowing every word of a verse is not the same as understanding it: grammar and context matter too. That is why Listen checks your understanding without the text.</p>
+    <h2>A day</h2>
+    <ul><li><b>Listen</b> to one verse in three passes: hear and see, fill, hear only. It ends with a check: which translation matches what you heard?</li><li><b>New words</b>, a few a day, most frequent first. Words from your own surahs come a little earlier.</li><li><b>Review</b>: say the meaning before you look. Missed words come back tomorrow; known ones after 2, 4, 8, 16 days and on. Aim for about 1 miss in 10.</li></ul>
+    <h2>Honest numbers</h2>
+    <p>Today shows how many verses you know every word of, and your listening checks. The checks matter more: they test hearing, not just recognising words on a card.</p>
+  </article>
+  <article class="prose l-tr">
+    <h1 class="h1">Bu program nasıl çalışır</h1>
+    <p>Hedef: bir pasaj okunurken, duyduğun anda ne dediğini takip etmek.</p>
+    <h2>En sık geçenler önce</h2>
+    <p>Kur'an'da 77.429 kelime var; bunlar yaklaşık 4.800 sözlük biçimi, ön ek ve zamirden oluşuyor. Bunların küçük bir kısmı her yerde geçiyor. En sık 300 tanesini bilirsen, Kur'an'daki kelimelerin yaklaşık %74'ünün her parçasını biliyorsun; 1.000 ile yaklaşık %89. Bu sayılar Quranic Arabic Corpus'tan; yöntem projenin araştırma notlarında.</p>
+    <p>Bir ayetin her kelimesini bilmek, ayeti anlamakla aynı şey değil: dil bilgisi ve bağlam da önemli. Bu yüzden Dinle bölümü anladığını metin olmadan kontrol eder.</p>
+    <h2>Bir gün</h2>
+    <ul><li><b>Dinle</b>: bir ayet, üç geçiş: dinle ve gör, boşluk, sadece dinle. Sonunda bir kontrol: duyduğuna hangi meal uyuyor?</li><li><b>Yeni kelimeler</b>: günde birkaç tane, en sık geçenler önce. Kendi surelerindeki kelimeler biraz daha erken gelir.</li><li><b>Tekrar</b>: bakmadan önce anlamı söyle. Bilemediğin kelimeler yarın gelir; bildiklerin 2, 4, 8, 16 gün sonra ve sonrasında. Hedef: 10'da yaklaşık 1 hata.</li></ul>
+    <h2>Dürüst sayılar</h2>
+    <p>Bugün sayfası, her kelimesini bildiğin ayet sayısını ve dinleme kontrollerini gösterir. Kontroller daha önemli: kartta kelime tanımayı değil, duyarak anlamayı ölçer.</p>
+  </article>
+</Base>

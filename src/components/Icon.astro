@@ -1,0 +1,13 @@
+---
+interface Props { name: string }
+const { name } = Astro.props;
+const P: Record<string, string> = {
+  today: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  words: '<rect x="4.5" y="5" width="15" height="14" rx="2"/><path d="M8 10h8M8 14h5"/>',
+  listen: '<path d="M4 13a8 8 0 0 1 16 0v4a2 2 0 0 1-2 2h-1v-6h3M4 13v4a2 2 0 0 0 2 2h1v-6H4"/>',
+  surahs: '<path d="M5 4.5h9.5L19 9v10.5H5z"/><path d="M14.5 4.5V9H19M8.5 13h7M8.5 16h5"/>',
+  library: '<path d="M5 4.5v15M9.5 4.5v15M14 5l4.5 14"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3M6 6l2 2M16 16l2 2M6 18l2-2M16 8l2-2"/>',
+};
+---
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" set:html={P[name] || ''}></svg>

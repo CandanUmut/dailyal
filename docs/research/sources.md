@@ -8,9 +8,8 @@
 |---|---|---|
 | Quran text (Uthmani) | **Tanzil** | **Yes**, verbatim only, with the notice and a link |
 | Root and dictionary form (lemma) of every word | **Quranic Arabic Corpus v0.4** | **Yes**, verbatim only, with the notice and a link. The download asks for an e-mail address (see below) |
-| Word-by-word meanings, **English** | **Quranic Arabic Corpus** word-by-word pages (University of Leeds; the same English glosses Quran.com shows) | **Yes**, GNU GPL with credit and link (decided 2026-11-20) |
-| Word-by-word meanings, **Turkish** | Quran.com API (live) | Fetch live in the app, cache ≤ 1 week (their terms). Not bundled |
-| Verse translations, English and Turkish | Tanzil translations: **Saheeh International** (EN), **Diyanet İşleri** (TR) | **Yes** for this app: Tanzil allows non-commercial use, and the app has no income (Umut, 2026-11-20). Credit each translator |
+| Word-by-word meanings, **Turkish and English** | **Açık Kuran** API (`acikkuran.md`) | **Yes**: downloaded once at build time, shared under CC BY-NC-SA 4.0 (non-commercial). Decided 2026-11-20 after the plan review |
+| Verse translations, English and Turkish | Via Açık Kuran: **Sahih International** (EN), **Diyanet İşleri** (TR) | **Yes** for this app: Tanzil allows non-commercial use, and the app has no income (Umut, 2026-11-20). Credit each translator |
 | Recitation audio (per verse) | everyayah.com, Quran.com | Stream only. Keep offline only when the user asks (**open** for everyayah: no terms found) |
 | Word timing inside verse audio (for "light the word as it is recited") | Quran.com API | **No** bundling (same terms) |
 | Audio of single words | Quran.com (`audio.qurancdn.com/wbw/…`) | **No** bundling (same terms) |
@@ -69,3 +68,10 @@ What this changes:
 - **Tanzil translations:** allowed, because their terms are "non-commercial purposes only". Chosen: Saheeh International (English) and Diyanet İşleri (Turkish), both widely trusted. Each is credited by name.
 - **English word meanings:** the Quranic Arabic Corpus word-by-word glosses (GPL). Checked 1:2: "All praises and thanks / (be) to Allah / the Lord / of the universe". These are the same glosses Quran.com shows, so we get the trusted data from its free, GPL source.
 - **What it does not change:** the Quran Foundation terms forbid bundling for **all** apps, paid or free, so having no income does not change them. Their Turkish word meanings are therefore fetched live when online and cached for at most a week. When offline, the app falls back to the English word meaning plus the Diyanet verse translation. Umut can overrule this.
+
+## Update 2026-11-20 (later): one source for each kind of data
+After Umut pointed to Açık Kuran, and after the plan review found three different versions of this decision, it is now:
+- Quran text: Tanzil.
+- Morphology (lemma, root, parts): Quranic Arabic Corpus v0.4. The unchanged file was found in a public GitHub repository and checked: its SHA-256 matches that repository's Git LFS record, and its copyright header is intact. No e-mail was used, which closes G2.
+- Word meanings (TR + EN), root meanings and translations: Açık Kuran (`acikkuran.md`).
+- Quran.com: not used.

@@ -1,0 +1,22 @@
+---
+import Base from '../../layouts/Base.astro';
+import T from '../../components/T.astro';
+import { u } from '../../lib/url';
+const links = [
+  ['library/how/', 'How this program works', 'Bu program nasıl çalışır', 'The daily plan, and why it is built this way', 'Günlük plan ve neden böyle kurulduğu'],
+  ['library/pronouns/', 'Pronouns: who is who', 'Zamirler: kim kimdir', 'The endings that tell you who speaks and to whom', 'Kimin kime konuştuğunu söyleyen ekler'],
+  ['library/roots/', 'Roots', 'Kökler', 'Word families, by how often they appear', 'Kelime aileleri, sıklığa göre'],
+  ['place/', 'Placement', 'Seviye belirleme', 'Mark the words you already know', 'Zaten bildiğin kelimeleri işaretle'],
+  ['about/', 'About and sources', 'Hakkında ve kaynaklar', 'Where every text and meaning comes from', 'Her metnin ve anlamın kaynağı'],
+];
+---
+<Base title="Library" tab="library">
+  <h1 class="h1"><T en="Library" tr="Kitaplık" /></h1>
+  <p class="sub"><T en="Short lessons, roots, and the sources behind everything." tr="Kısa dersler, kökler ve her şeyin kaynakları." /></p>
+  <ul class="list sec">
+    {links.map(([href, en, tr, den, dtr]) => (
+      <li><a href={u(href)}><span style="flex:1"><b><T en={en} tr={tr} /></b><span class="note" style="display:block"><T en={den} tr={dtr} /></span></span><span class="go">›</span></a></li>
+    ))}
+  </ul>
+  <p class="note sec"><T en="More lessons come in the next phases: particles, prepositions, negation, إنّ and كان, and how recitation joins words." tr="Sonraki aşamalarda yeni dersler: edatlar, harf-i cerler, olumsuzluk, إنّ ve كان, ve kıraatte kelimelerin birleşmesi." /></p>
+</Base>

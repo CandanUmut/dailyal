@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import { u } from '../../lib/url';
+---
+<Base title="About" tab="library">
+  <a class="back" href={u('library/')}>‹ Library / Kitaplık</a>
+  <article class="prose">
+    <h1 class="h1">About and sources · Hakkında ve kaynaklar</h1>
+    <p class="l-en">A free, non-commercial daily program for understanding the Quran when you hear it. No ads, no account; your progress stays on your device. It teaches language: word meanings and sourced translations. It gives no commentary (tafsir) of its own.</p>
+    <p class="l-tr">Kur'an'ı duyduğunda anlamak için ücretsiz, ticari olmayan bir günlük program. Reklam yok, hesap yok; ilerlemen cihazında kalır. Dil öğretir: kelime anlamları ve kaynaklı mealler. Kendine ait bir tefsir sunmaz.</p>
+    <h2>Quran text · Kur'an metni</h2>
+    <p>Tanzil Quran Text (Uthmani), Copyright (C) 2007-2021 Tanzil Project, License: Creative Commons Attribution 3.0. Used verbatim. <a href="https://tanzil.net">tanzil.net</a> · metadata (surah type, revelation order, sections): Tanzil Quran Metadata, CC BY 3.0.</p>
+    <h2>Word analysis · Kelime çözümlemesi</h2>
+    <p>Quranic Arabic Corpus (morphology, version 0.4), Copyright (C) 2011 Kais Dukes, GNU General Public License. <a href="https://corpus.quran.com">corpus.quran.com</a>. Dictionary forms, roots and word parts; the frequency counts are ours, made from it.</p>
+    <h2>Word meanings and translations · Kelime anlamları ve mealler</h2>
+    <p><a href="https://acikkuran.com">Açık Kuran</a> (acikkuran.com), an open-source, non-profit project: word-by-word meanings in Turkish and English, root meanings, and the translations Diyanet İşleri (Kur'an-ı Kerim Türkçe Meali) and Sahih International. Shared under CC BY-NC-SA 4.0. Words in brackets in a translation are the translators' own additions.</p>
+    <h2>Recitation · Kıraat</h2>
+    <p>Audio streamed from <a href="https://everyayah.com">everyayah.com</a>: Mishary Alafasy, Mahmoud Khalil Al-Husary, Mohamed Siddiq Al-Minshawi, Abdul Basit.</p>
+    <h2>Fonts · Yazı tipleri</h2>
+    <p>Amiri Quran and Amiri (SIL Open Font License), Atkinson Hyperlegible Next, Literata.</p>
+    <h2>Licence · Lisans</h2>
+    <p>Because the Açık Kuran data is CC BY-NC-SA 4.0, this program and its data are shared under the same licence: non-commercial, with credit, share-alike.</p>
+  </article>
+</Base>

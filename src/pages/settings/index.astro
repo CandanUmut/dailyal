@@ -1,0 +1,29 @@
+---
+import Base from '../../layouts/Base.astro';
+import T from '../../components/T.astro';
+---
+<Base title="Settings" tab="settings">
+  <h1 class="h1"><T en="Settings" tr="Ayarlar" /></h1>
+  <div class="field"><label for="lang"><T en="Language" tr="Dil" /></label><select id="lang"><option value="auto">Device / Cihaz</option><option value="en">English</option><option value="tr">Türkçe</option></select></div>
+  <div class="field"><label for="theme"><T en="Theme" tr="Tema" /></label><select id="theme"><option value="auto">Auto / Otomatik</option><option value="light">Light / Açık</option><option value="dark">Dark / Koyu</option></select></div>
+  <div class="field"><label for="npd"><T en="New words per day" tr="Günde yeni kelime" /></label><select id="npd"><option>3</option><option>5</option><option>8</option><option>10</option><option>15</option><option>20</option></select></div>
+  <div class="field"><label for="rec"><T en="Reciter" tr="Kâri" /></label><select id="rec"></select><p class="note"><T en="Audio is streamed from everyayah.com when you press play." tr="Ses, çal'a bastığında everyayah.com'dan akar." /></p></div>
+  <div class="sec"><div class="sh"><T en="Your progress" tr="İlerlemen" /></div><p class="note"><T en="Progress stays in this browser only. Save a backup file to move it or keep it safe." tr="İlerleme sadece bu tarayıcıda durur. Taşımak veya saklamak için yedek dosyası al." /></p>
+    <div class="stackb"><button class="btn" id="exp"><T en="Save a backup" tr="Yedek al" /></button><label class="btn quiet" for="imp"><T en="Load a backup" tr="Yedeği yükle" /></label><input type="file" id="imp" accept="application/json" hidden><button class="btn quiet" id="reset"><T en="Start over" tr="Baştan başla" /></button></div></div>
+</Base>
+<script>
+  import { state, save, normalize, replace, blank, KEY } from '../../scripts/store';
+  import { RECITERS } from '../../scripts/verse';
+  import { $, toast } from '../../scripts/util';
+  const sel = (id: string) => $<HTMLSelectElement>('#' + id)!;
+  sel('rec').innerHTML = Object.entries(RECITERS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+  sel('lang').value = state.set.lang; sel('theme').value = state.set.theme; sel('npd').value = String(state.set.newPerDay); sel('rec').value = state.set.reciter;
+  const apply = () => { const th = state.set.theme; if (th === 'light' || th === 'dark') document.documentElement.dataset.theme = th; else delete document.documentElement.dataset.theme; const l = state.set.lang; document.documentElement.lang = l === 'tr' || l === 'en' ? l : (navigator.language || '').toLowerCase().startsWith('tr') ? 'tr' : 'en'; };
+  sel('lang').onchange = () => { state.set.lang = sel('lang').value; save(); apply(); };
+  sel('theme').onchange = () => { state.set.theme = sel('theme').value; save(); apply(); };
+  sel('npd').onchange = () => { state.set.newPerDay = +sel('npd').value; save(); };
+  sel('rec').onchange = () => { state.set.reciter = sel('rec').value; save(); };
+  $('#exp')!.onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(state)], { type: 'application/json' })); a.download = `fahm-backup-${new Date().toISOString().slice(0, 10)}.json`; a.click(); };
+  $<HTMLInputElement>('#imp')!.onchange = async (e) => { const f = (e.target as HTMLInputElement).files?.[0]; if (!f) return; try { replace(normalize(JSON.parse(await f.text()))); save(); toast('OK'); location.reload(); } catch { toast('Could not read this file'); } };
+  $('#reset')!.onclick = () => { if (confirm('Delete all progress on this device? / Bu cihazdaki bütün ilerleme silinsin mi?')) { replace(blank()); localStorage.removeItem(KEY); location.href = document.body.dataset.base!; } };
+</script>
