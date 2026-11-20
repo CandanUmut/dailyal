@@ -109,7 +109,9 @@ At 5 new words a day, the top 300 lemmas take about 2 months. That is where 74% 
 2. **Palette and fonts** above: approve, or change after seeing the mockup.
 3. **Underline for known words**, rather than fading the unknown ones. Fading would change how the Quran text looks, so I proposed the underline. Agree?
 
-## 9. The big open problem: where word meanings come from
+## 9. Where word meanings come from
+
+> **Decided 2026-11-20:** Umut asked for the most trusted free sources (no income from the app). English word meanings come from the Quranic Arabic Corpus (GPL). Verse translations: Saheeh International and Diyanet İşleri via Tanzil. Turkish word meanings are fetched live from Quran.com. Details: `docs/research/sources.md`. The table below is kept for the record.
 
 The best word-by-word data (Quran.com, English + Turkish) **cannot be bundled** into an offline app or a public repo under its terms (`docs/research/sources.md`). Options:
 

@@ -8,8 +8,9 @@
 |---|---|---|
 | Quran text (Uthmani) | **Tanzil** | **Yes**, verbatim only, with the notice and a link |
 | Root and dictionary form (lemma) of every word | **Quranic Arabic Corpus v0.4** | **Yes**, verbatim only, with the notice and a link. The download asks for an e-mail address (see below) |
-| Word-by-word meanings, English and Turkish | Quran.com / Quran Foundation API | **No.** Their terms forbid build-time bundles and copies in public repos |
-| Verse translations, English and Turkish | Tanzil translations | Non-commercial only; each translator holds the rights. Public-domain editions are the safe choice (**open**) |
+| Word-by-word meanings, **English** | **Quranic Arabic Corpus** word-by-word pages (University of Leeds; the same English glosses Quran.com shows) | **Yes**, GNU GPL with credit and link (decided 2026-11-20) |
+| Word-by-word meanings, **Turkish** | Quran.com API (live) | Fetch live in the app, cache ≤ 1 week (their terms). Not bundled |
+| Verse translations, English and Turkish | Tanzil translations: **Saheeh International** (EN), **Diyanet İşleri** (TR) | **Yes** for this app: Tanzil allows non-commercial use, and the app has no income (Umut, 2026-11-20). Credit each translator |
 | Recitation audio (per verse) | everyayah.com, Quran.com | Stream only. Keep offline only when the user asks (**open** for everyayah: no terms found) |
 | Word timing inside verse audio (for "light the word as it is recited") | Quran.com API | **No** bundling (same terms) |
 | Audio of single words | Quran.com (`audio.qurancdn.com/wbw/…`) | **No** bundling (same terms) |
@@ -60,3 +61,11 @@
 ### Fonts
 - **Amiri Quran** (SIL Open Font License). It can be self-hosted. It is my mockup choice for Quran text.
 - KFGQPC Uthmanic Hafs is the classic Mushaf font, but its redistribution terms are **open**.
+
+## Decision 2026-11-20 (Umut)
+"Don't worry about the licensing, we don't have any income intention from this app so you can use the most trusted and free sources."
+
+What this changes:
+- **Tanzil translations:** allowed, because their terms are "non-commercial purposes only". Chosen: Saheeh International (English) and Diyanet İşleri (Turkish), both widely trusted. Each is credited by name.
+- **English word meanings:** the Quranic Arabic Corpus word-by-word glosses (GPL). Checked 1:2: "All praises and thanks / (be) to Allah / the Lord / of the universe". These are the same glosses Quran.com shows, so we get the trusted data from its free, GPL source.
+- **What it does not change:** the Quran Foundation terms forbid bundling for **all** apps, paid or free, so having no income does not change them. Their Turkish word meanings are therefore fetched live when online and cached for at most a week. When offline, the app falls back to the English word meaning plus the Diyanet verse translation. Umut can overrule this.
