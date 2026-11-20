@@ -5,8 +5,10 @@
 | Phase | What | Status |
 |---|---|---|
 | 0 | Design brief, content plan, sources and licence check, phone mockup | **Done, waiting for Umut's review** (draft PR) |
-| 1 | Astro app (same base as Uu): Today, Words, Listen, Roots, Library; top 100 lemmas; 6 lessons; offline; EN/TR; contrast and phone e2e checks | Not started; waiting for mockup approval |
-| 2+ | Content in steps of 100 lemmas, one PR each | Not started |
+| Plan | `docs/PLAN.md`, reviewed by the critic (`docs/reviews/plan-review.md`) | **Done**; review decisions in PLAN §5b |
+| R0 | Learning-method sources (`docs/research/learning.md`) | In progress (research agent) |
+| 1 | Foundation: data pipeline, app (Today, Placement, Words, Listen, Surahs, Library), EN/TR, offline, tests | **Built, tests pass**; waiting for the full Açık Kuran download, then the Phase 1 critic review |
+| 2–6 | See `docs/PLAN.md` §5 | Not started |
 
 Each phase ends with phone-size screenshots, test results and a PR.
 
@@ -20,3 +22,6 @@ Each phase ends with phone-size screenshots, test results and a PR.
 - **2026-11-20**: Found: the Quran.com / Quran Foundation terms forbid bundling their word-by-word data, audio or timing into an app or a public repo (`docs/research/sources.md`). Options A / B / C are in `docs/design/DESIGN.md` §9, for Umut to choose.
 - **2026-11-20**: Found: the Quranic Arabic Corpus forbids changed copies. The app will use the original v0.4 file, not the GitHub fork used for the first estimate.
 - **2026-11-20**: Umut: no income from the app, so use the most trusted free sources. Chosen: Quranic Arabic Corpus English glosses (GPL), Saheeh International and Diyanet İşleri via Tanzil (non-commercial allowed), Turkish word meanings live from Quran.com (their terms still forbid bundling, even for free apps).
+- **2026-11-20**: Umut: use Açık Kuran (open source, has APIs); open the branch; plan the whole app with a critic; work phase by phase, with a critic using the app after each phase; work until usage runs out and continue on a schedule. Done: Açık Kuran key saved as a network secret (never in the repo); `main` created; draft PR #1; a scheduled task continues the work every 5 hours.
+- **2026-11-20**: Unchanged Quranic Arabic Corpus v0.4 file found (checksum matches its repository's Git LFS record), so no e-mail was needed.
+- **2026-11-20**: Tanzil and the corpus align word for word in all 6,236 verses once 4 known two-token joins (بَعْدَ مَا, إِلْ يَاسِينَ) are handled. The Basmala is stored per surah, because 95 and 97 spell it بِّسْمِ.
