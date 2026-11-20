@@ -19,9 +19,12 @@ export function toggle(b: HTMLElement) {
   btn = b;
   audio.onplay = () => setIcon(b, true); audio.onpause = audio.onended = () => setIcon(b, false);
   audio.onerror = () => { setIcon(b, false); b.dispatchEvent(new CustomEvent('audioerror', { bubbles: true })); };
-  audio.currentTime = 0; audio.play().catch(() => setIcon(b, false));
+  audio.playbackRate = state.set.speed || 1; audio.currentTime = 0; audio.play().catch(() => setIcon(b, false));
 }
 function setIcon(b: HTMLElement, playing: boolean) { b.innerHTML = playing ? ICON_PAUSE : ICON_PLAY; b.setAttribute('aria-pressed', String(playing)); }
+export const SPEEDS = [1, 0.85, 0.7];
+export const speedChips = () => `<div class="chips" role="group" aria-label="Speed">${SPEEDS.map((x) => `<button class="chip" data-a="speed" data-v="${x}" aria-pressed="${(state.set.speed || 1) === x}">${x}×</button>`).join('')}</div>`;
+export function setSpeed(x: number) { state.set.speed = x; if (audio) audio.playbackRate = x; }
 export const playBtn = (s: number, v: number, label: string, cls = '') => `<button class="play ${cls}" data-a="play" data-s="${s}" data-v="${v}" aria-label="${esc(label)}" aria-pressed="false">${ICON_PLAY}</button>`;
 
 /** Verse text from Tanzil, unchanged, one button per word. Known words get the thin underline. */

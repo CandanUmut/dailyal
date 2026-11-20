@@ -10,7 +10,7 @@ export type State = {
   r: Record<string, Rec>;
   heard: Record<string, Heard>;
   day: { d: number; nw: number; done: number; heard: number };
-  set: { newPerDay: number; theme: string; lang: string; reciter: string; en: number };
+  set: { newPerDay: number; theme: string; lang: string; reciter: string; en: number; speed?: number };
   my: number[];
   placed: number;
   /** hist[day] = [first-try answers, first-try misses, listening checks ok, listening checks total, self-report sum, self-report count] */

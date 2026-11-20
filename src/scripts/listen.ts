@@ -3,7 +3,7 @@ import { state, save, bump, rollDay } from './store';
 import { surah, surahs, items, type Verse, type Item, type Surah } from './data';
 import { knownIdx, pickVerse, wordKnown } from './coverage';
 import { place } from './srs';
-import { verseHtml, playBtn, toggle, reciterName } from './verse';
+import { verseHtml, playBtn, toggle, reciterName, speedChips, setSpeed } from './verse';
 import { meaning } from './cardview';
 import { badge } from './chrome';
 import { t, pick, lang } from './i18n';
@@ -49,7 +49,7 @@ function context() {
   <p class="src" style="margin-top:6px">${t('ctxSrc')}</p></details>`;
 }
 function share() { const ws = V.w.filter((w) => w[0].length), kn = ws.filter((w) => wordKnown(w[0], k)).length; return kn === ws.length ? t('followAll') : t('followN', { k: kn, n: ws.length }); }
-const player = () => `<div class="player">${playBtn(sv.s, sv.v, t('play'))}<div><p class="note" style="margin:0">${esc(t('reciter', { r: reciterName() }))}</p></div></div>`;
+const player = () => `<div class="player">${playBtn(sv.s, sv.v, t('play'))}<div style="flex:1">${speedChips()}<p class="note" style="margin:4px 0 0">${esc(t('reciter', { r: reciterName() }))}</p></div></div>`;
 
 function pass1() {
   let h = context() + (V.b && V.bt ? `<p class="q basmala" lang="ar">${esc(V.bt)}</p>` : '') + verseHtml(V, k, { sel });
@@ -102,6 +102,7 @@ document.addEventListener('click', async (e) => {
   const b = (e.target as HTMLElement).closest<HTMLElement>('[data-a]'); if (!b) return;
   const a = b.dataset.a!;
   if (a === 'play') { toggle(b); return; }
+  if (a === 'speed') { setSpeed(+b.dataset.v!); save(); render(); return; }
   if (a === 'word' && pass === 1) sel = +b.dataset.i! === sel ? -1 : +b.dataset.i!;
   else if (a === 'tr') showTr = !showTr;
   else if (a === 'learn') { place(b.dataset.id!, false); save(); badge(); toast(t('added')); }

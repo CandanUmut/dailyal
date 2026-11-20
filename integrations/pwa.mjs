@@ -1,5 +1,6 @@
 // Writes dist/sw.js after each build, so the app installs and works offline.
-// - Precached on install: every page, script, stylesheet, font, the data files and icons
+// - Precached on install: every page, script, stylesheet, font, the core data files and icons.
+//   Per-surah files (data/s/) are cached when opened; Settings can save all of them for offline use.
 //   (the whole app is small, and it must work in a lab or on a plane).
 // - Pages and data: network first (always the latest when online), saved copy offline.
 // - Hashed assets (_astro/): cache first; their names change when they do.
@@ -21,7 +22,7 @@ export default function pwa() {
         const urls = [];
         for (const f of files) {
           const rel = path.relative(out, f).split(path.sep).join('/');
-          if (rel === 'sw.js' || rel === '.nojekyll') continue;
+          if (rel === 'sw.js' || rel === '.nojekyll' || rel.startsWith('data/s/')) continue;
           hash.update(rel).update(readFileSync(f));
           urls.push(base + (rel.endsWith('index.html') ? rel.slice(0, -'index.html'.length) : rel));
         }
