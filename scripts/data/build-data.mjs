@@ -86,7 +86,8 @@ const items = ranked.map((id, rank) => {
   // base form: verbs in the past tense, 3rd person masculine singular ("he did"), active, not after a negation;
   // nouns without prefixes or endings. Then the most common gloss in that pool.
   if (kind === 'l') {
-    const scored = list.map((W) => ({ W, g: gloss(W), sc: baseScore(W, code) })).filter((x) => x.g && !negated(x.W, x.g));
+    const fn = code.includes('#');
+    const scored = list.map((W) => ({ W, g: gloss(W), sc: baseScore(W, code) })).filter((x) => x.g && (fn || !negated(x.W, x.g)));
     const best = Math.max(-9, ...scored.map((x) => x.sc));
     const pool = scored.filter((x) => x.sc === best);
     // For past-tense verbs, prefer a Turkish gloss that is itself a plain past form (…dı/di/du/dü/tı/ti…), not a relative clause.
