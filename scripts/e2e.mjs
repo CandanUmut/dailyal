@@ -54,7 +54,7 @@ await p.tap('[data-a=play]'); await p.waitForSelector('[data-a=check]'); await p
 await p.goto(ROOT + 'lesson/'); await p.waitForTimeout(800); await p.tap('[data-a=next]');
 for (let k = 0; k < 6 && (await p.$('[data-a=sheet]')); k++) await p.tap('[data-a=next]');
 for (let k = 0; k < 14 && (await p.$('[data-a=ans]')); k++) { await p.tap('[data-a=ans] >> nth=0'); if (k === 0) await p.screenshot({ path: `${OUT}/flow-lesson-practice.png`, fullPage: true }); await p.tap('[data-a=next]'); }
-await p.tap('.play[data-a=play]'); await p.waitForSelector('[data-a=reveal]'); await p.tap('[data-a=reveal]'); await p.tap('[data-a=self][data-v="2"]'); await p.tap('[data-a=next]');
+await p.tap('[data-a=playall]'); await p.waitForSelector('[data-a=reveal]'); await p.tap('[data-a=reveal]'); await p.tap('[data-a=self][data-v="2"]'); await p.tap('[data-a=next]');
 for (let k = 0; k < 10 && (await p.$('[data-a=ans]')); k++) { await p.tap('[data-a=ans] >> nth=0'); await p.tap('[data-a=next]'); }
 await p.waitForSelector('.done-box'); await p.screenshot({ path: `${OUT}/flow-lesson-done.png`, fullPage: true });
 await p.goto(ROOT + 'words/?deck=phrases'); await p.waitForTimeout(600); await p.tap('[data-a=start]'); await p.tap('[data-a=show]'); await p.waitForTimeout(400); await p.screenshot({ path: `${OUT}/flow-phrase.png`, fullPage: true }); await p.tap('[data-a=grade][data-v="2"]');

@@ -5,6 +5,7 @@ import { meaning } from './cardview';
 import { t, pick } from './i18n';
 import { $, base, esc } from './util';
 const r = new URLSearchParams(location.search).get('r');
+const mine = new URLSearchParams(location.search).get('mine') === '1';
 (async () => {
   const [rs, rm, all, k] = await Promise.all([roots(), rootMeans(), items(), knownIdx()]);
   if (r && rs[r]) {
@@ -14,6 +15,7 @@ const r = new URLSearchParams(location.search).get('r');
     h += `<div class="sec"><ul class="list">${R.items.map((i) => `<li><a href="${base()}words/?id=${encodeURIComponent(all[i].id)}"><span class="ar" style="font-size:24px;min-width:110px;text-align:right">${esc(all[i].ar)}</span><span style="flex:1">${esc(meaning(all[i]))}<span class="note" style="display:block">${t('times', { n: all[i].n })}</span></span>${k[i] ? `<span class="tag known">✓</span>` : ''}</a></li>`).join('')}</ul></div>`;
     $('#roots')!.innerHTML = h; return;
   }
-  const list = Object.entries(rs).sort((a, b) => b[1].n - a[1].n);
-  $('#roots')!.innerHTML = `<a class="back" href="${base()}library/">‹ ${t('library')}</a><h1 class="h1">${t('roots')}</h1><p class="sub">${t('rootsSub')}</p><ul class="list sec">${list.slice(0, 300).map(([id, R]) => { const kn = R.items.filter((i) => k[i]).length; return `<li><a href="?r=${encodeURIComponent(id)}"><span class="ar" style="font-size:24px;min-width:90px;text-align:right">${esc(R.ar)}</span><span style="flex:1">${t('times', { n: R.n })}<span class="note" style="display:block">${kn} / ${R.items.length} ✓</span></span><span class="go">›</span></a></li>`; }).join('')}</ul><p class="note" style="margin-top:10px">300 / ${list.length}</p>`;
+  const { state } = await import('./store'), ids = new Set(Object.keys(state.met));
+  const list = Object.entries(rs).filter(([, R]) => !mine || R.items.some((i) => ids.has(all[i].id))).sort((a, b) => b[1].n - a[1].n);
+  $('#roots')!.innerHTML = `<a class="back" href="${base()}library/">‹ ${t('library')}</a><h1 class="h1">${mine ? t('rootsMine') : t('roots')}</h1><p class="sub">${t('rootsSub')}</p><ul class="list sec">${list.slice(0, 300).map(([id, R]) => { const kn = R.items.filter((i) => k[i]).length; return `<li><a href="?r=${encodeURIComponent(id)}"><span class="ar" style="font-size:24px;min-width:90px;text-align:right">${esc(R.ar)}</span><span style="flex:1">${t('times', { n: R.n })}<span class="note" style="display:block">${kn} / ${R.items.length} ✓</span></span><span class="go">›</span></a></li>`; }).join('')}</ul><p class="note" style="margin-top:10px">300 / ${list.length}</p>`;
 })();

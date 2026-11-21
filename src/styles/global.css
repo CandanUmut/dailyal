@@ -208,3 +208,8 @@ body.noscroll { overflow: hidden; }
 body.focus .nav { display: none; }
 body.focus { padding-bottom: 96px; }
 body.focus .dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; margin: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--paper) 75%, transparent); max-width: 640px; margin: 0 auto; }
+.discover { display: grid; gap: 4px; text-decoration: none; background: var(--card); border: 1px solid var(--rule); border-left: 3px solid var(--rubric); border-radius: 14px; padding: 14px 16px; min-height: 56px; }
+.discover b { font-size: 18px; }
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile { display: flex; flex-direction: column; justify-content: space-between; gap: 6px; min-height: 120px; padding: 14px; background: var(--card); border: 1px solid var(--rule); border-radius: 16px; text-decoration: none; }
+.tile b { font-size: 18px; } .tile .big { font-size: 34px; }

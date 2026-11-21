@@ -182,6 +182,26 @@ Umut: "very hard to understand what I am doing, where I am … overwhelming … 
 - **Today:** where you are, one button, and a short course view. **Words:** the words from your lessons, with review. **You:** days, words and verses learned.
 - The reader, search, word sheet, roots, phrases and passages stay for free exploring. They are not in the daily path.
 
+## 5i. v3.1: the middle way (2026-11-21)
+
+Umut asked for a middle way that helps with the whole Quran, and for the good parts not to be hidden. He chose **4 + 2**.
+
+**How much of the whole Quran you would understand** (all words learned are assumed remembered, so these are upper limits; the comparison is what matters):
+
+| Days | One verse a day | Middle way (4 + 2) |
+|---|---|---|
+| 30 | 31% | 59% |
+| 90 | 43% | 78% |
+| 180 | 56% | 85% (Juz 30 done) |
+| 365 | 67% | 90% |
+
+What the lesson does now:
+- **4 words from your surahs.** The lesson takes verses in order, in the same surah, until it has 4 **useful** new words (words that occur 3 or more times in the Quran). At most 5 verses.
+- **Rare words** (1–2 times in the Quran) are shown with their meaning but are not drilled.
+- **2 frequent words.** Each lesson adds 2 of the Quran's most frequent words you don't know yet. Each one is taught inside a real verse, with its count shown.
+- **"What you learned today"** plus **one** Discover card (a root family, or a short lesson), tied to your words. The same card also appears on Today.
+- **Words tab:** clear tiles for My words, My roots (only the roots of your words), Phrases and Lessons.
+
 ## 6. The critic
 
 - A separate agent, given only the app (running at 390 × 844), `docs/PLAN.md` and a persona. It is told to be honest and specific, not kind.
