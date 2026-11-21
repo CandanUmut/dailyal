@@ -81,8 +81,28 @@ document.addEventListener('click', async (e) => {
   await render(); window.scrollTo(0, 0);
 });
 
+/** Words tab (v3): the words learned in lessons, with their meaning in the verse; review asks you to choose, never to grade yourself. */
+async function myWords() {
+  const { surah } = await import('./data'), { quizGloss } = await import('./i18n'), { dayNum } = await import('./util');
+  const toks = Object.entries(state.r).filter(([k]) => k.startsWith('t:')), t0 = dayNum(), due = toks.filter(([, r]) => r.due <= t0 && (r.f ?? 0) < t0).length;
+  let h = `<h1 class="h1">${t('wdTitle')}</h1><p class="sub">${t('wdSub')}</p>`;
+  h += due ? `<div class="stackb"><a class="btn pri big" href="${base()}lesson/?review=1">${t('wdReview', { n: Math.min(due, 8) })}</a></div>` : `<p class="note sec">${toks.length ? t('wdNoReview') : t('wdNone')}</p>`;
+  if (toks.length) {
+    const rows: string[] = [];
+    for (const [k, r] of toks.sort((a, b) => (a[1].f ?? 0) - (b[1].f ?? 0))) {
+      const [, s, v, i] = k.split(':').map(Number), V = (await surah(s))[v - 1];
+      rows.push(`<li><div class="li"><span class="ar" style="font-size:26px;min-width:110px;text-align:right">${esc(V.t[i])}</span><span style="flex:1">${esc(quizGloss(V.w[i]))}<span class="note" style="display:block">${s}:${v}${r.c ? ' · ✓' : ''}</span></span></div></li>`);
+    }
+    h += `<ul class="list sec">${rows.join('')}</ul>`;
+  }
+  const pd = dueItems(ps).length, pn = newPhrases(ps).length;
+  h += `<div class="sec"><div class="sh">${t('moreWords')}</div><ul class="list">${[[`words/?deck=phrases`, t('phrasesLink'), t('phrasesLinkD', { d: pd, n: pn })], ['words/parts/', t('partsLink'), t('partsLinkD')], ['library/roots/', t('roots'), t('rootsSub')], ['library/', t('lessons'), t('lessonsLink')]].map(([href, l, d]) => `<li><a href="${base()}${href}"><span style="flex:1"><b>${l}</b><span class="note" style="display:block">${d}</span></span><span class="go">›</span></a></li>`).join('')}</ul></div>`;
+  $('#words')!.innerHTML = h;
+}
+
 (async () => {
   ps = await phrases();
+  if (!one && !deck && !unitN) { await myWords(); return; }
   all = deck === 'phrases' ? ps : await items();
   if (one) {
     const x = one.startsWith('ph:') ? ps.find((p) => p.id === one) : (await itemById()).get(one);
