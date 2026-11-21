@@ -6,7 +6,7 @@ import { surah, surahs, items, type Verse, type Item, type Surah } from './data'
 import { knownIdx, pickVerse, wordKnown } from './coverage';
 import { place } from './srs';
 import { verseHtml, playBtn, toggle, reciterName, speedChips, setSpeed } from './verse';
-import { meaning, grammarLabel, personOf, PERSON_OPTIONS } from './cardview';
+import { meaning, grammarLabel, personOf, PERSON_OPTIONS, isFirstSecond } from './cardview';
 import { trText, trName, checkSet, similar } from './trans';
 import { badge } from './chrome';
 import { t, pick, lang } from './i18n';
@@ -34,7 +34,7 @@ async function load(s: number, v: number) {
     return { word: c.i, right: c.g, opts: shuffle([c.g, ...others]) };
   }).filter((q) => q.opts.length === 3);
   // "Who is doing it?": one verb in the verse, answered from its person ending (I, we, you, he, they).
-  const verbs = V.w.map((w, i) => ({ i, p: personOf(w[4]) })).filter((x) => x.p);
+  const verbs = V.w.map((w, i) => ({ i, p: personOf(w[4]) })).filter((x) => x.p && isFirstSecond(V.w[x.i][4]) && V.w[x.i][4].split('|')[0] !== 'IMPV');
   who = null;
   if (verbs.length) { const vb = verbs.find((x) => /^(1|2)/.test(V.w[x.i][4].split('|')[1])) || verbs[0]; who = { word: vb.i, right: vb.p, who: 1, opts: shuffle([vb.p, ...shuffle(PERSON_OPTIONS().filter((x) => x !== vb.p)).slice(0, 2)]) }; }
   // Check: this verse's own text and two others, all from ONE translator (Phase 3 review), sharing some words (fair, not easy).

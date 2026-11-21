@@ -6,7 +6,7 @@ import Base from '../../layouts/Base.astro';
 </Base>
 <script>
   // Search (Phase 4): dictionary forms and their meanings, surah names, and verse references like 2:255. Runs offline.
-  import { items, surahs } from '../../scripts/data';
+  import { items, surahs, roots } from '../../scripts/data';
   import { meaning } from '../../scripts/cardview';
   import { t, lang } from '../../scripts/i18n';
   import { $, base, esc } from '../../scripts/util';
@@ -15,14 +15,22 @@ import Base from '../../layouts/Base.astro';
   $('#ql')!.textContent = t('search'); $<HTMLInputElement>('#q')!.placeholder = t('searchPh');
   const initial = new URLSearchParams(location.search).get('q') || '';
   (async () => {
-    const [all, ss] = await Promise.all([items(), surahs()]);
+    const [all, ss, rs] = await Promise.all([items(), surahs(), roots()]);
+    // Arabic: strip common prefixes and endings to find the root (Phase 4 review: الرحمن, يعلمون found nothing).
+    const rootIdx = new Map(Object.entries(rs).map(([k, r]) => [r.ar.replace(/ /g, ''), k]));
+    const stems = (w: string) => { const out = new Set([w]); let x = w.replace(/^(و|ف)/, '').replace(/^(ب|ل|ك)/, '').replace(/^ال/, ''); out.add(x); x = x.replace(/(ون|ين|ات|ان|هم|كم|نا|ها|ه|ة|وا|ت|ي)$/, ''); out.add(x); x = x.replace(/^(ي|ت|ن|ا|أ|م|س)/, ''); out.add(x); for (const s of [...out]) if (s.length === 2) for (const m of ['و', 'ي', 'ا']) out.add(s[0] + m + s[1]); return [...out].filter((s) => s.length >= 2); };
+    // Turkish/English: match the verb stem too (bilmek → bil, korkmak → kork).
+    const tstem = (q: string) => q.replace(/(mak|mek|ing|ed|s)$/, '');
+    // Turkish final consonants soften before endings (kalp → kalbi, ağaç → ağacı): match both forms.
+    const soft = (s: string) => s.replace(/p$/, 'b').replace(/ç$/, 'c').replace(/t$/, 'd').replace(/k$/, 'ğ');
     const run = (q: string) => {
       q = q.trim(); if (!q) { $('#res')!.innerHTML = ''; return; }
       let h = '';
       const ref = /^(\d{1,3})\s*[:.]\s*(\d{1,3})$/.exec(q);
       if (ref && ss[+ref[1] - 1] && +ref[2] <= ss[+ref[1] - 1].ayas) h += `<ul class="list sec"><li><a href="${base()}listen/?v=${+ref[1]}:${+ref[2]}"><b>${t('sVerse')} ${+ref[1]}:${+ref[2]}</b><span class="go" style="margin-left:auto">›</span></a></li></ul>`;
       const isAr = /[؀-ۿ]/.test(q), qb = bare(q), ql = low(q);
-      const words = all.filter((x) => x.k !== 'ph' && (isAr ? bare(x.ar).includes(qb) : low(meaning(x)).includes(ql) || (x.senses && [...x.senses.tr, ...x.senses.en].some(([g]) => low(g).includes(ql))))).sort((a, b) => Number(isAr && bare(b.ar) === qb) - Number(isAr && bare(a.ar) === qb)).slice(0, 30);
+      const st = isAr ? stems(qb) : [], rootHits = new Set(st.map((s) => rootIdx.get(s)).filter(Boolean) as string[]), ts = tstem(ql);
+      const words = all.filter((x) => x.k !== 'ph' && (isAr ? bare(x.ar).includes(qb) || st.some((s) => s.length >= 3 && bare(x.ar) === s) || (x.root != null && rootHits.has(x.root)) : [ts, soft(ts)].some((q2) => low(meaning(x)).includes(q2) || (x.senses && [...x.senses.tr, ...x.senses.en].some(([g]) => low(g).includes(q2)))))).sort((a, b) => Number(isAr && bare(b.ar) === qb) - Number(isAr && bare(a.ar) === qb)).slice(0, 30);
       const sur = ss.filter((s) => (isAr ? bare(s.ar).includes(qb) : [s.tr, s.tname, s.en, s.trMean || '', s.enMean || ''].some((x) => low(x).includes(ql)))).slice(0, 10);
       if (sur.length) h += `<div class="sec"><div class="sh">${t('sSurahs')}</div><ul class="list">${sur.map((s) => `<li><a href="${base()}surahs/read/?n=${s.n}"><span class="ref" style="width:28px">${s.n}</span><span style="flex:1"><b>${esc(lang() === 'tr' ? s.tr : s.tname)}</b></span><span class="ar" style="font-size:22px">${esc(s.ar)}</span></a></li>`).join('')}</ul></div>`;
       if (words.length) h += `<div class="sec"><div class="sh">${t('sWords')}</div><ul class="list">${words.map((x) => `<li><a href="${base()}words/?id=${encodeURIComponent(x.id)}"><span class="ar" style="font-size:24px;min-width:100px;text-align:right">${esc(x.ar)}</span><span style="flex:1">${esc(meaning(x))}<span class="note" style="display:block">${t('times', { n: x.n })}</span></span></a></li>`).join('')}</ul></div>`;

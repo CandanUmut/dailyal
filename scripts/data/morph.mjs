@@ -19,7 +19,9 @@ export const PREFIX_FORM = { al: 'ٱل', wa: 'وَ', fa: 'فَ', bi: 'بِ', la:
 const person = (p) => (p.endsWith('D') ? p[0] + 'D' : p);
 export const PRONOUN_FORM = { '1S': 'أَنَا · ـِي، ـنِي', '1P': 'نَحْنُ · ـنَا', '2MS': 'أَنْتَ · ـكَ', '2FS': 'أَنْتِ · ـكِ', '2D': 'أَنْتُمَا · ـكُمَا', '2MP': 'أَنْتُمْ · ـكُمْ', '2FP': 'أَنْتُنَّ · ـكُنَّ', '3MS': 'هُوَ · ـهُ', '3FS': 'هِيَ · ـهَا', '3D': 'هُمَا · ـهُمَا', '3MP': 'هُمْ · ـهُمْ', '3FP': 'هُنَّ · ـهُنَّ' };
 const CONTENT = new Set(['N', 'PN', 'ADJ', 'V', 'IMPN']);
-const isObjectOnVerb = (bw) => /^(h|k)/.test(bw) || /^niy/.test(bw);
+// Object pronoun on a verb (Phase 4 review: ـنَا objects were lost): forms starting with h/k or niy are always objects;
+// naA / na` is an object unless the verb itself is 1st person plural (then it is the subject "we"); any second pronoun suffix is an object.
+const isObjectOnVerb = (bw, W) => /^(h|k)/.test(bw) || /^niy/.test(bw) || (/^na(A|`)/.test(bw) && W.f.per !== '1P') || W.f.prs > 0;
 
 /** @returns {{ words: Map<string, {s:number,v:number,w:number,items:string[],root:string|null,pos:string,parts:string[]}>, lemmaForm: Map<string,string>, lemmaRoot: Map<string,string|null>, lemmaPos: Map<string,string> }} */
 export function readCorpus(file) {
@@ -41,7 +43,8 @@ export function readCorpus(file) {
     } else if (f[0] === 'SUFFIX') {
       W.f.sfx++;
       const m = /^PRON:(\w+)/.exec(f[1]);
-      if (m && (W.stemPos !== 'V' || isObjectOnVerb(form))) W.items.push('pr:' + person(m[1]));
+      if (m && (W.stemPos !== 'V' || isObjectOnVerb(form, W))) W.items.push('pr:' + person(m[1]));
+      if (m) W.f.prs = (W.f.prs || 0) + 1;
     } else {
       const lem = f.find((x) => x.startsWith('LEM:'))?.slice(4);
       const root = f.find((x) => x.startsWith('ROOT:'))?.slice(5) ?? null;
@@ -54,6 +57,8 @@ export function readCorpus(file) {
         const id = 'l:' + lem + (CONTENT.has(tag) ? '' : '#' + tag);
         W.items.push(id);
         if (!lemmaForm.has(id)) { lemmaForm.set(id, ar(lem)); lemmaRoot.set(id, root); lemmaPos.set(id, tag); }
+        // إِيَّا carries its person in the stem (إِيَّاكَ = 2MS): add the person item too (Phase 4 review).
+        if (tag === 'PRON') { const p = f.find((x) => /^[123][MF]?[SDP]$/.test(x)); if (p) W.items.push('pr:' + person(p)); }
       } else if (tag === 'PRON') {
         const p = f.find((x) => /^[123][MF]?[SDP]$/.test(x));
         if (p) W.items.push('pr:' + person(p));

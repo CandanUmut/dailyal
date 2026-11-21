@@ -33,7 +33,7 @@ import { $, base, esc } from './util';
   ], o = opts[day % opts.length];
   h += `<div class="sec"><div class="sh">${t('practice')}</div><ul class="list"><li><a href="${o.href}"><span style="flex:1"><b>${o.label}</b></span><span class="go">›</span></a></li></ul></div>`;
   const sa = selfAvg7(), SELF = [t('none'), t('some'), t('most'), t('all')];
-  h += `<div class="sec"><div class="sh">${t('checks')}</div>${c.tot ? `<p class="big" style="font-size:30px">${t('checksN', { ok: c.ok, tot: c.tot })}</p>${sa != null ? `<p class="note">${t('selfAvg', { s: SELF[Math.round(sa)] })}</p>` : ''}` : `<p class="note">${t('checksNone')}</p>`}</div>`;
+  h += `<div class="sec"><div class="sh">${t('checks')}</div>${c.tot ? `<p class="big" style="font-size:30px">${t('checksN', { ok: c.ok, tot: c.tot })}</p>${sa != null ? `<p class="note">${t('selfAvg', { s: SELF[Math.round(sa)] })}</p>${(sa >= 2 && c.ok / c.tot < 0.5) || (sa <= 1 && c.ok / c.tot >= 0.67) ? `<p class="note">${t('mismatch')}</p>` : ''}` : ''}` : `<p class="note">${t('checksNone')}</p>`}</div>`;
   h += `<div class="sec"><div class="sh">${t('follow')}</div><div class="row" style="align-items:baseline"><span class="big">${num(ov.full)}</span><span class="sub">${t('versesAll', { t: num(ov.total) })}</span></div><p class="cap">${t('shareWords', { p: num(ov.share * 100, 1) })}</p></div>`;
   h += `<div class="sec">${strip(ov.perSurah)}<p class="cap">${t('stripCap')}</p></div>`;
   $('#today')!.innerHTML = h;

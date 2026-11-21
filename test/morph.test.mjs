@@ -11,3 +11,13 @@ describe('corpus items', () => {
   it('the opening letters (2:1 الٓمٓ) carry no item', () => expect(words.get('2:1:1').items).toEqual([]));
   it('a separate pronoun and an attached one are the same item', () => { expect(words.get('2:4:11').items).toContain('pr:3MP'); });
 });
+
+describe('pronouns found by the Phase 4 review', () => {
+  it('1:5:1 إِيَّاكَ carries "you" (2MS)', () => expect(words.get('1:5:1').items).toContain('pr:2MS'));
+  it('1:6:1 ٱهْدِنَا keeps the object "us" (1P)', () => expect(words.get('1:6:1').items).toEqual(['l:hadaY', 'pr:1P']));
+  it('2:3:7 رَزَقْنَاهُمْ: "we" is the subject, only "them" is an item', () => expect(words.get('2:3:7').items).toEqual(['l:razaqa', 'pr:3MP']));
+  it('every ـنَا on a verb that is not "we" is an object', () => {
+    let bad = 0; for (const W of words.values()) if (W.pos === 'V' && W.f.per && W.f.per !== '1P' && W.parts.some((p) => /^نَا$|^نَٰ$/.test(p)) && !W.items.includes('pr:1P')) bad++;
+    expect(bad).toBe(0);
+  });
+});

@@ -136,6 +136,19 @@ Each phase: build → tests + 390 px screenshots → **critic review** → re-pl
 | Reader's whole-surah check used other surahs | **Removed.** The reader keeps the playback and points to the ladder for the check. |
 | Turkish meanings (G17) block every meaning question | **Open — needs Umut's decision** (see PROGRESS). |
 
+## 5f. Changes after the Phase 4 review (`reviews/phase-4.md`, 2026-11-21) — Phase 4.1
+
+| Review point | Decision |
+|---|---|
+| Pronoun data had holes (إِيَّا without person; 438 verbs lost their ـنَا/ـنِي object) | **Fixed** in `morph.mjs`, with tests against the corpus: إِيَّاكَ = "you"; ـنَا on a verb that is not "we" is an object; any second pronoun ending is an object. |
+| Turkish meanings (G17) | **Small step:** nouns use the plain form already in the data (يَوْم = "gün", not "günü"); passive and "fakat …" glosses are rejected for active verbs. Critic's sample before this step: 19/30 verbs, 11/30 nouns. **The source decision is still Umut's.** |
+| "Persons" line and who-question teach agreement, not who | **Partly:** the who-question now uses only I / we / you verbs (where grammar and speaker or addressee agree); labels say "eril / dişil", not "erkek / kadın". Reworking the line into "who says this / who is spoken to" **waits for Umut**. |
+| Duplicate options (109:3 = 109:5); 3-verse surahs got only one question | **Fixed.** Repeated verses are skipped as prompts and options are de-duplicated; short whole surahs get a sequence question with 2–3 options. |
+| Self-report: no mismatch note on Today, not shown per passage | **Fixed.** |
+| Ladder order: whole surahs before easier passages | **Fixed** to follow the plan (§3: passages you can follow first): passages first, by the share of words you know. |
+| Wording ("1 gün sonra" for a passage, "1 days", "1 times") | **Fixed.** |
+| Search failed for inflected Arabic and Turkish stems | **Fixed for the common cases:** prefixes and endings are stripped to find the root (الرحمن, يعلمون, قل → قَالَ); Turkish infinitives and softened consonants (bilmek, korkmak, kalp → kalbi). |
+
 ## 6. The critic
 
 - A separate agent, given only the app (running at 390 × 844), `docs/PLAN.md` and a persona. It is told to be honest and specific, not kind.

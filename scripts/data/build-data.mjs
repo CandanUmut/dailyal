@@ -94,13 +94,16 @@ const items = ranked.map((id, rank) => {
     // were still relative, conditional or personal forms). Verbs: one word ending in the plain 3rd-person past (…dı/di/du/dü/tı/ti/tu/tü)
     // or present (…ar/er/ır/ir/ur/ür); nouns: no "-dır" ending, no "bir " in front, no possessive word. Fall back to the base pool.
     const isVerb = list[0].pos === 'V';
-    const PRON_START = /^(bunun|böylece|sonra|işte|artık|hani|nitekim|çünkü|eğer|de|da|ve|ki|ne|siz|biz|ben|sen|o|onlar|onları|onu|seni|sizi|bizi|beni|bana|sana|ona|onlara|size|bize|kendilerini|kendini|onun|onların|bizim|senin|sizin)\b/i;
-    const pastTr = (s) => !!s && !/[()]/.test(s) && !PRON_START.test(s.trim()) && /^(\S+\s){0,2}\S+(d|t)[ıiuü]$/i.test(s.trim()) && !/l[ae]rd[ıi]$/i.test(s.trim());
+    const PRON_START = /^(fakat|ama|hem|yine|bunun|böylece|sonra|işte|artık|hani|nitekim|çünkü|eğer|de|da|ve|ki|ne|siz|biz|ben|sen|o|onlar|onları|onu|seni|sizi|bizi|beni|bana|sana|ona|onlara|size|bize|kendilerini|kendini|onun|onların|bizim|senin|sizin)\b/i;
+    const pastTr = (s) => !!s && !/[()]/.test(s) && !PRON_START.test(s.trim()) && /^(\S+\s){0,2}\S+(d|t)[ıiuü]$/i.test(s.trim()) && !/l[ae]rd[ıi]$/i.test(s.trim()) && !/[ıiuü]l(d|t)[ıiuü]$/i.test(s.trim());
     const presTr = (s) => !!s && !/[()]/.test(s) && !PRON_START.test(s.trim()) && /^(\S+\s){0,2}\S+(a|e|ı|i|u|ü)r$/i.test(s.trim());
-    const nounTr = (s) => !!s && !/[()]/.test(s) && !PRON_START.test(s.trim()) && !/(d|t)[ıiuü]r$/i.test(s.trim()) && !/^bir /i.test(s.trim()) && s.trim().split(/\s+/).length <= 3;
+    const nounTr = (s) => !!s && !/[()]/.test(s) && !PRON_START.test(s.trim()) && !/(d|t)[ıiuü]r$/i.test(s.trim()) && !/([ıiuü]z|[ıiuü]m[ıiuü]z[ıiuü]?|s[ıiuü]n[ıiuü]z)$/i.test(s.trim()) && !/^bir /i.test(s.trim()) && s.trim().split(/\s+/).length <= 3;
     const pick1 = (f) => { const c = scored.filter((x) => f(x.g.tr)); return c.length ? c.filter((x) => x.sc >= Math.max(...c.map((y) => y.sc)) - 2) : null; };
     const trPool = (isVerb ? pick1(pastTr) || pick1(presTr) : pick1(nounTr)) || pool;
-    const tr = mostCommon(trPool.map((x) => x.g.tr)), en = mostCommon(pool.map((x) => x.g.en));
+    let tr = mostCommon(trPool.map((x) => x.g.tr));
+    const en = mostCommon(pool.map((x) => x.g.en));
+    // Nouns: if a shorter plain form of the chosen gloss also occurs (günü → gün, şeyi → şey), use it (Phase 4 review).
+    if (!isVerb && tr) { const counts = new Map(); for (const x of scored) if (nounTr(x.g.tr)) counts.set(x.g.tr.trim(), (counts.get(x.g.tr.trim()) || 0) + 1); const base = [...counts].filter(([g, c]) => c >= 3 && g.length >= 2 && tr.text.trim().startsWith(g) && g.length < tr.text.trim().length).sort((a, b) => b[1] - a[1])[0]; if (base) tr = { text: base[0], n: base[1], of: tr.of }; }
     if (tr || en) it.gl = { tr: tr?.text ?? null, en: en?.text ?? null, base: best };
     // Other meanings: from near-base places only, counted.
     // Function words (split by role) have no base form: count their meanings across all places.

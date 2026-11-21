@@ -28,11 +28,13 @@ export const ROLE: Record<string, [string, string]> = {
   REM: ['resumption (then, so)', 'isti\'naf'], RET: ['retraction (rather)', 'idrab (bilakis)'], RSLT: ['result (then)', 'sonuç'], SUR: ['surprise (behold)', 'şaşırma (bir de baktı ki)'], DET: ['the', 'belirlilik'],
 };
 /** Who is acting in a verb, and when: from the corpus features of that exact word (e.g. 'IMPF|1S|0' → "I · present"). */
-const PERS: Record<string, [string, string]> = { '1S': ['I', 'ben'], '1P': ['we', 'biz'], '2MS': ['you (one man)', 'sen (erkek)'], '2FS': ['you (one woman)', 'sen (kadın)'], '2D': ['you two', 'siz ikiniz'], '2MD': ['you two', 'siz ikiniz'], '2MP': ['you (all)', 'siz'], '2FP': ['you (women)', 'siz (kadınlar)'], '3MS': ['he / it', 'o (eril)'], '3FS': ['she / it', 'o (dişil)'], '3MD': ['they two', 'o ikisi'], '3FD': ['they two', 'o ikisi'], '3D': ['they two', 'o ikisi'], '3MP': ['they', 'onlar'], '3FP': ['they (women)', 'onlar (kadınlar)'] };
+const PERS: Record<string, [string, string]> = { '1S': ['I', 'ben'], '1P': ['we', 'biz'], '2MS': ['you (masculine)', 'sen (eril)'], '2FS': ['you (feminine)', 'sen (dişil)'], '2D': ['you two', 'siz ikiniz'], '2MD': ['you two', 'siz ikiniz'], '2MP': ['you (all)', 'siz'], '2FP': ['you (feminine plural)', 'siz (dişil)'], '3MS': ['he / it', 'o (eril)'], '3FS': ['she / it', 'o (dişil)'], '3MD': ['they two', 'o ikisi'], '3FD': ['they two', 'o ikisi'], '3D': ['they two', 'o ikisi'], '3MP': ['they', 'onlar'], '3FP': ['they (feminine)', 'onlar (dişil)'] };
 const ASP: Record<string, [string, string]> = { PERF: ['past', 'geçmiş zaman'], IMPF: ['present / future', 'şimdiki-geniş zaman'], IMPV: ['command', 'emir'] };
 /** The person of a verb tag in the reader's language ('IMPF|1S|0' → 'I'), for "who is doing it?" questions. */
 export const personOf = (tag: string | undefined) => { const per = tag?.split('|')[1]; return per && PERS[per] ? PERS[per][lang() === 'tr' ? 1 : 0] : ''; };
-export const PERSON_OPTIONS = () => ['1S', '1P', '2MS', '2MP', '3MS', '3FS', '3MP'].map((k) => PERS[k][lang() === 'tr' ? 1 : 0]);
+export const PERSON_OPTIONS = () => ['1S', '1P', '2MS', '2MP'].map((k) => PERS[k][lang() === 'tr' ? 1 : 0]);
+/** The who-question uses only I / we / you verbs: there grammar and speaker/addressee agree (Phase 4 review). */
+export const isFirstSecond = (tag: string | undefined) => /^(1|2)/.test(tag?.split('|')[1] || '');
 export function grammarLabel(tag: string | undefined) {
   if (!tag || !tag.includes('|')) return '';
   const [asp, per, pass] = tag.split('|'), L = lang() === 'tr' ? 1 : 0;
