@@ -46,7 +46,7 @@ await p.goto(ROOT + 'place/'); await p.waitForTimeout(500);
 for (let i = 0; i < 12; i++) { await p.tap('[data-a=show]'); if (i === 0) await p.screenshot({ path: `${OUT}/flow-place.png`, fullPage: true }); await p.tap(i % 3 ? '[data-a=yes]' : '[data-a=no]'); }
 await p.tap('[data-a=stop]'); const placeText = await p.textContent('main');
 await p.goto(ROOT + 'listen/?v=112:1'); await p.waitForTimeout(600); await p.tap('.play[data-a=play]'); await p.waitForSelector('[data-a=reveal]:not([disabled])'); await p.tap('[data-a=reveal]');
-await p.tap('.q .w >> nth=1'); await p.screenshot({ path: `${OUT}/flow-listen-1.png`, fullPage: true });
+await p.tap('.q .w >> nth=1'); await p.waitForSelector('.sheet'); await p.waitForTimeout(1500); await p.screenshot({ path: `${OUT}/flow-listen-1.png` }); await p.tap('.sheet-x');
 await p.tap('[data-a=next]');
 for (let i = 0; i < 4 && (await p.$('[data-a=fill]')); i++) { await p.tap('[data-a=fill] >> nth=0'); if (i === 0) await p.screenshot({ path: `${OUT}/flow-listen-2.png`, fullPage: true }); await p.tap('[data-a=next]'); }
 await p.tap('[data-a=play]'); await p.waitForSelector('[data-a=check]'); await p.tap('[data-a=check] >> nth=0'); if (await p.$('[data-a=who]')) await p.tap('[data-a=who] >> nth=0'); await p.tap('[data-a=self][data-v="2"]'); await p.tap('[data-a=self][data-v="3"]'); await p.screenshot({ path: `${OUT}/flow-listen-3.png`, fullPage: true });

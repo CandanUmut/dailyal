@@ -4,10 +4,10 @@ import { surahs, surah, items, type Surah } from './data';
 import { overview, knownIdx } from './coverage';
 import { verseHtml, playBtn, toggle, playAll, speedChips, setSpeed } from './verse';
 import { state as st } from './store';
-import { meaning, grammarLabel, cuesOf } from './cardview';
+import { openWordSheet } from './sheet';
 import { wordKnown } from './coverage';
-import { trText, trName, rangeOnce } from './trans';
-import { t, pick, lang } from './i18n';
+import { trName, rangeOnce } from './trans';
+import { t, lang } from './i18n';
 import { $, base, esc } from './util';
 
 const name = (s: Surah) => (lang() === 'tr' ? s.tr : s.tname);
@@ -44,8 +44,6 @@ async function reader() {
     if (V.ruku && !hide && starts.length > 1) { sec++; const a = V.n, b = (starts[sec] || vs.length + 1) - 1, ws = vs.slice(a - 1, b).flatMap((x) => x.w.filter((w) => w[0].length)), kn = ws.filter((w) => wordKnown(w[0], k)).length; h += `<div class="sh sec" style="margin-top:22px">${t('section', { k: sec, a, b })} · ${t('known', { p: ws.length ? Math.round((kn / ws.length) * 100) : 0 })}</div>`; }
     if (hide) { h += `<div class="sec" style="margin-top:8px;border-top:1px solid var(--rule);padding-top:8px" data-v="${V.n}"><p class="${playing === V.n ? 'ok' : 'note'}">${playing === V.n ? '▶ ' : ''}${t('verseN', { n: V.n })}</p></div>`; continue; }
     h += `<div class="sec" style="margin-top:14px;border-top:1px solid var(--rule);padding-top:8px;${playing === V.n ? 'background:var(--sunk);' : ''}" data-v="${V.n}">${verseHtml(V, k, { sel: sel?.v === V.n ? sel.i : undefined })}`;
-    if (sel?.v === V.n) { const w = V.w[sel.i]; h += `<div class="gloss"><span class="ar">${esc(V.t[sel.i])}</span> &nbsp;<b>${esc(pick(w[1], w[2])) || '—'}</b>${grammarLabel(w[4]) ? `<div class="note">${esc(grammarLabel(w[4]))}</div>` : ''}<div class="ref">${w[0].map((x) => `<a class="wlink" href="${base()}words/?id=${encodeURIComponent(all[x].id)}"><span class="ar">${esc(all[x].ar)}</span></a> ${esc(meaning(all[x]))}`).join(' · ')}</div></div>`; }
-    const cues = cuesOf(V, all); if (cues.length) h += `<p class="note">${esc(t('cues', { list: cues.join(' · ') }))}</p>`;
     h += `<div class="row" style="justify-content:space-between;align-items:flex-start;margin-top:4px"><p class="tl" style="flex:1">${esc(once.get(V.n) || '')}</p>${playBtn(n, V.n, t('play'), 'sm')}</div>`;
     h += `<a class="btn quiet" style="margin-top:6px" href="${base()}listen/?v=${n}:${V.n}">${t('listen')} ${n}:${V.n}</a></div>`;
   }
@@ -66,6 +64,6 @@ document.addEventListener('click', (e) => {
     return;
   }
   if (a === 'my') { const x = +b.dataset.n!; state.my = state.my.includes(x) ? state.my.filter((y) => y !== x) : [...state.my, x].sort((p, q) => p - q); save(); n ? reader() : list(); }
-  if (a === 'word') { const v = +b.closest<HTMLElement>('[data-v]')!.dataset.v!, i = +b.dataset.i!; sel = sel && sel.v === v && sel.i === i ? null : { v, i }; reader(); }
+  if (a === 'word') { const v = +b.closest<HTMLElement>('[data-v]')!.dataset.v!, i = +b.dataset.i!; sel = { v, i }; openWordSheet(n, v, i); }
 });
 n >= 1 && n <= 114 ? reader() : list();

@@ -6,8 +6,9 @@ import { state, save, bump, rollDay, MY_DEFAULT } from './store';
 import { surah, surahs, vreq, items, type Verse, type Surah, type Item } from './data';
 import { knownIdx, verseShare } from './coverage';
 import { verseHtml, playAll, speedChips, setSpeed, reciterName, toggle } from './verse';
-import { meaning, grammarLabel, personOf, PERSON_OPTIONS, cuesOf, isFirstSecond } from './cardview';
+import { personOf, PERSON_OPTIONS, isFirstSecond } from './cardview';
 import { trText, trName, checkSet, similar, rangeOnce } from './trans';
+import { openWordSheet } from './sheet';
 import { playBtn } from './verse';
 import { t, pick, lang, num } from './i18n';
 import { $, base, esc, shuffle, dayNum } from './util';
@@ -105,8 +106,6 @@ function render() {
     for (const v of inP) {
       if (v.b && v.bt) h += `<p class="q basmala" lang="ar">${esc(v.bt)}</p>`;
       h += `<div data-v="${v.n}" style="border-top:1px solid var(--rule);padding-top:6px;margin-top:8px">${verseHtml(v, k, { sel: sel?.v === v.n ? sel.i : undefined })}`;
-      if (sel?.v === v.n) { const w = v.w[sel.i], gr = grammarLabel(w[4]); h += `<div class="gloss"><span class="ar">${esc(v.t[sel.i])}</span> <b>${esc(pick(w[1], w[2])) || '—'}</b>${gr ? `<div class="note">${esc(gr)}</div>` : ''}<div class="ref">${w[0].map((x) => `${esc(all[x].ar)} ${esc(meaning(all[x]))}`).join(' · ')}</div></div>`; }
-      const cues = cuesOf(v, all); if (cues.length) h += `<p class="note">${esc(t('cues', { list: cues.join(' · ') }))}</p>`;
       h += once.has(v.n) ? `<p class="tl">${esc(once.get(v.n)!)}</p></div>` : '</div>';
     }
     const hd = state.heard[key(P)];
@@ -144,7 +143,7 @@ document.addEventListener('click', async (e) => {
   else if (a === 'ans') { const q = qs[qi]; if (!q.chosen) q.chosen = q.opts[+b.dataset.i!]; }
   else if (a === 'nextq') { if (qi + 1 < qs.length) qi++; else { step = 'score'; record(); } }
   else if (a === 'totext') step = 'text';
-  else if (a === 'word') { const v = +b.closest<HTMLElement>('[data-v]')!.dataset.v!, i = +b.dataset.i!; sel = sel && sel.v === v && sel.i === i ? null : { v, i }; }
+  else if (a === 'word') { const v = +b.closest<HTMLElement>('[data-v]')!.dataset.v!, i = +b.dataset.i!; sel = { v, i }; openWordSheet(P.s, v, i); return; }
   else return;
   render();
 });

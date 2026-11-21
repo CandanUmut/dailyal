@@ -9,6 +9,7 @@ import { verseHtml, playBtn, toggle, reciterName, speedChips, setSpeed } from '.
 import { meaning, grammarLabel, personOf, PERSON_OPTIONS, isFirstSecond } from './cardview';
 import { trText, trName, checkSet, similar } from './trans';
 import { badge } from './chrome';
+import { openWordSheet } from './sheet';
 import { t, pick, lang } from './i18n';
 import { $, base, esc, shuffle, dayNum, toast } from './util';
 
@@ -65,12 +66,6 @@ function pass1() {
   if (pre) return context() + `<h2 class="h2" style="margin-top:8px">${t('hearFirst')}</h2><p class="sub">${t('hearFirstSub')}</p>` + player() + `<div class="stackb"><button class="btn pri" data-a="reveal" ${preHeard ? '' : 'disabled'}>${t('showText')}</button>${preHeard ? '' : `<p class="note">${t('playFirst')}</p>`}</div>`;
   let h = context() + (V.b && V.bt ? `<p class="q basmala" lang="ar">${esc(V.bt)}</p>` : '') + verseHtml(V, k, { sel });
   h += `<p class="cap">${share()} ${t('tapWord')}</p>`;
-  if (sel >= 0) {
-    const w = V.w[sel], gr = grammarLabel(w[4]);
-    h += `<div class="gloss" aria-live="polite"><span class="ar" lang="ar">${esc(V.t[sel])}</span> &nbsp;<b>${esc(place_(V, sel)) || '—'}</b>${gr ? `<div class="note">${esc(gr)}</div>` : ''}<div class="ref">${t('meaningHere')} · ${t('srcAk')}</div>`;
-    for (const x of w[0]) { const it = all[x]; h += `<div class="row" style="margin-top:6px;flex-wrap:wrap"><a href="${base()}words/?id=${encodeURIComponent(it.id)}" class="ar wlink">${esc(it.ar)}</a><span class="note">${esc(meaning(it))} · ${t('rank', { r: it.r })}</span>${k[x] ? `<span class="tag known">${t('knownWord')}</span>` : state.r[it.id] ? '' : `<button class="btn quiet" data-a="learn" data-id="${esc(it.id)}">${t('addWord')}</button>`}</div>`; }
-    h += '</div>';
-  }
   h += player();
   h += `<div class="stackb"><button class="btn quiet" data-a="tr">${showTr ? t('hideTr') : t('showTr')}</button></div>`;
   if (showTr) h += `<p class="tl" style="margin-top:12px">${esc(trText(V))}<small>${esc(trName())} · Açık Kuran</small></p>`;
@@ -125,7 +120,7 @@ document.addEventListener('click', async (e) => {
   const a = b.dataset.a!;
   if (a === 'play') { toggle(b); return; }
   if (a === 'speed') { setSpeed(+b.dataset.v!); save(); render(); return; }
-  if (a === 'word' && pass === 1) sel = +b.dataset.i! === sel ? -1 : +b.dataset.i!;
+  if (a === 'word' && pass === 1) { sel = +b.dataset.i!; openWordSheet(sv.s, sv.v, sel); }
   else if (a === 'reveal') pre = false;
   else if (a === 'tr') { showTr = !showTr; if (showTr) readTr = true; }
   else if (a === 'learn') { place(b.dataset.id!, false); save(); badge(); toast(t('added')); }
