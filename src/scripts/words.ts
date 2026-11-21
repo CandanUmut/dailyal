@@ -85,18 +85,21 @@ document.addEventListener('click', async (e) => {
 async function myWords() {
   const { surah } = await import('./data'), { quizGloss } = await import('./i18n'), { dayNum } = await import('./util');
   const toks = Object.entries(state.r).filter(([k]) => k.startsWith('t:')), t0 = dayNum(), due = toks.filter(([, r]) => r.due <= t0 && (r.f ?? 0) < t0).length;
-  let h = `<h1 class="h1">${t('wdTitle')}</h1><p class="sub">${t('wdSub')}</p>`;
-  h += due ? `<div class="stackb"><a class="btn pri big" href="${base()}lesson/?review=1">${t('wdReview', { n: Math.min(due, 8) })}</a></div>` : `<p class="note sec">${toks.length ? t('wdNoReview') : t('wdNone')}</p>`;
+  const { roots, items: itemsF } = await import('./data');
+  const [rs, allIt] = await Promise.all([roots(), itemsF()]), byId = new Map(allIt.map((x) => [x.id, x]));
+  const myRoots = new Set(Object.keys(state.met).map((id) => byId.get(id)?.root).filter(Boolean) as string[]);
+  let h = `<h1 class="h1">${t('wdTitle')}</h1>`;
+  h += due ? `<div class="stackb"><a class="btn pri big" href="${base()}lesson/?review=1">${t('wdReview', { n: Math.min(due, 8) })}</a></div>` : `<p class="note">${toks.length ? t('wdNoReview') : t('wdNone')}</p>`;
+  h += `<div class="cards sec"><a class="tile" href="#mine"><span class="note">${t('wdCardWords')}</span><span class="big">${toks.length}</span></a><a class="tile" href="${base()}library/roots/?mine=1"><b>${t('wdCardRoots')}</b><span class="big">${myRoots.size}</span><span class="note">${t('wdCardRootsS')}</span></a><a class="tile" href="${base()}words/?deck=phrases"><b>${t('wdCardPhrases')}</b><span class="note">${t('phrasesLinkD', { d: dueItems(ps).length, n: newPhrases(ps).length })}</span></a><a class="tile" href="${base()}library/"><b>${t('wdCardLessons')}</b><span class="note">${t('wdCardLessonsS')}</span></a></div>`;
   if (toks.length) {
     const rows: string[] = [];
-    for (const [k, r] of toks.sort((a, b) => (a[1].f ?? 0) - (b[1].f ?? 0))) {
+    for (const [k, r] of toks.sort((a, b) => (b[1].f ?? 0) - (a[1].f ?? 0))) {
       const [, s, v, i] = k.split(':').map(Number), V = (await surah(s))[v - 1];
       rows.push(`<li><div class="li"><span class="ar" style="font-size:26px;min-width:110px;text-align:right">${esc(V.t[i])}</span><span style="flex:1">${esc(quizGloss(V.w[i]))}<span class="note" style="display:block">${s}:${v}${r.c ? ' · ✓' : ''}</span></span></div></li>`);
     }
-    h += `<ul class="list sec">${rows.join('')}</ul>`;
+    h += `<div class="sec" id="mine"><div class="sh">${t('wdCardWords')}</div><p class="note">${t('wdSub')}</p><ul class="list">${rows.join('')}</ul></div>`;
   }
-  const pd = dueItems(ps).length, pn = newPhrases(ps).length;
-  h += `<div class="sec"><div class="sh">${t('moreWords')}</div><ul class="list">${[[`words/?deck=phrases`, t('phrasesLink'), t('phrasesLinkD', { d: pd, n: pn })], ['words/parts/', t('partsLink'), t('partsLinkD')], ['library/roots/', t('roots'), t('rootsSub')], ['library/', t('lessons'), t('lessonsLink')]].map(([href, l, d]) => `<li><a href="${base()}${href}"><span style="flex:1"><b>${l}</b><span class="note" style="display:block">${d}</span></span><span class="go">›</span></a></li>`).join('')}</ul></div>`;
+  void rs;
   $('#words')!.innerHTML = h;
 }
 
