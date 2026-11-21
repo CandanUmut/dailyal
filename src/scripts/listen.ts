@@ -15,7 +15,7 @@ import { $, base, esc, shuffle, dayNum, toast } from './util';
 type Q = { word: number; opts: string[]; right: string; chosen?: string; who?: 1 };
 let S: Surah, V: Verse, all: Item[], k: Uint8Array, sv = { s: 1, v: 1 };
 let pass = 1, sel = -1, showTr = false, readTr = false, ctxOpen = false, fill: Q[] = [], fi = 0, heard3 = false, audioFail = false;
-let check: { opts: string[]; right: string; by: string; chosen?: string } | null = null, self = -1;
+let check: { opts: string[]; right: string; by: string; chosen?: string } | null = null, self = -1, who: Q | null = null;
 const seen = new Set<string>();
 const AGAIN = [1, 3, 7, 14];
 const place_ = (v: Verse, i: number) => pick(v.w[i][1], v.w[i][2]);
@@ -35,16 +35,16 @@ async function load(s: number, v: number) {
   }).filter((q) => q.opts.length === 3);
   // "Who is doing it?": one verb in the verse, answered from its person ending (I, we, you, he, they).
   const verbs = V.w.map((w, i) => ({ i, p: personOf(w[4]) })).filter((x) => x.p);
-  if (verbs.length) { const vb = verbs.find((x) => /^(1|2)/.test(V.w[x.i][4].split('|')[1])) || verbs[0]; fill.push({ word: vb.i, right: vb.p, who: 1, opts: shuffle([vb.p, ...shuffle(PERSON_OPTIONS().filter((x) => x !== vb.p)).slice(0, 2)]) }); }
+  who = null;
+  if (verbs.length) { const vb = verbs.find((x) => /^(1|2)/.test(V.w[x.i][4].split('|')[1])) || verbs[0]; who = { word: vb.i, right: vb.p, who: 1, opts: shuffle([vb.p, ...shuffle(PERSON_OPTIONS().filter((x) => x !== vb.p)).slice(0, 2)]) }; }
   // Check: this verse's own text, and two clearly different texts from nearby verses.
   const mine = checkTr(V), seenTexts = [mine.text], others: string[] = [];
   const near = ss.filter((x) => x.n !== V.n).sort((a, b) => Math.abs(a.n - V.n) - Math.abs(b.n - V.n));
   const extra = await surah(s < 114 ? s + 1 : s - 1);
-  for (const x of shuffle(near.slice(0, 12)).concat(shuffle(extra))) {
-    const o = checkTr(x).text;
-    if (!o || seenTexts.some((y) => y === o || similar(y, o) >= 0.4)) continue;
-    others.push(o); seenTexts.push(o); if (others.length === 2) break;
-  }
+  // Fair but not easy (Phase 2 review): prefer texts that share some words with the right one (0.1–0.4 overlap).
+  const cand = [...new Set(near.concat(extra).map((x) => checkTr(x).text).filter((o) => o && o !== mine.text))]
+    .map((o) => ({ o, sim: similar(mine.text, o) })).filter((c) => c.sim < 0.4).sort((a, b) => Math.abs(0.22 - a.sim) - Math.abs(0.22 - b.sim));
+  for (const c of cand) { if (seenTexts.some((y) => similar(y, c.o) >= 0.4)) continue; others.push(c.o); seenTexts.push(c.o); if (others.length === 2) break; }
   check = { right: mine.text, by: trName(mine.id), opts: shuffle([mine.text, ...others]) };
 }
 
@@ -94,6 +94,10 @@ function pass3() {
   if (c.chosen) {
     h += `<p class="${c.chosen === c.right ? 'ok' : 'bad'}" style="margin-top:10px">${c.chosen === c.right ? t('correct') : t('wrong')}</p>`;
     if (readTr) h += `<p class="note">${t('practiceOnly')}</p>`;
+    if (who) {
+      h += `<p style="margin-top:14px"><b>${t('whoHeardQ')}</b> <span class="ar" style="font-size:24px">${esc(V.t[who.word])}</span></p>` + who.opts.map((o, i) => `<button class="opt ${who!.chosen ? (o === who!.right ? 'right' : o === who!.chosen ? 'wrong' : '') : ''}" data-a="who" data-i="${i}" ${who!.chosen ? 'disabled' : ''}>${esc(o)}</button>`).join('');
+      if (!who.chosen) return h;
+    }
     h += `<p style="margin-top:14px"><b>${t('selfQ')}</b></p><div class="chips" style="margin-top:8px">${[t('none'), t('some'), t('most'), t('all')].map((x, i) => `<button class="chip" data-a="self" data-v="${i}" aria-pressed="${self === i}">${x}</button>`).join('')}</div>`;
   }
   if (self >= 0) {
@@ -126,6 +130,7 @@ document.addEventListener('click', async (e) => {
   else if (a === 'learn') { place(b.dataset.id!, false); save(); badge(); toast(t('added')); }
   else if (a === 'next') { if (pass === 1) pass = fill.length ? 2 : 3; else if (pass === 2) { if (fi + 1 < fill.length) fi++; else pass = 3; } }
   else if (a === 'fill') { const q = fill[fi]; q.chosen = q.opts[+b.dataset.i!]; }
+  else if (a === 'who' && who && !who.chosen) { who.chosen = who.opts[+b.dataset.i!]; }
   else if (a === 'check') { const c = check!; if (c.chosen) return; c.chosen = c.opts[+b.dataset.i!]; finishVerse(c.chosen === c.right); }
   else if (a === 'self') { const v = +b.dataset.v!; if (self < 0) { bump(4, v); bump(5); } else bump(4, v - self); self = v; save(); }
   else if (a === 'another') { const n = await pickVerse(seen); await load(n.s, n.v); window.scrollTo(0, 0); }

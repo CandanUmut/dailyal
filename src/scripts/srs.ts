@@ -34,3 +34,4 @@ export function place(id: string, knew: boolean) {
 export const nextGap = (id: string, g: number) => INTERVALS[Math.min(INTERVALS.length - 1, (state.r[id] ? state.r[id].b : 0) + g)];
 export function missRate7() { const t = dayNum(); let a = 0, m = 0; for (let d = t - 6; d <= t; d++) { const h = state.hist[d]; if (h) { a += h[0] || 0; m += h[1] || 0; } } return { a, m, r: a ? m / a : 0 }; }
 export function checks7() { const t = dayNum(); let ok = 0, tot = 0; for (let d = t - 6; d <= t; d++) { const h = state.hist[d]; if (h) { ok += h[2] || 0; tot += h[3] || 0; } } return { ok, tot }; }
+export function selfAvg7() { const t = dayNum(); let s = 0, n = 0; for (let d = t - 6; d <= t; d++) { const h = state.hist[d]; if (h) { s += h[4] || 0; n += h[5] || 0; } } return n ? s / n : null; }

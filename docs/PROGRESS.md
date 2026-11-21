@@ -9,7 +9,9 @@
 | R0 | Learning-method sources (`docs/research/learning.md`) | **Done**; PLAN §2 rewritten from it. Two behaviour changes are waiting for Umut (see below) |
 | 1 | Foundation: data pipeline, app (Today, Placement, Words, Listen, Surahs, Library), EN/TR, offline, tests | **Built, tests pass**; waiting for the full Açık Kuran download, then the Phase 1 critic review |
 | 1.1 | Fixes from the Phase 1 review (`docs/reviews/phase-1.md`; decisions in PLAN §5c) | **Done**, tests pass |
-| 2–6 | See `docs/PLAN.md` §5 | Next: Phase 2 (ear and parts) |
+| 2 | Ear and parts (`docs/reviews/phase-2.md`) | **Done** |
+| 2.1 | Fixes from the Phase 2 review (PLAN §5d) | **Done**, tests pass |
+| 3–6 | See `docs/PLAN.md` §5 | Next: Phase 3 (listening ladder) |
 
 Each phase ends with phone-size screenshots, test results and a PR.
 
@@ -28,3 +30,4 @@ Each phase ends with phone-size screenshots, test results and a PR.
 - **2026-11-20**: Tanzil and the corpus align word for word in all 6,236 verses once 4 known two-token joins (بَعْدَ مَا, إِلْ يَاسِينَ) are handled. The Basmala is stored per surah, because 95 and 97 spell it بِّسْمِ.
 - **2026-11-20**: R0 found that growing review gaps do not beat equal gaps in the long term. The doubling is kept only as a design choice (fewer misses while learning), and is now labelled that way.
 - **Waiting for Umut** (these would change how the app behaves): (1) in Listen, hear the verse once **without** the text before seeing it (predict, then check); (2) switch reciters on later re-listens, to vary the conditions.
+- **2026-11-21**: Correction. On 2026-11-21 I reported the Turkish card meanings as fixed after Phase 1.1. The Phase 2 critic showed they were only partly fixed. Now improved (144 of 156 top verbs are plain), still not perfect (G17).

@@ -29,11 +29,11 @@ let hide = false, heardAll = false, playing = 0, stop: (() => void) | null = nul
 async function makeGist() {
   const [vs, ss] = await Promise.all([surah(n), surahs()]);
   const right = checkTr(shuffle(vs.filter((v) => (checkTr(v).text || '').length > 20))[0] || vs[0]).text, opts = [right];
-  for (let tries = 0; opts.length < 3 && tries < 20; tries++) {
-    const other = 1 + Math.floor(Math.random() * 114); if (other === n) continue;
-    const ov = await surah(other), x = checkTr(ov[Math.floor(Math.random() * ov.length)]).text;
-    if (x && x.length > 20 && opts.every((o) => similar(o, x) < 0.3)) opts.push(x);
-  }
+  // Wrong options share some words with the right one (Phase 2 review: random surahs were a giveaway).
+  const cands: { x: string; sim: number }[] = [];
+  for (const other of shuffle([...Array(37)].map((_, i) => 78 + i).filter((o) => o !== n)).slice(0, 12)) for (const ov of await surah(other)) { const x = checkTr(ov).text; if (x && x.length > 20) cands.push({ x, sim: similar(right, x) }); }
+  cands.sort((a, b) => b.sim - a.sim);
+  for (const c of cands) { if (opts.length === 3) break; if (c.sim < 0.4 && opts.every((o) => similar(o, c.x) < 0.4)) opts.push(c.x); }
   void ss; gist = { right, opts: shuffle(opts) };
 }
 async function reader() {

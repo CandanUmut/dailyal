@@ -96,7 +96,7 @@ Each phase: build → tests + 390 px screenshots → **critic review** → re-pl
 
 | Review point | Decision |
 |---|---|
-| Word cards taught wrong or negated meanings (هَدَى = "doğru yola iletmez") | **Fixed.** Meanings now come from places where the word is in its base form (verbs: past, "he", active, not after a negation; nouns: no prefix or ending), preferring a plain past form in Turkish. هَدَى = "doğru yola iletti", أَرْسَلَ = "gönderdi", قَالَ = "dedi". Function words are split by role (مَا "not" vs مَا "what") and show their role first. A build check reports meanings that still look negated (6 of the top 1,000, listed in `data/build-report.txt`). A truly dictionary-style Turkish source would still be better: **open (G17)**. |
+| Word cards taught wrong or negated meanings (هَدَى = "doğru yola iletmez") | **Partly fixed** (corrected after the Phase 2 review, which found 88 of 154 top verbs still not in plain form; see §5d). Meanings now come from places where the word is in its base form (verbs: past, "he", active, not after a negation; nouns: no prefix or ending), preferring a plain past form in Turkish. هَدَى = "doğru yola iletti", أَرْسَلَ = "gönderdi", قَالَ = "dedi". Function words are split by role (مَا "not" vs مَا "what") and show their role first. A build check reports meanings that still look negated (6 of the top 1,000, listed in `data/build-report.txt`). A truly dictionary-style Turkish source would still be better: **open (G17)**. |
 | The listening check could be passed without listening | **Fixed.** Each verse is checked against its own text (Diyanet's joined ranges fall back to Elmalılı for the check). Near-twin options (word overlap ≥ 40%) are dropped. The options appear only after the audio has played to the end. No surah name or verse number is shown during the check. If the translation was read earlier, or the audio failed, the check is practice only and is not counted. |
 | "Meaning here" lost who is speaking | **Fixed.** Every verb shows person and tense from the corpus ("ben · şimdiki-geniş zaman"). |
 | The numbers flattered | **Fixed.** An item counts as known only after a correct recall on a later day than first seen; placement words are checked first. Today calls the figure "dictionary-form coverage" and explains it. |
@@ -105,6 +105,20 @@ Each phase: build → tests + 390 px screenshots → **critic review** → re-pl
 | Tap targets under 48 px | **Fixed**, and the e2e test now checks width too. |
 | Ear-first review, whole-surah listening, "who speaks?" questions | **Phase 2** (below). |
 | One Turkish translation for both reading and the check | **Waiting for Umut**: which Turkish translation should be the default (Settings now offers Diyanet, Elmalılı (sadeleştirilmiş), Süleyman Ateş). |
+
+## 5d. Changes after the Phase 2 review (`reviews/phase-2.md`, 2026-11-21) — Phase 2.1
+
+| Review point | Decision |
+|---|---|
+| Turkish meanings still often not dictionary-like | **Improved, not solved.** The Turkish gloss is now chosen from all places of the word: plain past forms of up to 3 words (else present) for verbs, no "-dır", "bir …" or pronoun-first glosses for nouns. Top-500 verbs in a plain form: 144 of 156 (was about 66). Nouns ending in "-dır": 0 (was 41). The rest stay in G17. |
+| Ear-first could be revealed without playing; few words qualified | **Fixed.** The verse must be played first. Any place in Al-Fatiha or Juz 30 (up to 5) can be used, your surahs first. |
+| Who-question asked with the text on screen | **Fixed.** It moved to the hear-only step, after the check, with only the verb shown. |
+| Joined-word wrong options gave the answer away | **Fixed.** Wrong options now drop a joined part, or swap a pronoun for one with the same first letter (ـهُ / ـهَا / ـهُمْ). |
+| Checks too easy (loanwords, random surahs) | **Improved.** Wrong options are chosen to share some words with the right one (about 0.1–0.4 overlap), from the same surah, nearby verses or Juz 30. Loanword overlap (e.g. "din") cannot be fully avoided. |
+| Lessons were word lists with errors (لَا "ve") | **Partly.** Meanings of function words are now counted from places where the word stands alone. Real explanations wait for a cited grammar (G7, G18). |
+| Today never offered Phase 2 | **Fixed.** One rotating practice a day (joined words, whole surah by ear, phrases); the self-report sits next to the check results. |
+| Leftovers: placement 150 cards, "çal", English in Turkish mode | **Fixed.** Placement is about 40 words and stops after 12 unknown in a row; an English fallback in Turkish mode is labelled "(İng.)". |
+| Listening ladder with the text off first, narrow-listening sets, results per passage | **Phase 3** (next). |
 
 ## 6. The critic
 

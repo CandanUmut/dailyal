@@ -90,14 +90,22 @@ const items = ranked.map((id, rank) => {
     const scored = list.map((W) => ({ W, g: gloss(W), sc: baseScore(W, code) })).filter((x) => x.g && (fn || !negated(x.W, x.g)));
     const best = Math.max(-9, ...scored.map((x) => x.sc));
     const pool = scored.filter((x) => x.sc === best);
-    // For past-tense verbs, prefer a Turkish gloss that is itself a plain past form (…dı/di/du/dü/tı/ti…), not a relative clause.
-    const isPastVerb = pool.length && pool[0].W.pos === 'V' && pool[0].W.f.asp === 'PERF';
-    const trPool = isPastVerb && pool.some((x) => PAST_TR.test(x.g.tr || '')) ? pool.filter((x) => PAST_TR.test(x.g.tr || '')) : pool;
+    // Turkish: prefer a "clean" dictionary-like form found anywhere in the word's places (Phase 2 review: 88 of 154 top verbs
+    // were still relative, conditional or personal forms). Verbs: one word ending in the plain 3rd-person past (…dı/di/du/dü/tı/ti/tu/tü)
+    // or present (…ar/er/ır/ir/ur/ür); nouns: no "-dır" ending, no "bir " in front, no possessive word. Fall back to the base pool.
+    const isVerb = list[0].pos === 'V';
+    const PRON_START = /^(bunun|böylece|sonra|işte|artık|hani|nitekim|çünkü|eğer|de|da|ve|ki|ne|siz|biz|ben|sen|o|onlar|onları|onu|seni|sizi|bizi|beni|bana|sana|ona|onlara|size|bize|kendilerini|kendini|onun|onların|bizim|senin|sizin)\b/i;
+    const pastTr = (s) => !!s && !/[()]/.test(s) && !PRON_START.test(s.trim()) && /^(\S+\s){0,2}\S+(d|t)[ıiuü]$/i.test(s.trim()) && !/l[ae]rd[ıi]$/i.test(s.trim());
+    const presTr = (s) => !!s && !/[()]/.test(s) && !PRON_START.test(s.trim()) && /^(\S+\s){0,2}\S+(a|e|ı|i|u|ü)r$/i.test(s.trim());
+    const nounTr = (s) => !!s && !/[()]/.test(s) && !PRON_START.test(s.trim()) && !/(d|t)[ıiuü]r$/i.test(s.trim()) && !/^bir /i.test(s.trim()) && s.trim().split(/\s+/).length <= 3;
+    const pick1 = (f) => { const c = scored.filter((x) => f(x.g.tr)); return c.length ? c.filter((x) => x.sc >= Math.max(...c.map((y) => y.sc)) - 2) : null; };
+    const trPool = (isVerb ? pick1(pastTr) || pick1(presTr) : pick1(nounTr)) || pool;
     const tr = mostCommon(trPool.map((x) => x.g.tr)), en = mostCommon(pool.map((x) => x.g.en));
     if (tr || en) it.gl = { tr: tr?.text ?? null, en: en?.text ?? null, base: best };
     // Other meanings: from near-base places only, counted.
     // Function words (split by role) have no base form: count their meanings across all places.
-    const near = code.includes('#') ? scored : scored.filter((x) => x.sc >= best - 1);
+    const alone = scored.filter((x) => x.W.items.length === 1);
+    const near = code.includes('#') ? (alone.length >= 5 ? alone : scored) : scored.filter((x) => x.sc >= best - 1);
     const senses = (lang) => { const m = new Map(); for (const x of near) { const g = x.g[lang]; if (g) m.set(g, (m.get(g) || 0) + 1); } return [...m].sort((a, b) => b[1] - a[1]).slice(0, 4); };
     const st = senses('tr'), se = senses('en'); if (st.length > 1 || se.length > 1) it.senses = { tr: st, en: se };
   }
@@ -108,7 +116,7 @@ const items = ranked.map((id, rank) => {
   cands.sort((a, b) => b.score - a.score);
   for (const c of cands.slice(0, 3)) ex.push(`${c.W.s}:${c.W.v}:${c.W.w}`);
   it.ex = ex;
-  const heard = list.filter((W) => W.s === 1 || W.s >= 78).slice(0, 2).map((W) => `${W.s}:${W.v}:${W.w}`);
+  const heard = list.filter((W) => W.s === 1 || W.s >= 78).slice(0, 5).map((W) => `${W.s}:${W.v}:${W.w}`);
   if (heard.length) it.ex30 = heard;
   return it;
 });

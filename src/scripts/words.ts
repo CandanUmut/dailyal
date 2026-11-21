@@ -19,7 +19,8 @@ const deck = new URLSearchParams(location.search).get('deck');
 const PHRASES_PER_DAY = 3;
 
 // Ear-first (Phase 2): about half of the words you are past learning come as "hear the verse first", using a verse from your own surahs.
-const earRef = (c: Item) => { const r = state.r[c.id]; if (!r || r.b < 2) return undefined; const mine = (c.ex30 || []).filter((x) => state.my.includes(+x.split(':')[0])); return mine.length && Math.random() < 0.5 ? mine[0] : undefined; };
+const earRef = (c: Item) => { const r = state.r[c.id]; if (!r || r.b < 2 || !c.ex30?.length || Math.random() >= 0.5) return undefined; const mine = c.ex30.filter((x) => state.my.includes(+x.split(':')[0])); const pool = mine.length ? mine : c.ex30; return pool[Math.floor(Math.random() * pool.length)]; };
+let earPlayed = false;
 function start(list: Item[]) { s = { queue: shuffle(list).map((c) => ({ c, again: false, ear: earRef(c) })), shown: false, done: 0, missed: 0 }; }
 const kindLabel = (c: Item) => (c.k === 'p' ? t('prefix') : c.k === 'pr' ? t('pronoun') : c.k === 'ph' ? t('phrase') : roleLabel(c));
 /** New phrases: 3 a day, kept apart from the word count. */
@@ -45,7 +46,7 @@ function session() {
   h += `<div class="card" style="margin-top:10px"><div class="row" style="flex-wrap:wrap;gap:8px"><span class="eyebrow">${esc(kindLabel(c))}</span>${isNew ? `<span class="tag new">${t('newTag')}</span>` : ''}${it.again ? `<span class="tag">${t('again')}</span>` : ''}</div>`;
   if (it.ear && !it.heard && !v.shown) {
     const [es, ev] = it.ear.split(':').map(Number);
-    h += `<span class="tag new">${t('earTag')}</span><p class="note" style="margin:10px 0">${t('earSub')}</p><div class="player">${playBtn(es, ev, t('play'))}</div></div><div class="stackb"><button class="btn pri" data-a="heard" style="min-height:60px">${t('showVerse')}</button></div>`;
+    h += `<span class="tag new">${t('earTag')}</span><p class="note" style="margin:10px 0">${t('earSub')}</p><div class="player">${playBtn(es, ev, t('play'))}</div></div><div class="stackb"><button class="btn pri" data-a="heard" style="min-height:60px" ${earPlayed ? '' : 'disabled'}>${t('showVerse')}</button>${earPlayed ? '' : `<p class="note">${t('earPlayFirst')}</p>`}</div>`;
     return h;
   }
   if (it.ear && earVerse) h += earVerse;
@@ -62,12 +63,12 @@ async function render() { $('#words')!.innerHTML = s ? session() : await landing
 document.addEventListener('click', async (e) => {
   const b = (e.target as HTMLElement).closest<HTMLElement>('[data-a]'); if (!b) return;
   const a = b.dataset.a!;
-  if (a === 'play') { toggle(b); return; }
+  if (a === 'play') { toggle(b); if (s && s.queue[0]?.ear && !s.queue[0].heard) { earPlayed = true; await render(); } return; }
   if (a === 'start') start(dueItems(all).concat(deck ? newPhrases(all) : newItems(all, boost)));
   else if (a === 'stop') s = null;
   else if (a === 'heard') { const it = s!.queue[0], [es, ev, ew] = it.ear!.split(':').map(Number); earVerse = verseHtml((await surah(es))[ev - 1], null, { mark: ew - 1 }); it.heard = true; }
   else if (a === 'show') { back = await cardBack(s!.queue[0].c); s!.shown = true; }
-  else if (a === 'grade') { const v = +b.dataset.v!, it = s!.queue.shift()!; const wasNew = !state.r[it.c.id]; grade(it.c.id, v, it.again); if (deck && wasNew) { state.day.nw--; state.day.np = (state.day.np || 0) + 1; save(); } s!.done++; if (v === 0) { s!.missed++; s!.queue.push({ c: it.c, again: true }); } s!.shown = false; earVerse = ''; badge(); }
+  else if (a === 'grade') { const v = +b.dataset.v!, it = s!.queue.shift()!; const wasNew = !state.r[it.c.id]; grade(it.c.id, v, it.again); if (deck && wasNew) { state.day.nw--; state.day.np = (state.day.np || 0) + 1; save(); } s!.done++; if (v === 0) { s!.missed++; s!.queue.push({ c: it.c, again: true }); } s!.shown = false; earVerse = ''; earPlayed = false; badge(); }
   else return;
   await render(); window.scrollTo(0, 0);
 });

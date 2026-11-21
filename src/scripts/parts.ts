@@ -17,16 +17,18 @@ async function build() {
   for (const sn of surahsList) for (const V of await surah(sn)) V.w.forEach((w, wi) => {
     if (w[0].length >= 2 && w[0].some((x) => all[x].k !== 'l')) pool.push({ s: sn, v: V.n, w: wi, word: V.t[wi], parts: w[0], opts: [], gloss: pick(w[1], w[2]) });
   });
-  const affixes = all.map((x, k) => ({ x, k })).filter(({ x }) => x.k !== 'l').slice(0, 14).map(({ k }) => k);
-  qs = shuffle(pool).slice(0, 8).map((q) => {
-    const opts = [q.parts];
-    for (let tries = 0; opts.length < 3 && tries < 30; tries++) {
-      const alt = q.parts.slice(), j = alt.findIndex((x) => all[x].k !== 'l'), r = affixes[Math.floor(Math.random() * affixes.length)];
-      if (j < 0 || alt.includes(r) || all[r].k !== all[alt[j]].k) continue; alt[j] = r;
-      if (!opts.some((o) => o.join() === alt.join())) opts.push(alt);
-    }
+  // Fair wrong options (Phase 2 review: letters not in the word gave the answer away):
+  // drop one joined part, or swap a pronoun for another with the same first letter (ـهُ / ـهَا / ـهُمْ …, ـكَ / ـكُمْ …).
+  const pr = new Map(all.map((x, k) => [x.id, k]));
+  const FAMILY: Record<string, string[]> = { h: ['3MS', '3FS', '3D', '3MP', '3FP'], k: ['2MS', '2FS', '2D', '2MP', '2FP'] };
+  const famOf = (person: string) => (person.startsWith('3') ? 'h' : person.startsWith('2') ? 'k' : '');
+  qs = shuffle(pool).map((q) => {
+    const opts = [q.parts], alts: number[][] = [];
+    q.parts.forEach((x, j) => { if (all[x].k !== 'l') alts.push(q.parts.filter((_, m) => m !== j)); });
+    q.parts.forEach((x, j) => { const it = all[x]; if (it.k === 'pr' && famOf(it.person!)) for (const p of FAMILY[famOf(it.person!)]) { const k = pr.get('pr:' + p); if (k != null && k !== x) { const a = q.parts.slice(); a[j] = k; alts.push(a); } } });
+    for (const a of shuffle(alts)) { if (opts.length === 3) break; if (a.length && !opts.some((o) => o.join() === a.join())) opts.push(a); }
     return { ...q, opts: shuffle(opts) };
-  }).filter((q) => q.opts.length === 3);
+  }).filter((q) => q.opts.length === 3).slice(0, 8);
 }
 async function render() {
   const el = $('#parts')!;

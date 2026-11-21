@@ -32,7 +32,7 @@ const tabs = [['today', 'Today', 'Bugün', ''], ['words', 'Words', 'Kelimeler', 
 <script is:inline>try{var s=(JSON.parse(localStorage.getItem("fahm-v1")||"{}").set||{});if(s.theme==="light"||s.theme==="dark")document.documentElement.dataset.theme=s.theme;var l=s.lang==="tr"||s.lang==="en"?s.lang:((navigator.language||"").toLowerCase().indexOf("tr")===0?"tr":"en");document.documentElement.lang=l;}catch(e){}</script>
 </head>
 <body data-base={u()}>
-<a class="l-en" href="#main" style="position:absolute;left:-999px">Skip to content</a>
+<a href="#main" style="position:absolute;left:-999px"><T en="Skip to content" tr="İçeriğe geç" /></a>
 <header class="top"><div class="wrap">
   <a class="mark" href={u()} aria-label={`${APP.name}, today`}><b>{APP.name}</b><span class="ar" style="font-size:18px">{APP.ar}</span></a>
   <a class="ib" href={u('settings/')} aria-label="Settings" aria-current={tab === 'settings' ? 'page' : undefined}><Icon name="settings" /></a>

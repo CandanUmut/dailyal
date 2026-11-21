@@ -8,7 +8,8 @@ import { t } from './i18n';
 import { $, base, esc } from './util';
 
 let all: Item[] = [], i = 0, shown = false, known = 0, unknown = 0;
-const LIMIT = 150;
+const LIMIT = 40, STOP_AFTER_MISSES = 12;
+let streakNo = 0;
 const queue = () => all.filter((x) => !state.r[x.id]).slice(0, LIMIT);
 let q: Item[] = [];
 
@@ -30,7 +31,7 @@ document.addEventListener('click', (e) => {
   const b = (e.target as HTMLElement).closest<HTMLElement>('[data-a]'); if (!b) return;
   const a = b.dataset.a!;
   if (a === 'show') shown = true;
-  else if (a === 'yes' || a === 'no') { const x = q[i]; if (a === 'yes') { place(x.id, true); known++; } else unknown++; i++; shown = false; save(); }
+  else if (a === 'yes' || a === 'no') { const x = q[i]; if (a === 'yes') { place(x.id, true); known++; streakNo = 0; } else { unknown++; streakNo++; } i++; if (streakNo >= STOP_AFTER_MISSES) { save(); finish(); return; } shown = false; save(); }
   else if (a === 'stop') { finish(); return; }
   else return;
   render();
