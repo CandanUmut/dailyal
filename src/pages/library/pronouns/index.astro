@@ -1,0 +1,33 @@
+---
+import Base from '../../../layouts/Base.astro';
+import T from '../../../components/T.astro';
+import { u } from '../../../lib/url';
+---
+<Base title="Pronouns" tab="library">
+  <a class="back" href={u('library/')}>‹ <T en="Library" tr="Kitaplık" /></a>
+  <h1 class="h1"><T en="Pronouns: who is who" tr="Zamirler: kim kimdir" /></h1>
+  <div class="prose">
+    <p class="l-en">Arabic often says "them", "your" or "his" with a short ending joined to a word; the real examples below show it. In recitation these endings go by fast, and they answer the key question: who is speaking, and to whom. Each person has a separate form (like "he") and an attached form (like "him, his"). Together they are among the most frequent items in the Quran.</p>
+    <p class="l-tr">Arapça "onları", "sizin", "onun" gibi anlamları çoğu zaman kelimeye eklenen kısa bir ekle söyler; aşağıdaki gerçek örnekler bunu gösteriyor. Kıraatte bu ekler hızlı geçer ve en önemli soruyu cevaplar: kim konuşuyor, kime? Her şahsın ayrı bir biçimi ("o" gibi) ve bitişik bir biçimi ("onu, onun" gibi) var. Birlikte Kur'an'da en sık geçenler arasındalar.</p>
+  </div>
+  <div id="pron" class="sec"></div>
+  <p class="src sec"><T en="Counts and examples: Quranic Arabic Corpus and Açık Kuran word-by-word. The table of forms is the standard paradigm and is still being checked against a cited grammar (gap G8)." tr="Sayılar ve örnekler: Quranic Arabic Corpus ve Açık Kuran kelime meali. Biçim tablosu standart çekimdir ve kaynaklı bir dil bilgisi kitabıyla hâlâ karşılaştırılıyor (G8)." /></p>
+</Base>
+<script>
+  import { items, surah } from '../../../scripts/data';
+  import { meaning } from '../../../scripts/cardview';
+  import { knownIdx } from '../../../scripts/coverage';
+  import { verseHtml } from '../../../scripts/verse';
+  import { t, pick } from '../../../scripts/i18n';
+  import { $, base, esc } from '../../../scripts/util';
+  (async () => {
+    const [all, k] = await Promise.all([items(), knownIdx()]);
+    const pr = all.map((x, i) => ({ x, i })).filter(({ x }) => x.k === 'pr');
+    let h = '';
+    for (const { x, i } of pr) {
+      const [s, v, w] = x.ex[0].split(':').map(Number), V = (await surah(s))[v - 1], W = V.w[w - 1];
+      h += `<div class="card" style="margin-top:10px"><div class="row" style="justify-content:space-between;flex-wrap:wrap"><span class="ar" style="font-size:26px">${esc(x.ar)}</span><a style="display:inline-flex;align-items:center;min-height:48px" href="${base()}words/?id=${encodeURIComponent(x.id)}"><b>${esc(meaning(x))}</b></a></div><p class="note">${t('times', { n: x.n })} · ${t('rank', { r: x.r })}${k[i] ? ' · ✓' : ''}</p>${verseHtml(V, null, { mark: w - 1 })}<p class="ref">${s}:${v} · <span class="ar" style="font-size:18px">${esc(V.t[w - 1])}</span> = ${esc(pick(W[1], W[2]))}</p></div>`;
+    }
+    $('#pron')!.innerHTML = h;
+  })();
+</script>

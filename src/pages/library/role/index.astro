@@ -1,0 +1,41 @@
+---
+import Base from '../../../layouts/Base.astro';
+---
+<Base title="Lesson" tab="library"><div id="role"></div></Base>
+<script>
+  // A lesson per word role (Phase 2), built from the data: every word with this role in the corpus, by frequency,
+  // its common meanings (Açık Kuran, counted) and one real example with its translation.
+  import { items, surah } from '../../../scripts/data';
+  import { ROLE, roleOf } from '../../../scripts/cardview';
+  import { knownIdx } from '../../../scripts/coverage';
+  import { verseHtml, playBtn, toggle } from '../../../scripts/verse';
+  import { trText } from '../../../scripts/trans';
+  import { t, pick, lang } from '../../../scripts/i18n';
+  import { $, base, esc } from '../../../scripts/util';
+  const INTRO: Record<string, [string, string]> = {
+    NEG: ['These words make a sentence negative ("not", "no", "never"). They decide the meaning of everything after them, so hearing them is essential.', 'Bu kelimeler cümleyi olumsuz yapar ("değil", "yok", "asla"). Arkalarından gelen her şeyin anlamını belirlerler; duymak çok önemlidir.'],
+    P: ['Prepositions link words: in, from, to, on, with. Some are separate words; بِ، لِ، كَ are joined to the next word (see Joined words).', 'Harf-i cerler kelimeleri bağlar: -de, -den, -e, üzerine, ile. Bazıları ayrı kelimedir; بِ، لِ، كَ sonraki kelimeye bitişir (Bitişik kelimeler alıştırmasına bak).'],
+    ACC: ['إِنَّ and its sisters open a statement and give it weight ("indeed", "that", "as if", "but", "perhaps").', 'إِنَّ ve kardeşleri bir cümleyi başlatır ve ona ağırlık verir ("şüphesiz", "ki", "sanki", "fakat", "umulur ki").'],
+    COND: ['Condition words: "if", "whoever", "whatever". A condition has two halves; listen for the second.', 'Şart kelimeleri: "eğer", "kim … ise", "ne … ise". Şartın iki yarısı vardır; ikinciyi dinle.'],
+    INTG: ['Question words: who, what, how, is it …? The Quran asks many questions; they often frame a whole passage.', 'Soru kelimeleri: kim, ne, nasıl, … mı? Kur\'an çok soru sorar; sorular çoğu zaman bütün bir pasajı çerçeveler.'],
+    REL: ['Relative words: "who", "which", "what". ٱلَّذِينَ (those who) is one of the most frequent words in the Quran.', 'İlgi kelimeleri: "ki o", "olan", "şey". ٱلَّذِينَ (o kimseler ki) Kur\'an\'da en sık geçen kelimelerden biridir.'],
+    DEM: ['Pointing words: this, that, these, those.', 'İşaret kelimeleri: bu, şu, bunlar, onlar.'],
+  };
+  const r = new URLSearchParams(location.search).get('r') || 'NEG';
+  const cap = (s: string) => s.charAt(0).toLocaleUpperCase(lang() === 'tr' ? 'tr-TR' : 'en-GB') + s.slice(1);
+  (async () => {
+    const [all, k] = await Promise.all([items(), knownIdx()]);
+    const L = lang() === 'tr' ? 1 : 0, list = all.map((x, i) => ({ x, i })).filter(({ x }) => x.k === 'l' && roleOf(x) === r).slice(0, 12);
+    let h = `<a class="back" href="${base()}library/">‹ ${t('library')}</a><h1 class="h1">${esc(cap((ROLE[r] || [r, r])[L]))}</h1><p class="sub">${esc(INTRO[r]?.[L] || '')}</p>`;
+    for (const { x, i } of list) {
+      const sense = (L ? x.senses?.tr : x.senses?.en)?.slice(0, 3).map(([g, n]) => `${esc(g)} (${n})`).join(' · ') || esc(pick(x.gl?.tr, x.gl?.en));
+      h += `<div class="card" style="margin-top:10px"><div class="row" style="justify-content:space-between;flex-wrap:wrap"><a class="wlink ar" style="font-size:28px" href="${base()}words/?id=${encodeURIComponent(x.id)}">${esc(x.ar)}</a><span class="note">${t('times', { n: x.n })}${k[i] ? ' · ✓' : ''}</span></div><p>${sense}</p>`;
+      const ref = (x.ex30 && x.ex30[0]) || x.ex[0];
+      if (ref) { const [s, v, w] = ref.split(':').map(Number), V = (await surah(s))[v - 1]; h += verseHtml(V, null, { mark: w - 1 }) + `<div class="row" style="justify-content:space-between"><span class="ref">${s}:${v} · ${esc(pick(V.w[w - 1][1], V.w[w - 1][2]))}</span>${playBtn(s, v, t('play'), 'sm')}</div><p class="tl note">${esc(trText(V))}</p>`; }
+      h += '</div>';
+    }
+    h += `<p class="src sec">${t('srcAk')} · Quranic Arabic Corpus</p>`;
+    $('#role')!.innerHTML = h;
+  })();
+  document.addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest<HTMLElement>('[data-a=play]'); if (b) toggle(b); });
+</script>

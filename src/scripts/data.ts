@@ -1,0 +1,37 @@
+// Loads the generated data files (public/data/, built by scripts/data/build-data.mjs). Cached per page.
+import { base } from './util';
+
+export type Item = { id: string; k: 'l' | 'p' | 'pr' | 'ph'; len?: number; n: number; r: number; ar: string; root?: string | null; pos: string; person?: string; gl?: { tr: string | null; en: string | null; pure: boolean }; senses?: { tr: [string, number][]; en: [string, number][] }; ex: string[]; ex30?: string[] };
+export type Surah = { n: number; ar: string; tname: string; en: string; tr: string; trMean: string | null; enMean: string | null; ayas: number; type: string; order: number; rukus: number; start: number };
+/** A word in a verse: [item indexes, Turkish meaning here, English meaning here, root, grammar: 'ASPECT|PERSON|PASSIVE' for verbs, else the part of speech] */
+export type Word = [number[], string | null, string | null, string | null, string];
+/** b/bt: the verse opens the surah with the Basmala, bt is Tanzil's text of it (it differs in 95 and 97). */
+export type Verse = { n: number; b: 0 | 1; bt?: string; t: string[]; w: Word[]; tr: string | null; en: string | null; t15?: string | null; t27?: string | null; e113?: string | null; ruku: 0 | 1 };
+/** tw: Turkish words derived from this root, as listed by Açık Kuran ('Türkçe'ye girmiş türevler'). */
+export type Root = { ar: string; n: number; items: number[]; akCount?: number; mean?: 1; tw?: string };
+
+const cache: Record<string, Promise<unknown>> = {};
+const load = <T>(f: string): Promise<T> => (cache[f] ||= fetch(base() + 'data/' + f).then((r) => { if (!r.ok) throw new Error(f + ' ' + r.status); return r.json(); })) as Promise<T>;
+export const items = () => load<Item[]>('items.json');
+/** Phrases: the most repeated runs of words (built from Tanzil), shaped like items so the review deck can use them. */
+export const phrases = () => load<{ id: string; ar: string; n: number; len: number; at: string[]; gl: { tr: string; en: string } | null }[]>('phrases.json').then((ps) => ps.map((p, i) => ({ id: p.id, k: 'ph' as const, n: p.n, r: i + 1, ar: p.ar, pos: 'PH', len: p.len, gl: p.gl ? { ...p.gl, pure: false } : undefined, ex: p.at })));
+export const surahs = () => load<Surah[]>('surahs.json');
+export const vreq = () => load<number[][][]>('vreq.json');
+export const surah = (n: number) => load<Verse[]>(`s/${n}.json`);
+export const roots = () => load<Record<string, Root>>('roots.json');
+export const rootMeans = () => load<Record<string, { tr: string | null; en: string | null }>>('rootmeans.json');
+export const translationsEn = (id: number) => (id === 32 ? null : load<Record<string, string>>(`en-${id}.json`));
+
+let byId: Map<string, Item> | null = null;
+export async function itemById() { if (!byId) byId = new Map((await items()).map((x) => [x.id, x])); return byId; }
+
+/** Global verse index (0-based) from surah and verse, using Tanzil's surah start offsets. */
+export async function vIndex(s: number, v: number) { return (await surahs())[s - 1].start + v - 1; }
+export async function vKey(i: number) { const ss = await surahs(); let s = ss.length - 1; while (ss[s].start > i) s--; return { s: s + 1, v: i - ss[s].start + 1 }; }
+
+/** Translators, all via Açık Kuran. Diyanet sometimes gives one text for several verses, marked like "(2-4)". */
+export const TRANSLATORS: Record<string, { name: string; lang: 'tr' | 'en'; field: 'tr' | 'en' | 't15' | 't27' | 'e113' }> = {
+  '11': { name: 'Diyanet İşleri', lang: 'tr', field: 'tr' }, '15': { name: 'Elmalılı Hamdi Yazır (sadeleştirilmiş)', lang: 'tr', field: 't15' }, '27': { name: 'Süleyman Ateş', lang: 'tr', field: 't27' },
+  '32': { name: 'Sahih International', lang: 'en', field: 'en' }, '113': { name: 'M. A. S. Abdel Haleem', lang: 'en', field: 'e113' },
+};
+export const isRange = (s: string | null | undefined) => !!s && /^\(\d+\s*-\s*\d+\)/.test(s.trim());

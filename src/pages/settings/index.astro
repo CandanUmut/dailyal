@@ -1,0 +1,49 @@
+---
+import Base from '../../layouts/Base.astro';
+import T from '../../components/T.astro';
+---
+<Base title="Settings" tab="settings">
+  <h1 class="h1"><T en="Settings" tr="Ayarlar" /></h1>
+  <div class="field"><label for="lang"><T en="Language" tr="Dil" /></label><select id="lang"><option value="auto" data-en="Same as the device" data-tr="Cihazın dili">Same as the device</option><option value="en">English</option><option value="tr">Türkçe</option></select></div>
+  <div class="field"><label for="trtr"><T en="Turkish translation" tr="Türkçe meal" /></label><select id="trtr"><option value="11">Diyanet İşleri</option><option value="15">Elmalılı Hamdi Yazır (sadeleştirilmiş)</option><option value="27">Süleyman Ateş</option></select><p class="note"><T en="Diyanet gives one text for some groups of verses; the listening check then uses Elmalılı for those verses." tr="Diyanet bazı ayet gruplarına tek metin verir; dinleme kontrolü o ayetlerde Elmalılı mealini kullanır." /></p></div>
+  <div class="field"><label for="tren"><T en="English translation" tr="İngilizce meal" /></label><select id="tren"><option value="32">Sahih International</option><option value="113">M. A. S. Abdel Haleem</option></select></div>
+  <div class="field"><label for="theme"><T en="Theme" tr="Tema" /></label><select id="theme"><option value="auto" data-en="Same as the device" data-tr="Cihaza göre">Same as the device</option><option value="light" data-en="Light" data-tr="Açık">Light</option><option value="dark" data-en="Dark" data-tr="Koyu">Dark</option></select></div>
+  <div class="field"><label for="npd"><T en="New words per day" tr="Günde yeni kelime" /></label><select id="npd"><option>3</option><option>5</option><option>8</option><option>10</option><option>15</option><option>20</option></select></div>
+  <div class="field"><label for="rec"><T en="Reciter" tr="Kâri" /></label><select id="rec"></select><p class="note"><T en="Audio is streamed from everyayah.com when you press play." tr="Ses, dinle düğmesine bastığında everyayah.com'dan gelir." /></p></div>
+  <div class="sec"><div class="sh"><T en="Offline" tr="Çevrimdışı" /></div><p class="note"><T en="Words, lessons and the surahs you have opened work offline. Save all 114 surahs (text, word meanings and translations, about 10 MB) to read them anywhere. Audio still needs a connection." tr="Kelimeler, dersler ve açtığın sureler çevrimdışı çalışır. 114 surenin hepsini (metin, kelime anlamları ve mealler, yaklaşık 10 MB) her yerde okumak için kaydet. Ses için yine bağlantı gerekir." /></p><div class="stackb"><button class="btn" id="offline"><T en="Save all surahs for offline" tr="Bütün sureleri çevrimdışı kaydet" /></button></div></div>
+  <div class="sec"><div class="sh"><T en="Audio offline" tr="Çevrimdışı ses" /></div><p class="note"><T en="Save the recitation of your surahs (current reciter) on this device, to listen without a connection. Only what you choose is saved." tr="Surelerinin kıraatini (seçili kâri) bu cihaza kaydet; bağlantı olmadan dinle. Sadece seçtiğin kaydedilir." /></p><div class="stackb"><button class="btn" id="audioOff"><T en="Save my surahs' audio" tr="Surelerimin sesini kaydet" /></button><button class="btn quiet" id="audioDel"><T en="Delete saved audio" tr="Kaydedilen sesi sil" /></button></div><p class="note" id="audioInfo"></p></div>
+  <div class="sec"><div class="sh"><T en="Your progress" tr="İlerlemen" /></div><p class="note"><T en="Progress stays in this browser only. Save a backup file to move it or keep it safe." tr="İlerleme sadece bu tarayıcıda durur. Taşımak veya saklamak için yedek dosyası al." /></p>
+    <div class="stackb"><button class="btn" id="exp"><T en="Save a backup" tr="Yedek al" /></button><label class="btn quiet" for="imp"><T en="Load a backup" tr="Yedeği yükle" /></label><input type="file" id="imp" accept="application/json" hidden><button class="btn quiet" id="reset"><T en="Start over" tr="Baştan başla" /></button></div></div>
+</Base>
+<script>
+  import { state, save, normalize, replace, blank, KEY } from '../../scripts/store';
+  import { RECITERS } from '../../scripts/verse';
+  import { $, toast } from '../../scripts/util';
+  const sel = (id: string) => $<HTMLSelectElement>('#' + id)!;
+  sel('rec').innerHTML = Object.entries(RECITERS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+  const localize = () => { const L = document.documentElement.lang === 'tr' ? 'tr' : 'en'; document.querySelectorAll<HTMLOptionElement>('option[data-en]').forEach((o) => { o.textContent = o.dataset[L]!; }); };
+  localize();
+  sel('trtr').value = String(state.set.tr || 11); sel('tren').value = String(state.set.en || 32);
+  sel('trtr').onchange = () => { state.set.tr = +sel('trtr').value; save(); };
+  sel('tren').onchange = () => { state.set.en = +sel('tren').value; save(); };
+  sel('lang').value = state.set.lang; sel('theme').value = state.set.theme; sel('npd').value = String(state.set.newPerDay); sel('rec').value = state.set.reciter;
+  const apply = () => { const th = state.set.theme; if (th === 'light' || th === 'dark') document.documentElement.dataset.theme = th; else delete document.documentElement.dataset.theme; const l = state.set.lang; document.documentElement.lang = l === 'tr' || l === 'en' ? l : (navigator.language || '').toLowerCase().startsWith('tr') ? 'tr' : 'en'; };
+  sel('lang').onchange = () => { state.set.lang = sel('lang').value; save(); apply(); localize(); };
+  sel('theme').onchange = () => { state.set.theme = sel('theme').value; save(); apply(); };
+  sel('npd').onchange = () => { state.set.newPerDay = +sel('npd').value; save(); };
+  sel('rec').onchange = () => { state.set.reciter = sel('rec').value; save(); };
+  $('#offline')!.onclick = async () => { const b = $<HTMLButtonElement>('#offline')!; b.disabled = true; let ok = 0; for (let n = 1; n <= 114; n++) { try { if ((await fetch(document.body.dataset.base + `data/s/${n}.json`)).ok) ok++; } catch { /* offline */ } b.textContent = `${n} / 114`; } b.textContent = ok === 114 ? '✓ 114 / 114' : `${ok} / 114`; };
+  const audioInfo = async () => { try { const n = (await (await caches.open('fahm-audio')).keys()).length; $('#audioInfo')!.textContent = n ? `${n} ✓` : ''; } catch { /* no cache API */ } };
+  audioInfo();
+  $('#audioOff')!.onclick = async () => {
+    const b = $<HTMLButtonElement>('#audioOff')!, { surahs } = await import('../../scripts/data'), { audioUrl } = await import('../../scripts/verse'), ss = await surahs(), c = await caches.open('fahm-audio');
+    const list = (state.my.length ? state.my : [1]).flatMap((n) => Array.from({ length: ss[n - 1].ayas }, (_, i) => audioUrl(n, i + 1)));
+    b.disabled = true; let ok = 0;
+    for (const [i, url] of list.entries()) { try { if (!(await c.match(url))) { const res = await fetch(url, { mode: 'cors' }); if (res.ok) await c.put(url, res); } ok++; } catch { /* offline or blocked */ } b.textContent = `${i + 1} / ${list.length}`; }
+    b.textContent = `✓ ${ok} / ${list.length}`; audioInfo();
+  };
+  $('#audioDel')!.onclick = async () => { await caches.delete('fahm-audio'); audioInfo(); };
+  $('#exp')!.onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(state)], { type: 'application/json' })); a.download = `fahm-backup-${new Date().toISOString().slice(0, 10)}.json`; a.click(); };
+  $<HTMLInputElement>('#imp')!.onchange = async (e) => { const f = (e.target as HTMLInputElement).files?.[0]; if (!f) return; try { replace(normalize(JSON.parse(await f.text()))); save(); toast(document.documentElement.lang === 'tr' ? 'Yüklendi' : 'Loaded'); location.reload(); } catch { toast(document.documentElement.lang === 'tr' ? 'Bu dosya okunamadı' : 'Could not read this file'); } };
+  $('#reset')!.onclick = () => { if (confirm(document.documentElement.lang === 'tr' ? 'Bu cihazdaki bütün ilerleme silinsin mi?' : 'Delete all progress on this device?')) { replace(blank()); localStorage.removeItem(KEY); location.href = document.body.dataset.base!; } };
+</script>

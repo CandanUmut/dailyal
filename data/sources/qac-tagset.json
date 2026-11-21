@@ -1,0 +1,181 @@
+{
+ "source": "Quranic Arabic Corpus, Part-of-speech Tagset, https://corpus.quran.com/documentation/tagset.jsp (GNU GPL)",
+ "tags": {
+  "N": {
+   "ar": "اسم",
+   "en": "Noun"
+  },
+  "PN": {
+   "ar": "اسم علم",
+   "en": "Proper noun"
+  },
+  "ADJ": {
+   "ar": "صفة",
+   "en": "Adjective"
+  },
+  "IMPN": {
+   "ar": "اسم فعل أمر",
+   "en": "Imperative verbal noun"
+  },
+  "PRON": {
+   "ar": "ضمير",
+   "en": "Personal pronoun"
+  },
+  "DEM": {
+   "ar": "اسم اشارة",
+   "en": "Demonstrative pronoun"
+  },
+  "REL": {
+   "ar": "اسم موصول",
+   "en": "Relative pronoun"
+  },
+  "T": {
+   "ar": "ظرف زمان",
+   "en": "Time adverb"
+  },
+  "LOC": {
+   "ar": "ظرف مكان",
+   "en": "Location adverb"
+  },
+  "V": {
+   "ar": "فعل",
+   "en": "Verb"
+  },
+  "P": {
+   "ar": "حرف جر",
+   "en": "Preposition"
+  },
+  "EMPH": {
+   "ar": "لام التوكيد",
+   "en": "Emphatic lām prefix"
+  },
+  "IMPV": {
+   "ar": "لام الامر",
+   "en": "Imperative lām prefix"
+  },
+  "PRP": {
+   "ar": "لام التعليل",
+   "en": "Purpose lām prefix"
+  },
+  "CONJ": {
+   "ar": "حرف عطف",
+   "en": "Coordinating conjunction"
+  },
+  "SUB": {
+   "ar": "حرف مصدري",
+   "en": "Subordinating conjunction"
+  },
+  "ACC": {
+   "ar": "حرف نصب",
+   "en": "Accusative particle"
+  },
+  "AMD": {
+   "ar": "حرف استدراك",
+   "en": "Amendment particle"
+  },
+  "ANS": {
+   "ar": "حرف جواب",
+   "en": "Answer particle"
+  },
+  "AVR": {
+   "ar": "حرف ردع",
+   "en": "Aversion particle"
+  },
+  "CAUS": {
+   "ar": "حرف سببية",
+   "en": "Particle of cause"
+  },
+  "CERT": {
+   "ar": "حرف تحقيق",
+   "en": "Particle of certainty"
+  },
+  "CIRC": {
+   "ar": "حرف حال",
+   "en": "Circumstantial particle"
+  },
+  "COM": {
+   "ar": "واو المعية",
+   "en": "Comitative particle"
+  },
+  "COND": {
+   "ar": "حرف شرط",
+   "en": "Conditional particle"
+  },
+  "EQ": {
+   "ar": "حرف تسوية",
+   "en": "Equalization particle"
+  },
+  "EXH": {
+   "ar": "حرف تحضيض",
+   "en": "Exhortation particle"
+  },
+  "EXL": {
+   "ar": "حرف تفصيل",
+   "en": "Explanation particle"
+  },
+  "EXP": {
+   "ar": "أداة استثناء",
+   "en": "Exceptive particle"
+  },
+  "FUT": {
+   "ar": "حرف استقبال",
+   "en": "Future particle"
+  },
+  "INC": {
+   "ar": "حرف ابتداء",
+   "en": "Inceptive particle"
+  },
+  "INT": {
+   "ar": "حرف تفسير",
+   "en": "Particle of interpretation"
+  },
+  "INTG": {
+   "ar": "حرف استفهام",
+   "en": "Interogative particle"
+  },
+  "NEG": {
+   "ar": "حرف نفي",
+   "en": "Negative particle"
+  },
+  "PREV": {
+   "ar": "حرف كاف",
+   "en": "Preventive particle"
+  },
+  "PRO": {
+   "ar": "حرف نهي",
+   "en": "Prohibition particle"
+  },
+  "REM": {
+   "ar": "حرف استئنافية",
+   "en": "Resumption particle"
+  },
+  "RES": {
+   "ar": "أداة حصر",
+   "en": "Restriction particle"
+  },
+  "RET": {
+   "ar": "حرف اضراب",
+   "en": "Retraction particle"
+  },
+  "RSLT": {
+   "ar": "حرف واقع في جواب الشرط",
+   "en": "Result particle"
+  },
+  "SUP": {
+   "ar": "حرف زائد",
+   "en": "Supplemental particle"
+  },
+  "SUR": {
+   "ar": "حرف فجاءة",
+   "en": "Surprise particle"
+  },
+  "VOC": {
+   "ar": "حرف نداء",
+   "en": "Vocative particle"
+  },
+  "INL": {
+   "ar": "حروف مقطعة",
+   "en": "Quranic initials"
+  }
+ }
+}

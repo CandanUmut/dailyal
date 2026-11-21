@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import T from '../../components/T.astro';
+import { u } from '../../lib/url';
+const links = [
+  ['library/how/', 'How this program works', 'Bu program nasıl çalışır', 'The daily plan, and why it is built this way', 'Günlük plan ve neden böyle kurulduğu'],
+  ['library/pronouns/', 'Pronouns: who is who', 'Zamirler: kim kimdir', 'The endings that tell you who speaks and to whom', 'Kimin kime konuştuğunu söyleyen ekler'],
+  ['library/role/?r=NEG', 'Negation: not, no, never', 'Olumsuzluk: değil, yok, asla', 'The words that turn a sentence around', 'Cümleyi tersine çeviren kelimeler'],
+  ['library/role/?r=P', 'Prepositions: in, from, to, on', 'Harf-i cerler: -de, -den, -e, üzerine', 'The small linking words', 'Küçük bağlayıcı kelimeler'],
+  ['library/role/?r=ACC', 'إِنَّ and its sisters', 'إِنَّ ve kardeşleri', 'Indeed, that, as if, but, perhaps', 'Şüphesiz, ki, sanki, fakat, umulur ki'],
+  ['library/role/?r=REL', 'Who, which, what (relative)', 'Ki o, olan (ilgi kelimeleri)', 'ٱلَّذِينَ and its family', 'ٱلَّذِينَ ve ailesi'],
+  ['library/role/?r=COND', 'If, whoever (conditions)', 'Eğer, kim … ise (şart)', 'Two-part sentences', 'İki parçalı cümleler'],
+  ['library/role/?r=INTG', 'Questions', 'Sorular', 'Who, what, how, is it …?', 'Kim, ne, nasıl, … mı?'],
+  ['library/role/?r=DEM', 'This, that (pointing words)', 'Bu, şu (işaret kelimeleri)', 'Pointing words', 'İşaret kelimeleri'],
+  ['words/parts/', 'Joined words (drill)', 'Bitişik kelimeler (alıştırma)', 'Split words into their parts', 'Kelimeleri parçalarına ayır'],
+  ['library/roots/', 'Roots', 'Kökler', 'Word families, by how often they appear', 'Kelime aileleri, sıklığa göre'],
+  ['place/', 'Placement', 'Seviye belirleme', 'Mark the words you already know', 'Zaten bildiğin kelimeleri işaretle'],
+  ['about/', 'About and sources', 'Hakkında ve kaynaklar', 'Where every text and meaning comes from', 'Her metnin ve anlamın kaynağı'],
+];
+---
+<Base title="Library" tab="library">
+  <h1 class="h1"><T en="Library" tr="Kitaplık" /></h1>
+  <p class="sub"><T en="Short lessons, roots, and the sources behind everything." tr="Kısa dersler, kökler ve her şeyin kaynakları." /></p>
+  <ul class="list sec">
+    {links.map(([href, en, tr, den, dtr]) => (
+      <li><a href={u(href)}><span style="flex:1"><b><T en={en} tr={tr} /></b><span class="note" style="display:block"><T en={den} tr={dtr} /></span></span><span class="go">›</span></a></li>
+    ))}
+  </ul>
+  <p class="note sec"><T en="Coming next: كان and its sisters, and how recitation joins words (waiting for a cited tajwid source)." tr="Sırada: كان ve kardeşleri, ve kıraatte kelimelerin birleşmesi (kaynaklı bir tecvid kaynağı bekleniyor)." /></p>
+</Base>

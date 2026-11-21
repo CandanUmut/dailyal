@@ -1,0 +1,6 @@
+---
+// Static text in both languages; CSS shows the one that matches <html lang>.
+interface Props { en: string; tr: string }
+const { en, tr } = Astro.props;
+---
+<span class="l-en">{en}</span><span class="l-tr">{tr}</span>
