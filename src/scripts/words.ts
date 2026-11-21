@@ -7,7 +7,7 @@ import { cardBack, roleLabel } from './cardview';
 import { toggle, playBtn, verseHtml } from './verse';
 import { surah } from './data';
 import { badge } from './chrome';
-import { t } from './i18n';
+import { t, lang } from './i18n';
 import { $, base, esc, shuffle } from './util';
 
 let all: Item[] = [];
@@ -16,6 +16,8 @@ let s: { queue: QI[]; shown: boolean; done: number; missed: number } | null = nu
 let back = '', earVerse = '';
 const one = new URLSearchParams(location.search).get('id');
 const deck = new URLSearchParams(location.search).get('deck');
+const unitN = Number(new URLSearchParams(location.search).get('unit')) || 0;
+let unitList: Item[] = [], unitName = '';
 const PHRASES_PER_DAY = 3;
 
 // Ear-first (Phase 2): about half of the words you are past learning come as "hear the verse first", using a verse from your own surahs.
@@ -29,12 +31,14 @@ let ps: Item[] = [];
 
 async function landing(boost: Set<string>) {
   rollDay();
-  const due = dueItems(all).length, nw = (deck ? newPhrases(all) : newItems(all, boost)).length, ready = due + nw, mr = missRate7();
-  let h = deck ? `<a class="back" href="${base()}words/">‹ ${t('reviewTitle')}</a><h1 class="h1">${t('phrasesLink')}</h1><p class="sub">${t('reviewSub')}</p>` : `<span class="eyebrow">${t('reviewTitle')}</span><h1 class="h1">${t('reviewTitle')}</h1><p class="sub">${t('reviewSub')}</p>`;
+  const due = dueItems(unitN ? unitList : all).length, nw = (unitN ? unitList.filter((c) => !state.r[c.id]).slice(0, 12) : deck ? newPhrases(all) : newItems(all, boost)).length, ready = due + nw, mr = missRate7();
+  let h = unitN ? `<a class="back" href="${base()}unit/?s=${unitN}">‹ ${t('backUnit')}</a><h1 class="h1">${t('unitWordsTitle', { name: esc(unitName) })}</h1><p class="sub">${t('reviewSub')}</p>` : deck ? `<a class="back" href="${base()}words/">‹ ${t('reviewTitle')}</a><h1 class="h1">${t('phrasesLink')}</h1><p class="sub">${t('reviewSub')}</p>` : `<span class="eyebrow">${t('reviewTitle')}</span><h1 class="h1">${t('reviewTitle')}</h1><p class="sub">${t('reviewSub')}</p>`;
   h += `<div class="sec row"><span class="big">${ready}</span><div><p style="font-weight:700">${ready ? t('ready') : t('caught')}</p><p class="note">${t('dueNew', { d: due, n: nw, m: Math.max(1, Math.round(ready * 0.3)) })}</p></div></div>`;
   if (ready) h += `<div class="stackb"><button class="btn pri" data-a="start">${t('start')}</button></div>`;
-  if (!deck) { const pd = dueItems(ps).length, pn = newPhrases(ps).length; h += `<ul class="list sec"><li><a href="${base()}words/?deck=phrases"><span style="flex:1"><b>${t('phrasesLink')}</b><span class="note" style="display:block">${t('phrasesLinkD', { d: pd, n: pn })}</span></span><span class="go">›</span></a></li></ul>`; }
-  h += `<ul class="list sec"><li><a href="${base()}words/parts/"><span style="flex:1"><b>${t('partsLink')}</b><span class="note" style="display:block">${t('partsLinkD')}</span></span><span class="go">›</span></a></li></ul>`;
+  if (!deck && !unitN) {
+    const pd = dueItems(ps).length, pn = newPhrases(ps).length;
+    h += `<div class="sec"><div class="sh">${t('moreWords')}</div><ul class="list">${[[`words/?deck=phrases`, t('phrasesLink'), t('phrasesLinkD', { d: pd, n: pn })], ['words/parts/', t('partsLink'), t('partsLinkD')], ['library/roots/', t('roots'), t('rootsSub')], ['library/', t('lessons'), t('lessonsLink')]].map(([href, l, d]) => `<li><a href="${base()}${href}"><span style="flex:1"><b>${l}</b><span class="note" style="display:block">${d}</span></span><span class="go">›</span></a></li>`).join('')}</ul></div>`;
+  }
   h += `<div class="sec"><div class="sh">${t('missRate')}</div>${mr.a >= 10 ? `<p><b>${t('mr', { p: Math.round(mr.r * 100), a: mr.a })}</b></p><p class="note">${mr.r < 0.05 ? t('mrLow') : mr.r <= 0.15 ? t('mrOk') : t('mrHigh')}</p>` : `<p class="note">${t('missRateNote')}</p>`}</div>`;
   return h;
 }
@@ -68,7 +72,7 @@ document.addEventListener('click', async (e) => {
   const b = (e.target as HTMLElement).closest<HTMLElement>('[data-a]'); if (!b) return;
   const a = b.dataset.a!;
   if (a === 'play') { toggle(b); return; }
-  if (a === 'start') start(dueItems(all).concat(deck ? newPhrases(all) : newItems(all, boost)));
+  if (a === 'start') start(unitN ? dueItems(unitList).concat(unitList.filter((c) => !state.r[c.id]).slice(0, 12)) : dueItems(all).concat(deck ? newPhrases(all) : newItems(all, boost)));
   else if (a === 'stop') s = null;
   else if (a === 'heard') { const it = s!.queue[0], [es, ev, ew] = it.ear!.split(':').map(Number); earVerse = verseHtml((await surah(es))[ev - 1], null, { mark: ew - 1 }); it.heard = true; }
   else if (a === 'show') { back = await cardBack(s!.queue[0].c); s!.shown = true; }
@@ -86,5 +90,6 @@ document.addEventListener('click', async (e) => {
     return;
   }
   boost = await mySurahItems();
+  if (unitN) { const { unitItems } = await import('./units'); const { surahs } = await import('./data'); unitList = await unitItems(unitN); const S = (await surahs())[unitN - 1]; unitName = lang() === 'tr' ? S.tr : S.tname; }
   await render();
 })();

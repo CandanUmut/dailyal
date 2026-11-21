@@ -9,7 +9,8 @@ import { verseHtml, playBtn, toggle, reciterName, speedChips, setSpeed } from '.
 import { meaning, grammarLabel, personOf, PERSON_OPTIONS, isFirstSecond } from './cardview';
 import { trText, trName, checkSet, similar } from './trans';
 import { badge } from './chrome';
-import { t, pick, lang } from './i18n';
+import { openWordSheet } from './sheet';
+import { t, pick, lang, quizGloss } from './i18n';
 import { $, base, esc, shuffle, dayNum, toast } from './util';
 
 type Q = { word: number; opts: string[]; right: string; chosen?: string; who?: 1 };
@@ -17,8 +18,9 @@ let S: Surah, V: Verse, all: Item[], k: Uint8Array, sv = { s: 1, v: 1 };
 let pre = true, preHeard = false, pass = 1, sel = -1, showTr = false, readTr = false, ctxOpen = false, fill: Q[] = [], fi = 0, heard3 = false, audioFail = false;
 let check: { opts: string[]; right: string; by: string; chosen?: string } | null = null, self = -1, who: Q | null = null;
 const seen = new Set<string>();
+const inUnit = new URLSearchParams(location.search).get('unit') === '1';
 const AGAIN = [1, 3, 7, 14];
-const place_ = (v: Verse, i: number) => pick(v.w[i][1], v.w[i][2]);
+const place_ = (v: Verse, i: number) => quizGloss(v.w[i]);
 
 async function load(s: number, v: number) {
   sv = { s, v }; seen.add(`${s}:${v}`);
@@ -27,7 +29,7 @@ async function load(s: number, v: number) {
   pre = true; preHeard = false; pass = 1; sel = -1; showTr = false; readTr = false; fi = 0; check = null; self = -1; heard3 = false; audioFail = false;
   // Choose meanings: up to 3 words that carry a dictionary form, preferring ones you are learning.
   // Options are meanings of other words in this surah that are clearly different (not near-twins).
-  const pool = [...new Set(ss.flatMap((x) => x.w.map((w) => pick(w[1], w[2]))).filter(Boolean))];
+  const pool = [...new Set(ss.flatMap((x) => x.w.map((w) => quizGloss(w))).filter(Boolean))];
   const cands = V.w.map((w, i) => ({ i, g: place_(V, i), learning: w[0].some((x) => state.r[all[x].id]), lemma: w[0].some((x) => all[x].k === 'l') })).filter((c) => c.g && c.lemma);
   fill = shuffle(cands).sort((a, b) => Number(b.learning) - Number(a.learning)).slice(0, Math.min(3, cands.length)).sort((a, b) => a.i - b.i).map((c) => {
     const others = shuffle(pool.filter((g) => g !== c.g && similar(g, c.g) < 0.34)).slice(0, 2);
@@ -63,14 +65,8 @@ const player = () => `<div class="player">${playBtn(sv.s, sv.v, t('play'))}<div 
 function pass1() {
   // Hear first (Umut, 2026-11-21): the verse plays once without the text; then the text appears.
   if (pre) return context() + `<h2 class="h2" style="margin-top:8px">${t('hearFirst')}</h2><p class="sub">${t('hearFirstSub')}</p>` + player() + `<div class="stackb"><button class="btn pri" data-a="reveal" ${preHeard ? '' : 'disabled'}>${t('showText')}</button>${preHeard ? '' : `<p class="note">${t('playFirst')}</p>`}</div>`;
-  let h = context() + (V.b && V.bt ? `<p class="q basmala" lang="ar">${esc(V.bt)}</p>` : '') + verseHtml(V, k, { sel });
+  let h = context() + `<div class="page">${V.b && V.bt ? `<p class="q basmala" lang="ar">${esc(V.bt)}</p>` : ''}${verseHtml(V, k, { sel })}</div>`;
   h += `<p class="cap">${share()} ${t('tapWord')}</p>`;
-  if (sel >= 0) {
-    const w = V.w[sel], gr = grammarLabel(w[4]);
-    h += `<div class="gloss" aria-live="polite"><span class="ar" lang="ar">${esc(V.t[sel])}</span> &nbsp;<b>${esc(place_(V, sel)) || '—'}</b>${gr ? `<div class="note">${esc(gr)}</div>` : ''}<div class="ref">${t('meaningHere')} · ${t('srcAk')}</div>`;
-    for (const x of w[0]) { const it = all[x]; h += `<div class="row" style="margin-top:6px;flex-wrap:wrap"><a href="${base()}words/?id=${encodeURIComponent(it.id)}" class="ar wlink">${esc(it.ar)}</a><span class="note">${esc(meaning(it))} · ${t('rank', { r: it.r })}</span>${k[x] ? `<span class="tag known">${t('knownWord')}</span>` : state.r[it.id] ? '' : `<button class="btn quiet" data-a="learn" data-id="${esc(it.id)}">${t('addWord')}</button>`}</div>`; }
-    h += '</div>';
-  }
   h += player();
   h += `<div class="stackb"><button class="btn quiet" data-a="tr">${showTr ? t('hideTr') : t('showTr')}</button></div>`;
   if (showTr) h += `<p class="tl" style="margin-top:12px">${esc(trText(V))}<small>${esc(trName())} · Açık Kuran</small></p>`;
@@ -103,7 +99,7 @@ function pass3() {
   if (self >= 0) {
     const h0 = state.heard[`${sv.s}:${sv.v}`];
     h += `<div class="sec">${verseHtml(V, k)}<p class="tl">${esc(trText(V))}<small>${esc(trName())} · Açık Kuran</small></p><p class="note" style="margin-top:8px">${t('again3', { n: AGAIN[Math.min((h0?.n || 1) - 1, 3)] })}</p></div>`;
-    h += `<div class="stackb"><button class="btn pri" data-a="another">${t('nextVerse')}</button><a class="btn quiet" href="${base()}">${t('finish')}</a></div>`;
+    h += inUnit ? `<div class="stackb">${sv.v < S.ayas ? `<a class="btn pri" href="${base()}listen/?v=${sv.s}:${sv.v + 1}&unit=1">${t('nextVerseU')}</a>` : ''}<a class="btn ${sv.v < S.ayas ? 'quiet' : 'pri'}" href="${base()}unit/?s=${sv.s}">${t('backUnit')}</a></div>` : `<div class="stackb"><button class="btn pri" data-a="another">${t('nextVerse')}</button><a class="btn quiet" href="${base()}">${t('finish')}</a></div>`;
   }
   return h;
 }
@@ -125,7 +121,7 @@ document.addEventListener('click', async (e) => {
   const a = b.dataset.a!;
   if (a === 'play') { toggle(b); return; }
   if (a === 'speed') { setSpeed(+b.dataset.v!); save(); render(); return; }
-  if (a === 'word' && pass === 1) sel = +b.dataset.i! === sel ? -1 : +b.dataset.i!;
+  if (a === 'word' && pass === 1) { sel = +b.dataset.i!; openWordSheet(sv.s, sv.v, sel); }
   else if (a === 'reveal') pre = false;
   else if (a === 'tr') { showTr = !showTr; if (showTr) readTr = true; }
   else if (a === 'learn') { place(b.dataset.id!, false); save(); badge(); toast(t('added')); }

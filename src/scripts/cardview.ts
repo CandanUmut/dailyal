@@ -1,6 +1,6 @@
 // The back of a word card: meaning, other senses, root, and up to 3 real verses with the word marked.
 import { esc, base } from './util';
-import { t, pick, lang } from './i18n';
+import { t, pick, lang, enRef, stemKey } from './i18n';
 import { surah, roots, rootMeans, items, type Item } from './data';
 import { verseHtml, playBtn } from './verse';
 import { knownIdx } from './coverage';
@@ -8,9 +8,9 @@ import { trText } from './trans';
 import { state } from './store';
 
 const PERSON: Record<string, [string, string]> = {
-  '1S': ['I, me, my', 'ben, beni, benim'], '1P': ['we, us, our', 'biz, bizi, bizim'], '2MS': ['you (one man), your', 'sen (erkek), senin'], '2FS': ['you (one woman), your', 'sen (kadın), senin'],
-  '2D': ['you two, your', 'siz ikiniz, sizin'], '2MP': ['you (all), your', 'siz, sizin'], '2FP': ['you (women), your', 'siz (kadınlar), sizin'], '3MS': ['he, him, his, it', 'o, onu, onun'],
-  '3FS': ['she, her, it', 'o (dişil), onu, onun'], '3D': ['they two, them, their', 'o ikisi, onları, onların'], '3MP': ['they, them, their', 'onlar, onları, onların'], '3FP': ['they (women), them, their', 'onlar (kadınlar), onların'],
+  '1S': ['I, me, my', 'ben, beni, benim'], '1P': ['we, us, our', 'biz, bizi, bizim'], '2MS': ['you (masculine), your', 'sen (eril), senin'], '2FS': ['you (feminine), your', 'sen (dişil), senin'],
+  '2D': ['you two, your', 'siz ikiniz, sizin'], '2MP': ['you (all), your', 'siz, sizin'], '2FP': ['you (feminine plural), your', 'siz (dişil), sizin'], '3MS': ['he, him, his, it', 'o, onu, onun'],
+  '3FS': ['she, her, it', 'o (dişil), onu, onun'], '3D': ['they two, them, their', 'o ikisi, onları, onların'], '3MP': ['they, them, their', 'onlar, onları, onların'], '3FP': ['they (feminine), them, their', 'onlar (dişil), onların'],
 };
 /** Short meaning shown on a card. Lemmas: Açık Kuran's most common word-by-word meaning. Prefixes: the corpus function. Pronouns: person. */
 /** Grammar roles of function words (corpus tagset), in plain English and Turkish grammar terms. */
@@ -73,18 +73,28 @@ export async function cardBack(x: Item): Promise<string> {
   const [rs, rm, k, all] = await Promise.all([roots(), rootMeans(), knownIdx(), items()]);
   const L = lang();
   let h = `<p class="mean">${esc(meaning(x)) || '—'}</p>`;
-  if (x.k === 'l' && x.senses) { const s = (L === 'tr' ? x.senses.tr : x.senses.en).slice(x.id.includes('#') ? 0 : 1); if (s.length) h += `<p class="note" style="text-align:center">${t('senses')}: ${s.map(([g, n]) => `${esc(g)} (${n})`).join(' · ')}</p>`; }
+  if (x.k === 'l' && enRef(x.gl?.tr, x.gl?.en)) h += `<p class="note" style="text-align:center">${esc(enRef(x.gl?.tr, x.gl?.en))}</p>`;
+  if (x.k === 'l' && x.senses) { const seenK = new Set([stemKey(meaning(x))]); const s = (L === 'tr' ? x.senses.tr : x.senses.en).filter(([g]) => { const k2 = stemKey(g); if (seenK.has(k2)) return false; seenK.add(k2); return true; }).slice(0, 3); if (s.length) h += `<p class="note" style="text-align:center">${t('senses')}: ${s.map(([g, n]) => `${esc(g)} (${n})`).join(' · ')}</p>`; }
   h += `<p class="note" style="text-align:center">${t('times', { n: x.n })} · ${t('rank', { r: x.r })}</p>`;
   if (x.root && rs[x.root]) {
     const R = rs[x.root], m = rm[x.root];
     const fam = R.items.filter((i) => all[i].id !== x.id).slice(0, 6).map((i) => `<a class="chip ar" style="font-size:20px" href="${base()}words/?id=${encodeURIComponent(all[i].id)}">${esc(all[i].ar)}${k[i] ? ' ✓' : ''}</a>`).join('');
     h += `<div class="sec"><div class="sh">${t('root')} <a href="${base()}library/roots/?r=${encodeURIComponent(x.root)}"><span class="ar" style="font-size:20px">${esc(R.ar)}</span></a> · ${t('family', { n: R.items.length, c: R.n })}</div>`;
     if (R.tw && L === 'tr') h += `<p style="margin:6px 0"><b>Türkçede:</b> ${esc(R.tw)} <span class="src">(Açık Kuran)</span></p>`;
-    if (m) h += `<p class="note root-mean clamp">${esc(pick(m.tr, m.en))}</p>`;
+    if (m && pick(m.tr, m.en)) { const full = pick(m.tr, m.en).replace(/\s+/g, ' ').trim(), mm = /^(.{20,160}?)[.;](\s|$)/.exec(full), cut = mm ? mm[1] + '.' : full.length > 160 ? full.slice(0, full.lastIndexOf(' ', 160)) + ' …' : full; h += `<p class="lh2">${t('shRootMean')}</p><p class="root-mean">${esc(cut)}</p><p class="src">${t('shRootSrc')}</p>`; }
     if (fam) h += `<div class="chips" style="margin-top:10px">${fam}</div>`;
     h += '</div>';
   }
-  if (x.ex.length) {
+  if (x.k === 'l') {
+    // Round 2: places where the word is translated differently, so the card shows the range of its meaning (your surahs first).
+    const { otherUses } = await import('./sheet');
+    const uses = await otherUses(all.indexOf(x), null, 3);
+    if (uses.length) {
+      h += `<div class="sec"><div class="sh">${t('shOther')}</div>`;
+      for (const u of uses) h += `<div style="margin-top:6px">${verseHtml(u.V, k, { mark: u.w })}<div class="row" style="justify-content:space-between"><span class="ref">${u.s}:${u.v} · <b>${esc(u.gloss)}</b> <span class="src">(${t('meaningHere')})</span></span>${playBtn(u.s, u.v, t('play'), 'sm')}</div><p class="tl note" style="margin-top:2px">${esc(trText(u.V))}</p></div>`;
+      h += `<p class="src" style="margin-top:8px">${t('srcAk')}</p></div>`;
+    }
+  } else if (x.ex.length) {
     h += `<div class="sec"><div class="sh">${t('heardIn')}</div>`;
     // Examples from your own surahs first (the review asked for verses you actually hear), each with its translation.
     const mine = (x.ex30 || []).filter((r) => state.my.includes(+r.split(':')[0]));

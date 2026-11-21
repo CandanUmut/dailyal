@@ -149,6 +149,22 @@ Each phase: build → tests + 390 px screenshots → **critic review** → re-pl
 | Wording ("1 gün sonra" for a passage, "1 days", "1 times") | **Fixed.** |
 | Search failed for inflected Arabic and Turkish stems | **Fixed for the common cases:** prefixes and endings are stripped to find the root (الرحمن, يعلمون, قل → قَالَ); Turkish infinitives and softened consonants (bilmek, korkmak, kalp → kalbi). |
 
+## 5g. Round 2 and its review (`reviews/round-2.md`, 2026-11-21)
+
+Built (direction approved by Umut: "the direction is fine … just the word selection and meanings"): the **word sheet** (meaning in this verse, joined parts, dictionary form, root meaning, the same word in other verses where it is translated differently, family); the **surah-unit path** on Today (Tanış, Kelimeler, Ayet ayet, Dinle, Takip); **four tabs** (Bugün, Kur'an, Kelimeler, Sen). Dropped on purpose: "sound of a surah", the per-verse persons line, any numerical content.
+
+| Review point | Decision |
+|---|---|
+| Wrong meanings in this verse (Açık Kuran data), graded as right in quizzes | **Flagged, not rewritten.** A careful review of Al-Fatiha and surahs 93–114 (714 words) found 4 clear errors (e.g. 1:7 عَلَيْهِمْ, 112:3 يُولَدْ) and 27 empty meanings (`data/review/tr-flags.json`, `research/tr-flags.md`). A flagged place shows a warning and the English reference; it is never used in quizzes or for a word's dictionary meaning. Other surahs: not reviewed yet (G21). |
+| "Other verses" often differed only in Turkish endings (Allah / Allah'ın / Allah'a) | **Fixed.** Meanings are compared by their stem; only real differences are shown, at most 3. Same for "other meanings" on cards. |
+| English shown in Turkish mode | **Fixed.** Never as the main meaning; when Turkish is missing, a labelled English reference ("İngilizce karşılığı: …"). |
+| Root meanings were walls of text | **Fixed.** The first sense only (up to the first full stop), with "Devamını oku". |
+| 4-verse surahs had an empty Listen step | **Fixed.** Surahs of 4–8 verses get at least 2 passages. |
+| "Takip" could be passed from memory of the verse order | **Changed.** After the whole surah by ear, three verses are played **one by one, without text**, and you choose each one's meaning (2 of 3 passes). The claim is now "Follow check passed: hearing its verses alone, you recognised their meaning" — **Umut to confirm** what passing should mean. |
+| Accessibility and layout (focus leaving the sheet, small root link, Meet button behind the tab bar, first verse at the bottom of the reader) | **Fixed.** Focus stays in the sheet; the link is 48 px; the step cards come first; reader controls fold away. |
+| Small bugs (corpus id "مَٰلِك2" visible; Day-30 seed without unit progress) | **Fixed.** |
+| Al-Fatiha in one sitting ≈ 40 minutes | **For Umut:** should a unit suggest a daily stopping point? Units already span several days. |
+
 ## 6. The critic
 
 - A separate agent, given only the app (running at 390 × 844), `docs/PLAN.md` and a persona. It is told to be honest and specific, not kind.

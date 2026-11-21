@@ -13,13 +13,15 @@ export type State = {
   day: { d: number; nw: number; done: number; heard: number; np?: number; hp?: number };
   set: { newPerDay: number; theme: string; lang: string; reciter: string; en: number; tr?: number; speed?: number };
   my: number[];
+  /** Surah units (round 2): day the Meet step was done, day the surah was followed by ear. */
+  units: Record<string, { meet?: number; follow?: number }>;
   placed: number;
   /** hist[day] = [first-try answers, first-try misses, listening checks ok, listening checks total, self-report sum, self-report count] */
   hist: Record<string, number[]>;
   updated: number;
 };
 export const MY_DEFAULT = [1, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114];
-export const blank = (): State => ({ v: 1, r: {}, heard: {}, day: { d: 0, nw: 0, done: 0, heard: 0 }, set: { newPerDay: 8, theme: 'auto', lang: 'auto', reciter: 'Alafasy_128kbps', en: 32 }, my: MY_DEFAULT.slice(), placed: 0, hist: {}, updated: 0 });
+export const blank = (): State => ({ v: 1, r: {}, heard: {}, day: { d: 0, nw: 0, done: 0, heard: 0 }, set: { newPerDay: 8, theme: 'auto', lang: 'auto', reciter: 'Alafasy_128kbps', en: 32 }, my: MY_DEFAULT.slice(), units: {}, placed: 0, hist: {}, updated: 0 });
 export function normalize(s: unknown): State {
   const b = blank() as Record<string, unknown>;
   if (s && typeof s === 'object') for (const k in b) { const v = (s as Record<string, unknown>)[k]; if (v !== undefined && v !== null && typeof v === typeof b[k] && Array.isArray(v) === Array.isArray(b[k])) b[k] = k === 'set' ? { ...(b[k] as object), ...(v as object) } : v; }

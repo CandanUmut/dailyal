@@ -6,12 +6,12 @@ import { u } from '../lib/url';
 import Icon from '../components/Icon.astro';
 import T from '../components/T.astro';
 
-interface Props { title?: string; tab?: 'today' | 'words' | 'listen' | 'surahs' | 'library' | 'settings'; description?: string }
+interface Props { title?: string; tab?: 'today' | 'quran' | 'words' | 'you'; description?: string }
 const { title, tab, description = APP.description } = Astro.props;
 const full = title ? `${title} · ${APP.name}` : `${APP.name} · ${APP.tagline}`;
 const vars = (p: Record<string, string>) => Object.entries(p).map(([k, v]) => `--${k}:${v}`).join(';');
 const tokens = `:root{${vars(palettes.light)};color-scheme:light}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){${vars(palettes.dark)};color-scheme:dark}}:root[data-theme="dark"]{${vars(palettes.dark)};color-scheme:dark}`;
-const tabs = [['today', 'Today', 'Bugün', ''], ['words', 'Words', 'Kelimeler', 'words/'], ['listen', 'Listen', 'Dinle', 'listen/'], ['surahs', 'Surahs', 'Sureler', 'surahs/'], ['library', 'Library', 'Kitaplık', 'library/']] as const;
+const tabs = [['today', 'Today', 'Bugün', ''], ['quran', 'Quran', "Kur'an", 'surahs/'], ['words', 'Words', 'Kelimeler', 'words/'], ['you', 'You', 'Sen', 'you/']] as const;
 ---
 <!doctype html>
 <html lang="en">
@@ -36,7 +36,6 @@ const tabs = [['today', 'Today', 'Bugün', ''], ['words', 'Words', 'Kelimeler', 
 <header class="top"><div class="wrap">
   <a class="mark" href={u()} aria-label={`${APP.name}, today`}><b>{APP.name}</b><span class="ar" style="font-size:18px">{APP.ar}</span></a>
   <a class="ib" href={u('search/')} aria-label="Search"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg></a>
-  <a class="ib" href={u('settings/')} aria-label="Settings" aria-current={tab === 'settings' ? 'page' : undefined}><Icon name="settings" /></a>
 </div></header>
 <main id="main" class="wrap"><slot /></main>
 <nav class="nav" aria-label="Sections"><ul>

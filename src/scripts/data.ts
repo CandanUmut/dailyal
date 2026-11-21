@@ -4,7 +4,8 @@ import { base } from './util';
 export type Item = { id: string; k: 'l' | 'p' | 'pr' | 'ph'; len?: number; n: number; r: number; ar: string; root?: string | null; pos: string; person?: string; gl?: { tr: string | null; en: string | null; pure: boolean }; senses?: { tr: [string, number][]; en: [string, number][] }; ex: string[]; ex30?: string[] };
 export type Surah = { n: number; ar: string; tname: string; en: string; tr: string; trMean: string | null; enMean: string | null; ayas: number; type: string; order: number; rukus: number; start: number };
 /** A word in a verse: [item indexes, Turkish meaning here, English meaning here, root, grammar: 'ASPECT|PERSON|PASSIVE' for verbs, else the part of speech] */
-export type Word = [number[], string | null, string | null, string | null, string];
+/** [5], when present: a review flag on the Turkish meaning of this place (shifted | voice | person | wrong). */
+export type Word = [number[], string | null, string | null, string | null, string, string?];
 /** b/bt: the verse opens the surah with the Basmala, bt is Tanzil's text of it (it differs in 95 and 97). */
 export type Verse = { n: number; b: 0 | 1; bt?: string; t: string[]; w: Word[]; tr: string | null; en: string | null; t15?: string | null; t27?: string | null; e113?: string | null; ruku: 0 | 1 };
 /** tw: Turkish words derived from this root, as listed by Açık Kuran ('Türkçe'ye girmiş türevler'). */
