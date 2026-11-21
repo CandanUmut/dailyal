@@ -41,6 +41,8 @@ self.addEventListener('install', (e) => { e.waitUntil(caches.open(SHELL).then((c
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => (k.startsWith('fahm-shell-') && k !== SHELL)).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
   const r = e.request, url = new URL(r.url);
+  // Recitation audio the learner chose to save (Settings): served from the 'fahm-audio' cache when present.
+  if (r.method === 'GET' && url.hostname === 'everyayah.com') { e.respondWith(caches.open('fahm-audio').then((c) => c.match(url.href)).then((hit) => hit || fetch(r))); return; }
   if (r.method !== 'GET' || url.origin !== location.origin || !url.pathname.startsWith(BASE)) return;
   if (url.pathname.includes('/_astro/')) { e.respondWith(caches.match(r).then((hit) => hit || fetch(r).then((res) => { const c = res.clone(); caches.open(ASSETS).then((x) => x.put(r, c)); return res; }))); return; }
   e.respondWith(fetch(r).then((res) => { if (res.ok) { const c = res.clone(); caches.open(SHELL).then((x) => x.put(r, c)); } return res; })
