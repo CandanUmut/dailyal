@@ -9,6 +9,7 @@ import { verseHtml, playAll, speedChips, setSpeed, reciterName, toggle } from '.
 import { personOf, PERSON_OPTIONS, isFirstSecond } from './cardview';
 import { trText, trName, checkSet, similar, rangeOnce } from './trans';
 import { openWordSheet } from './sheet';
+import { passagesOf, markFollow } from './units';
 import { playBtn } from './verse';
 import { t, pick, lang, num } from './i18n';
 import { $, base, esc, shuffle, dayNum } from './util';
@@ -74,7 +75,7 @@ async function buildQuestions() {
 
 function ref() { return P.a === 1 && P.b === S.ayas ? `${esc(lang() === 'tr' ? S.tr : S.tname)} (${t('wholeSurah')})` : `${esc(lang() === 'tr' ? S.tr : S.tname)} ${P.s}:${P.a}–${P.b}`; }
 function render() {
-  let h = `<a class="back" href="${base()}listen/ladder/">‹ ${t('ladder')}</a><span class="eyebrow">${step === 'listen' || step === 'q' ? t('ladder') : ref()}</span>`;
+  let h = `<a class="back" href="${unitParam ? `${base()}unit/?s=${P.s}` : `${base()}listen/ladder/`}">‹ ${unitParam ? t('backUnit') : t('ladder')}</a><span class="eyebrow">${step === 'listen' || step === 'q' ? t('ladder') : ref()}</span>`;
   if (step === 'ctx') {
     const type = S.type === 'Meccan' ? t('meccan') : t('medinan');
     h += `<h1 class="h1">${t('beforeListen')}</h1><div class="card"><p><b>${esc(lang() === 'tr' ? `${S.tr}${S.trMean ? ` (${S.trMean})` : ''}` : `${S.tname} (${S.enMean || S.en})`)}</b> <span class="ar" style="font-size:22px">${esc(S.ar)}</span></p><p class="note">${type} · ${t('verses', { n: S.ayas })} · ${t('order', { n: S.order })}</p><p class="note">${t('ladderVerses', { a: P.a, b: P.b })}</p><p class="src">${t('ctxSrc')}</p></div>`;
@@ -110,11 +111,12 @@ function render() {
     }
     const hd = state.heard[key(P)];
     h += `<p class="src">${esc(trName())} · ${t('srcAk')}</p><p class="note" style="margin-top:8px">${t('againP', { n: AGAIN[Math.min((hd?.n || 1) - 1, 3)] })}</p>`;
-    h += `<div class="stackb"><button class="btn" data-a="playtext">${stop ? t('stopAll') : t('playWithText')}</button><a class="btn pri" href="${base()}listen/ladder/">${t('ladderDone')}</a></div>`;
+    h += `<div class="stackb"><button class="btn" data-a="playtext">${stop ? t('stopAll') : t('playWithText')}</button><a class="btn pri" href="${unitParam ? `${base()}unit/?s=${P.s}` : `${base()}listen/ladder/`}">${unitParam ? t('backUnit') : t('ladderDone')}</a></div>`;
   }
   $('#ladder')!.innerHTML = h;
 }
 
+const unitParam = new URLSearchParams(location.search).get('unit');
 function record() {
   rollDay();
   const kk = key(P), d = dayNum(), hd = state.heard[kk] || { n: 0, last: 0, due: 0, ok: 0, tot: 0 };
@@ -123,7 +125,10 @@ function record() {
   const counted = qs.filter((q) => heardAll && (q.kind !== 'who' || q.heard)), ok = counted.filter((q) => q.chosen === q.right).length;
   if (counted.length) { hd.ok += ok; hd.tot += counted.length; bump(3, counted.length); bump(2, ok); }
   (hd as typeof hd & { self?: number }).self = self;
-  state.heard[kk] = hd; save();
+  state.heard[kk] = hd;
+  // Follow step: the whole surah heard to the end without the text, with at least 2 of 3 answers right.
+  if (P.a === 1 && P.b === S.ayas && heardAll && counted.length && ok / counted.length >= 2 / 3) markFollow(P.s);
+  save();
 }
 
 document.addEventListener('audioended', () => { if (step === 'q' && qs[qi]?.kind === 'who') { qs[qi].heard = true; render(); } });
@@ -149,11 +154,12 @@ document.addEventListener('click', async (e) => {
 });
 
 async function landing() {
-  const [list, ss] = await Promise.all([passages(), surahs()]), t0 = dayNum();
+  const un = Number(unitParam) || 0;
+  const [list, ss] = await Promise.all([un ? passagesOf(un).then((l) => l.filter((p) => !p.whole)) : passages(), surahs()]), t0 = dayNum();
   const due = list.filter((p) => { const hd = state.heard[key(p)]; return hd && hd.due <= t0; });
   const fresh = list.filter((p) => !state.heard[key(p)]).sort((x, y) => Number(x.whole) - Number(y.whole) || y.share - x.share);
-  const row = (p: typeof list[number]) => { const S = ss[p.s - 1], hd = state.heard[key(p)]; return `<li><a href="?p=${p.s}:${p.a}-${p.b}"><span style="flex:1"><b>${esc(lang() === 'tr' ? S.tr : S.tname)} ${p.whole ? `(${t('wholeSurah')})` : `${p.s}:${p.a}–${p.b}`}</b><span class="note" style="display:block">${t('known', { p: num(p.share * 100) })}${hd ? ` · ${t('ladderResult', { ok: hd.ok, tot: hd.tot, n: hd.n })}${(hd as { self?: number }).self != null ? ` · ${t('youSaid', { s: [t('none'), t('some'), t('most'), t('all')][(hd as { self?: number }).self!] })}` : ''}` : ''}</span></span><span class="go">›</span></a></li>`; };
-  let h = `<a class="back" href="${base()}listen/">‹ ${t('listen')}</a><h1 class="h1">${t('ladder')}</h1><p class="sub">${t('ladderSub')}</p>`;
+  const row = (p: typeof list[number]) => { const S = ss[p.s - 1], hd = state.heard[key(p)]; return `<li><a href="?p=${p.s}:${p.a}-${p.b}${unitParam ? '&unit=1' : ''}"><span style="flex:1"><b>${esc(lang() === 'tr' ? S.tr : S.tname)} ${p.whole ? `(${t('wholeSurah')})` : `${p.s}:${p.a}–${p.b}`}</b><span class="note" style="display:block">${t('known', { p: num(p.share * 100) })}${hd ? ` · ${t('ladderResult', { ok: hd.ok, tot: hd.tot, n: hd.n })}${(hd as { self?: number }).self != null ? ` · ${t('youSaid', { s: [t('none'), t('some'), t('most'), t('all')][(hd as { self?: number }).self!] })}` : ''}` : ''}</span></span><span class="go">›</span></a></li>`; };
+  let h = un ? `<a class="back" href="${base()}unit/?s=${un}">‹ ${t('backUnit')}</a><h1 class="h1">${esc(lang() === 'tr' ? ss[un - 1].tr : ss[un - 1].tname)} · ${t('st_listen')}</h1><p class="sub">${t('ladderSub')}</p>` : `<a class="back" href="${base()}surahs/">‹ ${t('quran')}</a><h1 class="h1">${t('ladder')}</h1><p class="sub">${t('ladderSub')}</p>`;
   if (due.length) h += `<div class="sec"><div class="sh">${t('ladderDue')}</div><ul class="list">${due.map(row).join('')}</ul></div>`;
   h += `<div class="sec"><div class="sh">${t('ladderNew')}</div><ul class="list">${fresh.slice(0, 12).map(row).join('')}</ul></div>`;
   const done = list.filter((p) => state.heard[key(p)] && !due.includes(p));

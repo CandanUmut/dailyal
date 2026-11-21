@@ -17,7 +17,7 @@ if (!state.my.length) state.my = MY_DEFAULT.slice();
 async function list() {
   const [ss, ov] = await Promise.all([surahs(), overview()]);
   const row = (s: Surah) => `<li><div class="li"><a href="${base()}surahs/read/?n=${s.n}" style="flex:1;display:flex;gap:12px;align-items:center;min-height:56px;text-decoration:none"><span class="ref" style="width:28px">${s.n}</span><span style="flex:1"><b>${esc(name(s))}</b><span class="note" style="display:block">${s.type === 'Meccan' ? t('meccan') : t('medinan')} · ${t('verses', { n: s.ayas })} · ${t('known', { p: Math.round(ov.perSurah[s.n - 1] * 100) })}</span></span><span class="ar" style="font-size:22px">${esc(s.ar)}</span></a><button class="chip" style="margin-left:8px" data-a="my" data-n="${s.n}" aria-pressed="${state.my.includes(s.n)}" aria-label="${t('inMy')}">${state.my.includes(s.n) ? '★' : '☆'}</button></div></li>`;
-  let h = `<h1 class="h1">${t('surahs')}</h1><div class="sec"><div class="sh">${t('mySurahs')}</div><p class="note">${t('mySub')}</p><ul class="list" style="margin-top:8px">${state.my.map((x) => row(ss[x - 1])).join('')}</ul></div>`;
+  let h = `<h1 class="h1">${t('quran')}</h1><ul class="list">${[['search/', t('searchLink')], ['listen/ladder/', t('ladderLink2')]].map(([href, l]) => `<li><a href="${base()}${href}"><span style="flex:1"><b>${l}</b></span><span class="go">›</span></a></li>`).join('')}</ul><div class="sec"><div class="sh">${t('mySurahs')}</div><p class="note">${t('mySub')}</p><ul class="list" style="margin-top:8px">${state.my.map((x) => row(ss[x - 1])).join('')}</ul></div>`;
   h += `<div class="sec"><div class="sh">${t('allSurahs')}</div><ul class="list">${ss.map(row).join('')}</ul></div>`;
   $('#surahs')!.innerHTML = h;
 }

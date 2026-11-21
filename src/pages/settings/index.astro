@@ -2,7 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import T from '../../components/T.astro';
 ---
-<Base title="Settings" tab="settings">
+<Base title="Settings" tab="you">
   <h1 class="h1"><T en="Settings" tr="Ayarlar" /></h1>
   <div class="field"><label for="lang"><T en="Language" tr="Dil" /></label><select id="lang"><option value="auto" data-en="Same as the device" data-tr="Cihazın dili">Same as the device</option><option value="en">English</option><option value="tr">Türkçe</option></select></div>
   <div class="field"><label for="trtr"><T en="Turkish translation" tr="Türkçe meal" /></label><select id="trtr"><option value="15">Elmalılı Hamdi Yazır (sadeleştirilmiş)</option><option value="11">Diyanet İşleri</option><option value="27">Süleyman Ateş</option></select><p class="note"><T en="Diyanet gives one text for some groups of verses; the listening check then uses Elmalılı for those verses." tr="Diyanet bazı ayet gruplarına tek metin verir; dinleme kontrolü o ayetlerde Elmalılı mealini kullanır." /></p></div>

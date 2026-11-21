@@ -18,6 +18,7 @@ let S: Surah, V: Verse, all: Item[], k: Uint8Array, sv = { s: 1, v: 1 };
 let pre = true, preHeard = false, pass = 1, sel = -1, showTr = false, readTr = false, ctxOpen = false, fill: Q[] = [], fi = 0, heard3 = false, audioFail = false;
 let check: { opts: string[]; right: string; by: string; chosen?: string } | null = null, self = -1, who: Q | null = null;
 const seen = new Set<string>();
+const inUnit = new URLSearchParams(location.search).get('unit') === '1';
 const AGAIN = [1, 3, 7, 14];
 const place_ = (v: Verse, i: number) => pick(v.w[i][1], v.w[i][2]);
 
@@ -64,7 +65,7 @@ const player = () => `<div class="player">${playBtn(sv.s, sv.v, t('play'))}<div 
 function pass1() {
   // Hear first (Umut, 2026-11-21): the verse plays once without the text; then the text appears.
   if (pre) return context() + `<h2 class="h2" style="margin-top:8px">${t('hearFirst')}</h2><p class="sub">${t('hearFirstSub')}</p>` + player() + `<div class="stackb"><button class="btn pri" data-a="reveal" ${preHeard ? '' : 'disabled'}>${t('showText')}</button>${preHeard ? '' : `<p class="note">${t('playFirst')}</p>`}</div>`;
-  let h = context() + (V.b && V.bt ? `<p class="q basmala" lang="ar">${esc(V.bt)}</p>` : '') + verseHtml(V, k, { sel });
+  let h = context() + `<div class="page">${V.b && V.bt ? `<p class="q basmala" lang="ar">${esc(V.bt)}</p>` : ''}${verseHtml(V, k, { sel })}</div>`;
   h += `<p class="cap">${share()} ${t('tapWord')}</p>`;
   h += player();
   h += `<div class="stackb"><button class="btn quiet" data-a="tr">${showTr ? t('hideTr') : t('showTr')}</button></div>`;
@@ -98,7 +99,7 @@ function pass3() {
   if (self >= 0) {
     const h0 = state.heard[`${sv.s}:${sv.v}`];
     h += `<div class="sec">${verseHtml(V, k)}<p class="tl">${esc(trText(V))}<small>${esc(trName())} · Açık Kuran</small></p><p class="note" style="margin-top:8px">${t('again3', { n: AGAIN[Math.min((h0?.n || 1) - 1, 3)] })}</p></div>`;
-    h += `<div class="stackb"><button class="btn pri" data-a="another">${t('nextVerse')}</button><a class="btn quiet" href="${base()}">${t('finish')}</a></div>`;
+    h += inUnit ? `<div class="stackb">${sv.v < S.ayas ? `<a class="btn pri" href="${base()}listen/?v=${sv.s}:${sv.v + 1}&unit=1">${t('nextVerseU')}</a>` : ''}<a class="btn ${sv.v < S.ayas ? 'quiet' : 'pri'}" href="${base()}unit/?s=${sv.s}">${t('backUnit')}</a></div>` : `<div class="stackb"><button class="btn pri" data-a="another">${t('nextVerse')}</button><a class="btn quiet" href="${base()}">${t('finish')}</a></div>`;
   }
   return h;
 }

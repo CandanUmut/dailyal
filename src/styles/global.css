@@ -29,7 +29,7 @@ img, svg { max-width: 100%; }
 
 /* bottom nav */
 .nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; background: var(--paper); border-top: 1px solid var(--rule); padding-bottom: env(safe-area-inset-bottom); }
-.nav ul { list-style: none; margin: 0 auto; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); max-width: 640px; }
+.nav ul { list-style: none; margin: 0 auto; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); max-width: 640px; }
 .nav a { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 64px; font-size: 12px; color: var(--ink-soft); text-decoration: none; }
 .nav a svg { width: 22px; height: 22px; }
 .nav a[aria-current='page'] { color: var(--ink); font-weight: 700; }
@@ -157,3 +157,28 @@ select, input[type='number'] { min-height: 48px; font: inherit; padding: 0 10px;
 .use .q .w { min-height: 40px; }
 body.noscroll { overflow: hidden; }
 @media (prefers-reduced-motion: no-preference) { .sheet { animation: rise .22s ease-out; } @keyframes rise { from { transform: translateY(24px); opacity: .6; } } }
+/* units and the path (round 2) */
+.unit { background: var(--card); border: 1px solid var(--rule); border-radius: 18px; padding: 16px; margin-top: 6px; box-shadow: 0 10px 24px -20px rgba(60, 40, 20, .45); }
+.unit-link { display: block; text-decoration: none; }
+.unitar { font-family: 'Amiri Quran', 'Amiri', serif; font-size: 44px; text-align: center; line-height: 1.5; border-top: 3px double var(--rule); border-bottom: 3px double var(--rule); padding: 4px 0; margin-bottom: 10px; direction: rtl; }
+.unitname { text-align: center; font-weight: 700; }
+.unit-hero { margin: 8px 0 4px; }
+.steps { list-style: none; padding: 0; display: flex; justify-content: space-between; margin: 16px 0 14px; position: relative; }
+.steps::before { content: ''; position: absolute; left: 18px; right: 18px; top: 7px; height: 1px; background: var(--rule-strong); }
+.steps li { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-soft); position: relative; flex: 1; text-align: center; }
+.steps i, .steplist i, .bead i { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid var(--rule-strong); background: var(--paper); flex: none; position: relative; z-index: 1; }
+.steps .done i, .steplist .done i, .bead.full i { background: var(--ink); border-color: var(--ink); }
+.steps .now i, .steplist .now i { border-color: var(--rubric); box-shadow: 0 0 0 4px var(--rubric-soft); }
+.steps .now span { color: var(--ink); font-weight: 700; }
+.cta { width: 100%; min-height: 58px; border-radius: 14px; }
+.steplist { list-style: none; padding: 0; margin-top: 16px; }
+.steplist li { display: flex; align-items: center; gap: 14px; min-height: 60px; border-bottom: 1px solid var(--rule); }
+.steplist .btn { min-width: 52px; }
+.thread { position: relative; padding-left: 2px; }
+.thread::before { content: ''; position: absolute; left: 9px; top: 18px; bottom: 18px; width: 1px; background: var(--rule-strong); }
+.bead { display: flex; gap: 14px; align-items: flex-start; min-height: 56px; padding: 6px 0; text-decoration: none; }
+.bead i { margin-top: 4px; }
+.bead.half i { background: linear-gradient(90deg, var(--ink) 50%, var(--paper) 50%); border-color: var(--ink); }
+.page { border-top: 3px double var(--rule); border-bottom: 3px double var(--rule); padding: 4px 0 8px; margin: 6px 0 4px; }
+.page .q { text-align: center; font-size: 34px; }
+.task:not(:has(.n)) { padding-left: 2px; }

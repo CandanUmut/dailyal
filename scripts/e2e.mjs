@@ -30,7 +30,7 @@ async function checkPage(p, scheme, name) {
   const small = await p.evaluate(() => [...document.querySelectorAll('main a, main button, nav a, main select, main label.btn')].filter((e) => { const b = e.getBoundingClientRect(); const st = getComputedStyle(e); return b.width && b.height && (b.height < 47.5 || b.width < 47.5) && st.display !== 'inline' && st.visibility !== 'hidden'; }).map((e) => (e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 30)));
   if (small.length) errors.push(`${scheme} ${name}: tap targets under 48px: ${small.slice(0, 5).join(' | ')}`);
 }
-const routes = ['', 'words/', 'words/?id=l%3Arab~', 'listen/?v=1:2', 'surahs/', 'surahs/read/?n=112', 'library/', 'library/roots/', 'library/roots/?r=rHm', 'library/pronouns/', 'library/how/', 'library/role/?r=NEG', 'library/role/?r=P', 'words/parts/', 'words/?deck=phrases', 'listen/ladder/', 'listen/ladder/?p=112:1-4', 'search/?q=rahmet', 'search/?q=رب', 'search/?q=2:255', 'surahs/read/?n=2', 'place/', 'settings/', 'about/'];
+const routes = ['', 'words/', 'words/?id=l%3Arab~', 'listen/?v=1:2', 'surahs/', 'surahs/read/?n=112', 'library/', 'library/roots/', 'library/roots/?r=rHm', 'library/pronouns/', 'library/how/', 'library/role/?r=NEG', 'library/role/?r=P', 'words/parts/', 'words/?deck=phrases', 'listen/ladder/', 'listen/ladder/?p=112:1-4', 'search/?q=rahmet', 'search/?q=رب', 'search/?q=2:255', 'surahs/read/?n=2', 'place/', 'settings/', 'about/', 'unit/?s=112', 'unit/?s=1', 'you/', 'words/?unit=112', 'listen/ladder/?unit=113'];
 for (const [scheme, locale] of [['light', 'en-GB'], ['dark', 'tr-TR']]) {
   const p = await page(scheme, locale);
   for (const r of routes) {
