@@ -45,7 +45,7 @@ const p = await page('light', 'en-GB');
 await p.goto(ROOT + 'place/'); await p.waitForTimeout(500);
 for (let i = 0; i < 12; i++) { await p.tap('[data-a=show]'); if (i === 0) await p.screenshot({ path: `${OUT}/flow-place.png`, fullPage: true }); await p.tap(i % 3 ? '[data-a=yes]' : '[data-a=no]'); }
 await p.tap('[data-a=stop]'); const placeText = await p.textContent('main');
-await p.goto(ROOT + 'listen/?v=112:1'); await p.waitForTimeout(600);
+await p.goto(ROOT + 'listen/?v=112:1'); await p.waitForTimeout(600); await p.tap('.play[data-a=play]'); await p.waitForSelector('[data-a=reveal]:not([disabled])'); await p.tap('[data-a=reveal]');
 await p.tap('.q .w >> nth=1'); await p.screenshot({ path: `${OUT}/flow-listen-1.png`, fullPage: true });
 await p.tap('[data-a=next]');
 for (let i = 0; i < 4 && (await p.$('[data-a=fill]')); i++) { await p.tap('[data-a=fill] >> nth=0'); if (i === 0) await p.screenshot({ path: `${OUT}/flow-listen-2.png`, fullPage: true }); await p.tap('[data-a=next]'); }
