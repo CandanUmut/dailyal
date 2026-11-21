@@ -19,7 +19,7 @@ export async function passagesOf(n: number) {
   const out: { s: number; a: number; b: number; share: number; whole: boolean }[] = [];
   const starts = vs.filter((v) => v.ruku).map((v) => v.n).concat(S.ayas + 1);
   for (let si = 0; si + 1 < starts.length; si++) {
-    const A = starts[si], B = starts[si + 1] - 1, len = B - A + 1, parts = Math.max(1, Math.round(len / 3)), size = len / parts;
+    const A = starts[si], B = starts[si + 1] - 1, len = B - A + 1, parts = Math.max(len >= 4 ? 2 : 1, Math.round(len / 3)), size = len / parts;
     for (let i = 0; i < parts; i++) { const a = A + Math.round(i * size), b = A + Math.round((i + 1) * size) - 1; if (b - a + 1 < S.ayas || S.ayas <= 3) out.push({ s: n, a, b, share: share(a, b), whole: false }); }
   }
   if (S.ayas <= SHORT && S.ayas > 3) out.push({ s: n, a: 1, b: S.ayas, share: share(1, S.ayas), whole: true });

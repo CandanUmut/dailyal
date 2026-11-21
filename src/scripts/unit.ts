@@ -14,15 +14,15 @@ async function render() {
   let firstV = 1; for (let v = 1; v <= S.ayas; v++) if (!(await import('./store')).state.heard[`${n}:${v}`]) { firstV = v; break; }
   let h = `<a class="back" href="${base()}">‹ ${t('today')}</a><div class="unit-hero"><div class="unitar" lang="ar">${esc(S.ar)}</div><p class="unitname">${esc(lang() === 'tr' ? S.tr : S.tname)} · ${esc(lang() === 'tr' ? S.trMean || '' : S.enMean || S.en)}</p><p class="note" style="text-align:center">${t('verses_n', { n: S.ayas })} · ${S.type === 'Meccan' ? t('meccan') : t('medinan')}</p></div>`;
   if (st.done.follow) h += `<p class="ok sec" style="text-align:center"><b>${t('unitDone')}</b></p>`;
+  // Meet: here. Follow: the whole-surah check in the ladder.
+  if (!st.done.meet || (!follow && st.next === 'meet')) h += `<div class="card sec"><b>${stepName('meet')}</b><p class="note">${t('meetSub')}</p>${speedChips()}<p class="note">${esc(t('reciter', { r: reciterName() }))}</p><div class="stackb"><button class="btn pri" data-a="meet">${stop ? t('stopAll') : t('meetPlay')}</button></div>${playing ? `<p class="ok">▶ ${t('verseN', { n: playing })}</p>` : ''}</div>`;
+  if (st.next === 'follow' || follow) h += `<div class="card sec"><b>${stepName('follow')}</b><p class="note">${t('followSub')}</p><div class="stackb"><a class="btn pri" href="${base()}listen/ladder/?p=${n}:1-${S.ayas}&unit=1">${t('followGo')}</a></div></div>`;
   h += '<ol class="steplist">';
   for (const s of STEPS) {
     const c = (st.counts as Record<string, number[]>)[s], isNext = st.next === s;
     h += `<li class="${st.done[s] ? 'done' : isNext ? 'now' : ''}"><i></i><div style="flex:1"><b>${stepName(s)}</b>${c ? `<span class="note" style="display:block">${t('stepsDone', { a: c[0], b: c[1] })}</span>` : ''}</div>${s !== 'meet' && s !== 'follow' ? `<a class="btn ${isNext ? 'pri' : 'quiet'}" href="${stepUrl(n, s, firstV)}">${st.done[s] ? '✓' : '›'}</a>` : st.done[s] ? '<span class="ok">✓</span>' : ''}</li>`;
   }
   h += '</ol>';
-  // Meet: here. Follow: the whole-surah check in the ladder.
-  if (!st.done.meet || (!follow && st.next === 'meet')) h += `<div class="card sec"><b>${stepName('meet')}</b><p class="note">${t('meetSub')}</p>${speedChips()}<p class="note">${esc(t('reciter', { r: reciterName() }))}</p><div class="stackb"><button class="btn pri" data-a="meet">${stop ? t('stopAll') : t('meetPlay')}</button></div>${playing ? `<p class="ok">▶ ${t('verseN', { n: playing })}</p>` : ''}</div>`;
-  if (st.next === 'follow' || follow) h += `<div class="card sec"><b>${stepName('follow')}</b><p class="note">${t('followSub')}</p><div class="stackb"><a class="btn pri" href="${base()}listen/ladder/?p=${n}:1-${S.ayas}&unit=1">${t('followGo')}</a></div></div>`;
   $('#unit')!.innerHTML = h;
 }
 document.addEventListener('click', (e) => {

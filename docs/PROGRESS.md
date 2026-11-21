@@ -16,7 +16,7 @@
 | 4 (sourced part) | Sections from Tanzil metadata in the reader (with known share) and as passage boundaries in the ladder; grammar-only person cues per verse ("we · you"); search (Arabic, meanings, surahs, 2:255); long surahs load 40 verses at a time. The topic/context cards wait for a source (G11) | **Done** (`docs/reviews/phase-4.md`) |
 | 4.1 | Fixes from the Phase 4 review (PLAN §5f) | **Done**, tests pass |
 | 5–6 (part) | Offline audio on request: Settings saves the recitation of My surahs (tested: 55 of 55 verses saved); the service worker serves saved audio first. Search, My surahs, backup were already in place | **Done** |
-| Next | Waiting for Umut's decisions (G17 meanings, G11 context source, defaults); then Phase 6 polish and a final critic pass | — |
+| R2 | Round 2: word sheet, surah-unit path, four tabs; review fixes (PLAN §5g) | **Done**, tests pass |
 
 Each phase ends with phone-size screenshots, test results and a PR.
 
@@ -42,3 +42,4 @@ Each phase ends with phone-size screenshots, test results and a PR.
 - **2026-11-21**: Umut merged PR #1. The Pages deploy failed: "Branch main is not allowed to deploy to github-pages due to environment protection rules". Cause (Claude's mistake): the work branch was pushed before `main` existed, so GitHub made it the default branch, and the Pages environment only allows the default branch. Fix needs two settings changes by Umut (default branch → `main`; Environments → github-pages → allow `main`).
 - **2026-11-21**: Umut's answers: default Turkish translation **Elmalılı (sadeleştirilmiş)**; single-verse Listen **plays once without the text first**; reciter: "m asif is good", read as **Mishary Alafasy, no rotation** (to confirm); introductions: Umut asked why they are needed (answer pending in the round-2 brief); word meanings: **find a reliable source, do not write our own** (G17 stays open; Tarteel QUL and the corpus dictionary are being checked).
 - **2026-11-21**: The scheduled task was stopped at Umut's request. New rule: schedule a one-shot continuation only if usage runs out before the work is done.
+- **2026-11-21**: Umut: "start the next phase … do what really could make impact … the direction is fine … I didn't ask for numerical miracle, just the word selection and meanings." The GitHub Pages settings were fixed by Umut; the site deploys from `main` (https://candanumut.github.io/dailyal/).

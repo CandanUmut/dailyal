@@ -10,7 +10,7 @@ import { meaning, grammarLabel, personOf, PERSON_OPTIONS, isFirstSecond } from '
 import { trText, trName, checkSet, similar } from './trans';
 import { badge } from './chrome';
 import { openWordSheet } from './sheet';
-import { t, pick, lang } from './i18n';
+import { t, pick, lang, quizGloss } from './i18n';
 import { $, base, esc, shuffle, dayNum, toast } from './util';
 
 type Q = { word: number; opts: string[]; right: string; chosen?: string; who?: 1 };
@@ -20,7 +20,7 @@ let check: { opts: string[]; right: string; by: string; chosen?: string } | null
 const seen = new Set<string>();
 const inUnit = new URLSearchParams(location.search).get('unit') === '1';
 const AGAIN = [1, 3, 7, 14];
-const place_ = (v: Verse, i: number) => pick(v.w[i][1], v.w[i][2]);
+const place_ = (v: Verse, i: number) => quizGloss(v.w[i]);
 
 async function load(s: number, v: number) {
   sv = { s, v }; seen.add(`${s}:${v}`);
@@ -29,7 +29,7 @@ async function load(s: number, v: number) {
   pre = true; preHeard = false; pass = 1; sel = -1; showTr = false; readTr = false; fi = 0; check = null; self = -1; heard3 = false; audioFail = false;
   // Choose meanings: up to 3 words that carry a dictionary form, preferring ones you are learning.
   // Options are meanings of other words in this surah that are clearly different (not near-twins).
-  const pool = [...new Set(ss.flatMap((x) => x.w.map((w) => pick(w[1], w[2]))).filter(Boolean))];
+  const pool = [...new Set(ss.flatMap((x) => x.w.map((w) => quizGloss(w))).filter(Boolean))];
   const cands = V.w.map((w, i) => ({ i, g: place_(V, i), learning: w[0].some((x) => state.r[all[x].id]), lemma: w[0].some((x) => all[x].k === 'l') })).filter((c) => c.g && c.lemma);
   fill = shuffle(cands).sort((a, b) => Number(b.learning) - Number(a.learning)).slice(0, Math.min(3, cands.length)).sort((a, b) => a.i - b.i).map((c) => {
     const others = shuffle(pool.filter((g) => g !== c.g && similar(g, c.g) < 0.34)).slice(0, 2);

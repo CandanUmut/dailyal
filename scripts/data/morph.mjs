@@ -56,7 +56,7 @@ export function readCorpus(file) {
         // Function words are split by role: مَا as "not" (NEG) and as "what" (REL) are different things to learn.
         const id = 'l:' + lem + (CONTENT.has(tag) ? '' : '#' + tag);
         W.items.push(id);
-        if (!lemmaForm.has(id)) { lemmaForm.set(id, ar(lem)); lemmaRoot.set(id, root); lemmaPos.set(id, tag); }
+        if (!lemmaForm.has(id)) { lemmaForm.set(id, ar(lem.replace(/\d+$/, ''))); lemmaRoot.set(id, root); lemmaPos.set(id, tag); }
         // إِيَّا carries its person in the stem (إِيَّاكَ = 2MS): add the person item too (Phase 4 review).
         if (tag === 'PRON') { const p = f.find((x) => /^[123][MF]?[SDP]$/.test(x)); if (p) W.items.push('pr:' + person(p)); }
       } else if (tag === 'PRON') {

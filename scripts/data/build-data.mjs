@@ -59,7 +59,12 @@ for (const V of verses) for (const W of V.cw) for (const i of W.items) { count.s
 const ranked = [...count.keys()].sort((a, b) => count.get(b) - count.get(a) || (a < b ? -1 : 1));
 const idx = new Map(ranked.map((id, i) => [id, i]));
 
-const gloss = (W) => akWords[`${W.s}:${W.v}:${W.w}`];
+// Reviewed flags (data/review/tr-flags.json): places where Açık Kuran's Turkish does not fit the word (shifted, voice, person, wrong).
+const trFlags = existsSync('data/review/tr-flags.json') ? JSON.parse(readFileSync('data/review/tr-flags.json', 'utf8')).flags : {};
+const isFlagged = (W) => { const f = trFlags[`${W.s}:${W.v}:${W.w}`]; return f && f.why !== 'missing'; };
+const rawGloss = (W) => akWords[`${W.s}:${W.v}:${W.w}`];
+/** For choosing dictionary meanings, a flagged Turkish gloss is not used. */
+const gloss = (W) => { const g = rawGloss(W); return g && isFlagged(W) ? { ...g, tr: null } : g; };
 const NEG_EN = /\b(not|n't|never|nor|no)\b/i, NEG_TR = /(değil|\b\w+(m[ae]z|m[ae]d[ıi]|m[ae]y[ıi]n|m[ae]s[ıi]n|m[ae]m[ıi]ş)\b)/i;
 const PAST_TR = /(d|t)[ıiuü](lar|ler)?$/i;
 const prevWord = (W) => words.get(`${W.s}:${W.v}:${W.w - 1}`);
@@ -154,7 +159,7 @@ for (let s = 1; s <= 114; s++) {
     b: V.basmala ? 1 : 0,
     ...(V.basmala ? { bt: V.basmala } : {}),
     t: V.t,
-    w: V.cw.map((W) => { const g = gloss(W); return [W.items.map((i) => idx.get(i)), g?.tr ?? null, g?.en ?? null, W.root ?? null, W.pos === 'V' ? [W.f.asp, W.f.per, W.f.pass].join('|') : W.pos]; }),
+    w: V.cw.map((W) => { const g = rawGloss(W); return [W.items.map((i) => idx.get(i)), g?.tr ?? null, g?.en ?? null, W.root ?? null, W.pos === 'V' ? [W.f.asp, W.f.per, W.f.pass].join('|') : W.pos, ...(isFlagged(W) ? [trFlags[`${W.s}:${W.v}:${W.w}`].why] : [])]; }),
     tr: trTR[V.key] ?? null,
     en: trEN[V.key] ?? null,
     // Per-verse alternatives (Diyanet joins some verses into one text): Elmalılı (sadeleştirilmiş), Süleyman Ateş, Abdel Haleem.

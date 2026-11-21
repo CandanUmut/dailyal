@@ -24,17 +24,17 @@ async function list() {
 
 let sel: { v: number; i: number } | null = null;
 // Whole-surah listening: play every verse in order, text shown or hidden, then a short gist check.
-let limit = 40, hide = false, playing = 0, stop: (() => void) | null = null, done = false;
+let wholeOpen = false, limit = 40, hide = false, playing = 0, stop: (() => void) | null = null, done = false;
 async function reader() {
   const [ss, vs, k, all] = await Promise.all([surahs(), surah(n), knownIdx(), items()]);
   const S = ss[n - 1];
   let h = `<a class="back" href="${base()}surahs/">‹ ${t('surahs')}</a><span class="eyebrow">${n} · ${S.type === 'Meccan' ? t('meccan') : t('medinan')} · ${t('order', { n: S.order })}</span><h1 class="h1">${esc(name(S))} <span class="ar" style="font-size:30px">${esc(S.ar)}</span></h1>`;
   h += `<p class="sub">${esc(lang() === 'tr' ? S.trMean || '' : S.enMean || S.en)} · ${t('verses', { n: S.ayas })}</p>`;
-  h += `<button class="chip" style="margin-top:10px" data-a="my" data-n="${n}" aria-pressed="${state.my.includes(n)}">${state.my.includes(n) ? '★ ' + t('inMy') : '☆ ' + t('addMy')}</button><p class="src" style="margin-top:8px">${t('ctxSrc')}</p>`;
-  h += `<div class="card sec"><b>${t('wholeTitle')}</b><p class="note">${t('wholeSub')}</p><div class="chips" style="margin-top:8px"><button class="chip" data-a="hide" aria-pressed="${hide}">${t('hideText')}</button></div>${speedChips()}<div class="stackb"><button class="btn pri" data-a="all">${playing ? t('stopAll') : t('playAll')}</button></div>`;
+  h += `<button class="chip" style="margin-top:10px" data-a="my" data-n="${n}" aria-pressed="${state.my.includes(n)}">${state.my.includes(n) ? '★ ' + t('inMy') : '☆ ' + t('addMy')}</button>`;
+  h += `<details class="card sec" ${playing || done || hide || wholeOpen ? 'open' : ''} data-whole><summary><b>${t('wholeTitle')}</b></summary><p class="note">${t('wholeSub')}</p><div class="chips" style="margin-top:8px"><button class="chip" data-a="hide" aria-pressed="${hide}">${t('hideText')}</button></div>${speedChips()}<div class="stackb"><button class="btn pri" data-a="all">${playing ? t('stopAll') : t('playAll')}</button></div>`;
   // The check for a whole surah lives in the ladder (same-surah questions); here we only point to it (Phase 3 review).
   if (done) h += `<p class="sec">${t('wholeDone')}</p><div class="stackb"><a class="btn" href="${base()}listen/ladder/${S.ayas <= 8 && S.ayas > 3 ? `?p=${n}:1-${S.ayas}` : ''}">${t('ladder')} ›</a></div>`;
-  h += '</div>';
+  h += '</details>';
   if (vs[0].b && vs[0].bt && !hide) h += `<p class="q basmala" lang="ar" style="margin-top:12px">${esc(vs[0].bt)}</p>`;
   const once = rangeOnce(vs);
   // Sections (Tanzil metadata): header with the share of words you know in it.
@@ -50,6 +50,7 @@ async function reader() {
   h += `<p class="src" style="margin-top:14px">${esc(trName())} · ${t('srcAk')}</p>`;
   const y = window.scrollY; $('#surahs')!.innerHTML = h; window.scrollTo(0, y);
 }
+document.addEventListener('toggle', (e) => { if ((e.target as HTMLElement).matches?.('[data-whole]')) wholeOpen = (e.target as HTMLDetailsElement).open; }, true);
 document.addEventListener('click', (e) => {
   const b = (e.target as HTMLElement).closest<HTMLElement>('[data-a]'); if (!b) return;
   const a = b.dataset.a!;

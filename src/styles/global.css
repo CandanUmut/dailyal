@@ -182,3 +182,4 @@ body.noscroll { overflow: hidden; }
 .page { border-top: 3px double var(--rule); border-bottom: 3px double var(--rule); padding: 4px 0 8px; margin: 6px 0 4px; }
 .page .q { text-align: center; font-size: 34px; }
 .task:not(:has(.n)) { padding-left: 2px; }
+.lnk { display: inline-flex; align-items: center; min-height: 48px; color: var(--rubric); }

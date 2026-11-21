@@ -1,0 +1,183 @@
+{
+ "_about": "Produced by a careful word-by-word review (surah 1 and surahs 93-114, 714 words) comparing Açık Kuran's Turkish word meanings with its English word meanings (which match the Quranic Arabic Corpus) and the Arabic. Flags only: no new Turkish meanings are given. 'flags' are clear mismatches for this exact word (shifted = meaning belongs to a neighbouring word; voice; person = person or number; wrong; missing = Turkish is empty). 'unsure' are borderline cases for a human to decide. Reviewed 2026-11-21. Method: docs/research/tr-flags.md.",
+ "flags": {
+  "1:7:4": {
+   "why": "shifted",
+   "note": "'on them'; Turkish 'kimselerin' (those) belongs to the previous word ٱلَّذِينَ. The 'on them' meaning is missing."
+  },
+  "93:2:2": {
+   "why": "missing",
+   "note": "Turkish is empty for 'when'. The next word 'sakinleşen' (that grows still) does not really carry 'when'."
+  },
+  "93:3:1": {
+   "why": "missing",
+   "note": "Turkish is empty for 'Not'. Its meaning is folded into the next word's Turkish 'seni bırakmadı'."
+  },
+  "93:6:1": {
+   "why": "missing",
+   "note": "Turkish is empty for 'Did not'. Its meaning is folded into the next word's Turkish 'seni bulmadı mı?'."
+  },
+  "93:10:1": {
+   "why": "shifted",
+   "note": "'And as for'; Turkish 've sakın' (and beware) takes the 'do not' of فَلَا (word 3, which is empty)."
+  },
+  "93:10:3": {
+   "why": "missing",
+   "note": "Turkish is empty for 'then (do) not'. Its meaning was moved to word 1 ('ve sakın')."
+  },
+  "94:1:1": {
+   "why": "missing",
+   "note": "Turkish is empty for 'Have not'. Its meaning is folded into the next word's Turkish 'açmadık mı?'."
+  },
+  "95:4:4": {
+   "why": "missing",
+   "note": "Turkish is empty for 'in'. Its meaning is carried by the locative ending of word 6 ('biçimde')."
+  },
+  "96:1:4": {
+   "why": "missing",
+   "note": "Turkish is empty for 'the One Who'. Its meaning is folded into the next word's Turkish 'yaratan'."
+  },
+  "96:5:4": {
+   "why": "missing",
+   "note": "Turkish is empty for 'not'. Its meaning is folded into the next word's Turkish 'bilmediği'."
+  },
+  "96:8:2": {
+   "why": "missing",
+   "note": "Turkish is empty for 'to'. Its meaning is folded into the next word's Turkish 'Rabbinedir'."
+  },
+  "96:14:1": {
+   "why": "missing",
+   "note": "Turkish is empty for 'Does not'. Its meaning is folded into the next word's Turkish 'bilmedi mi (o)?'."
+  },
+  "96:15:3": {
+   "why": "missing",
+   "note": "Turkish is empty for 'not'. Its meaning is folded into the next word's Turkish 'bundan vazgeçmezse'."
+  },
+  "96:19:2": {
+   "why": "missing",
+   "note": "Turkish is empty for '(Do) not'. Its meaning is folded into the next word's Turkish 'ona boyun eğme'."
+  },
+  "97:1:3": {
+   "why": "missing",
+   "note": "Turkish is empty for 'in'. Its meaning is folded into the next word's Turkish 'gecesinde'."
+  },
+  "98:1:1": {
+   "why": "missing",
+   "note": "Turkish is empty for 'Not'. Its meaning is folded into the next word's Turkish 'değillerdi'."
+  },
+  "98:4:7": {
+   "why": "missing",
+   "note": "Turkish is empty for 'from'. Its meaning is folded into the next word's Turkish '(ondan) sonra'."
+  },
+  "98:5:7": {
+   "why": "person",
+   "note": "'to Him' (lahu, third person masculine singular); Turkish 'kendilerine' means 'to themselves'."
+  },
+  "98:8:7": {
+   "why": "missing",
+   "note": "Turkish is empty for 'from'. Its meaning is folded into the next word's Turkish 'altlarından'."
+  },
+  "100:7:2": {
+   "why": "missing",
+   "note": "Turkish is empty for 'on'. Its meaning is folded into the next word's Turkish 'buna'."
+  },
+  "100:9:1": {
+   "why": "missing",
+   "note": "Turkish is empty for 'But does not'. Its meaning is folded into the next word's Turkish 'bilmez mi?'."
+  },
+  "100:9:6": {
+   "why": "missing",
+   "note": "Turkish is empty for '(is) in'. Its meaning is folded into the next word's Turkish 'kabirlerde'."
+  },
+  "100:10:3": {
+   "why": "missing",
+   "note": "Turkish is empty for '(is) in'. Its meaning is folded into the next word's Turkish 'göğüslerde'."
+  },
+  "104:4:3": {
+   "why": "missing",
+   "note": "Turkish is empty for 'in'. Its meaning is folded into the next word's Turkish 'Hutame'ye'."
+  },
+  "104:7:3": {
+   "why": "missing",
+   "note": "Turkish is empty for 'to'. Its meaning is folded into the next word's Turkish 'gönüllere'."
+  },
+  "105:1:1": {
+   "why": "missing",
+   "note": "Turkish is empty for 'Have not'. Its meaning is folded into the next word's Turkish 'görmedin mi?'."
+  },
+  "105:2:1": {
+   "why": "missing",
+   "note": "Turkish is empty for 'Did not'. Its meaning is folded into the next word's Turkish 'çıkarmadı mı?'."
+  },
+  "105:2:4": {
+   "why": "missing",
+   "note": "Turkish is empty for 'go'. Its meaning is folded into the next word's Turkish 'boşa'."
+  },
+  "111:5:1": {
+   "why": "missing",
+   "note": "Turkish is empty for 'In'. Its meaning is folded into the next word's Turkish 'boynunda'."
+  },
+  "112:3:4": {
+   "why": "voice",
+   "note": "Passive 'is he begotten'; Turkish 'doğuranı' means 'the one who bore (him)', an active form. The pair reads right, but this word teaches the wrong voice."
+  },
+  "113:4:4": {
+   "why": "missing",
+   "note": "Turkish is empty for 'in'. Its meaning is folded into the next word's Turkish 'düğümlere'."
+  }
+ },
+ "unsure": {
+  "93:11:1": {
+   "why": "missing",
+   "note": "'But as for' (amma); Turkish only 've' (and). The 'as for' part is missing; not wrong, only incomplete."
+  },
+  "94:7:3": {
+   "why": "wrong",
+   "note": "'then labor hard'; Turkish '(tekrar) başla' (start again). A free reading; the toil sense is lost."
+  },
+  "98:6:13": {
+   "why": "wrong",
+   "note": "'Those' (ula'ika); Turkish 'işte' (behold, so). The pair 'işte onlar' reads fine, but the word alone loses 'those'."
+  },
+  "98:7:6": {
+   "why": "wrong",
+   "note": "Same as 98:6:13: 'those' given as 'işte'."
+  },
+  "100:11:5": {
+   "why": "wrong",
+   "note": "'(is) surely All-Aware' (an adjective); Turkish 'mutlaka haber almıştır' (has surely been informed), a verb in the past."
+  },
+  "102:5:2": {
+   "why": "wrong",
+   "note": "'If'; Turkish 'keşke' (if only / I wish). Possible for law, but the plain sense here is 'if'."
+  },
+  "102:6:1": {
+   "why": "wrong",
+   "note": "'Surely you will see' (future, oath form); Turkish 'mutlaka görürdünüz' (you would see), read as the answer to law. Interpretive."
+  },
+  "105:4:2": {
+   "why": "shifted",
+   "note": "'with stones'; Turkish 'sertleşmiş taşlar' adds 'hardened', which comes from sijjil (word 4)."
+  },
+  "107:2:2": {
+   "why": "person",
+   "note": "Singular 'the one who' (alladhi); Turkish 'kimseler' is plural. In 107:1:2 the same word is singular 'kimseyi'."
+  },
+  "107:5:5": {
+   "why": "wrong",
+   "note": "'neglectful' (sahun); Turkish 'yanılmaktadır' (are mistaken). Related, but not the same idea."
+  },
+  "108:2:3": {
+   "why": "wrong",
+   "note": "'and sacrifice'; Turkish 've göğüs ger' (and stand firm). A known minority reading of nahr, not the common one. Translators differ."
+  },
+  "109:1:2": {
+   "why": "wrong",
+   "note": "'O' (ya ayyuha); Turkish 've ey' adds 've' (and), which is not in the Arabic."
+  },
+  "113:1:4": {
+   "why": "wrong",
+   "note": "'(of) the dawn' (a noun); Turkish 'karanlığı yarıp sabahı ortaya çıkaran' (who splits the dark and brings out the morning) describes the Lord, not the word itself."
+  }
+ }
+}

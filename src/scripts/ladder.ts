@@ -29,7 +29,7 @@ export async function passages() {
     // Passages never cross a section boundary (Tanzil metadata, Phase 4).
     const vsN = await surah(n), starts = vsN.filter((v) => v.ruku).map((v) => v.n).concat(S.ayas + 1);
     for (let si = 0; si + 1 < starts.length; si++) {
-      const A = starts[si], B = starts[si + 1] - 1, len = B - A + 1, parts = Math.max(1, Math.round(len / 3)), size = len / parts;
+      const A = starts[si], B = starts[si + 1] - 1, len = B - A + 1, parts = Math.max(len >= 4 ? 2 : 1, Math.round(len / 3)), size = len / parts;
       for (let i = 0; i < parts; i++) { const a = A + Math.round(i * size), b = A + Math.round((i + 1) * size) - 1; if (b - a + 1 < S.ayas || S.ayas <= 3) out.push({ s: n, a, b, share: share(a, b), whole: false }); }
     }
     if (S.ayas <= SHORT && S.ayas > 3) out.push({ s: n, a: 1, b: S.ayas, share: share(1, S.ayas), whole: true });
@@ -39,7 +39,7 @@ export async function passages() {
 
 let P: Passage, S: Surah, vs: Verse[], all: Item[], k: Uint8Array;
 let step: 'ctx' | 'listen' | 'self' | 'q' | 'score' | 'text' = 'ctx', playing = 0, stop: (() => void) | null = null, heardAll = false, plays = 0;
-type Q = { kind: 'said' | 'after' | 'who'; prompt?: string; verse?: number; by?: string; opts: string[]; right: string; chosen?: string; heard?: boolean };
+type Q = { kind: 'said' | 'after' | 'who' | 'which'; prompt?: string; verse?: number; by?: string; opts: string[]; right: string; chosen?: string; heard?: boolean; failed?: boolean };
 let qs: Q[] = [], qi = 0, self = -1, sel: { v: number; i: number } | null = null;
 
 async function buildQuestions() {
@@ -49,6 +49,13 @@ async function buildQuestions() {
   const named = (x: string) => names.some((nm) => x.toLocaleLowerCase().includes(nm));
   qs = [];
   const whole = P.a === 1 && P.b === S.ayas;
+  // Follow check in a unit (round-2 review: sequence questions could be passed from memory of the order):
+  // play one verse alone, no text, and choose its meaning from translations of the same surah. Three verses.
+  if (whole && unitParam) {
+    const set = checkSet(inP), pick3 = shuffle(inP.map((v, i) => ({ v, txt: set.texts[i] })).filter((x) => x.txt && set.texts.filter((y) => y === x.txt).length === 1)).slice(0, 3);
+    for (const x of pick3) { const others = shuffle(set.texts.filter((y) => y && y !== x.txt && similar(y, x.txt) < 0.4)).slice(0, 2); if (others.length === 2) qs.push({ kind: 'which', verse: x.v.n, right: x.txt, by: trName(set.id), opts: shuffle([x.txt, ...others]) }); }
+    qi = 0; return;
+  }
   if (!whole && outP.length >= 2) {
     for (const v of shuffle(inP).slice(0, Math.min(2, inP.length))) {
       const set = checkSet([v, ...outP]), right = set.texts[0];
@@ -93,6 +100,7 @@ function render() {
     h += `<h1 class="h1">${qi + 1} / ${qs.length}</h1>`;
     if (q.kind === 'said') h += `<p><b>${t('saidQ')}</b></p>`;
     else if (q.kind === 'after') h += `<p><b>${t('afterQ')}</b></p><p class="tl" style="margin:6px 0 4px">“${esc(q.prompt!)}”</p>`;
+    else if (q.kind === 'which') { h += `<p><b>${t('whichQ')}</b></p><div class="player">${playBtn(P.s, q.verse!, t('play'))}</div>`; if (!q.heard) { $('#ladder')!.innerHTML = h + `<p class="note" style="margin-top:10px">${t('playFirst')}</p>`; return; } }
     else { h += `<p><b>${t('whoVerseQ', { n: q.verse! })}</b></p><div class="player">${playBtn(P.s, q.verse!, t('play'))}</div>`; if (!q.heard) { $('#ladder')!.innerHTML = h + `<p class="note" style="margin-top:10px">${t('playFirst')}</p>`; return; } }
     h += '<div style="margin-top:10px">' + q.opts.map((o, i) => `<button class="opt ${q.chosen ? (o === q.right ? 'right' : o === q.chosen ? 'wrong' : '') : ''}" data-a="ans" data-i="${i}" ${q.chosen ? 'disabled' : ''}>${esc(o)}</button>`).join('') + '</div>';
     if (q.by) h += `<p class="src" style="margin-top:6px">${esc(q.by)} · Açık Kuran</p>`;
@@ -122,17 +130,17 @@ function record() {
   const kk = key(P), d = dayNum(), hd = state.heard[kk] || { n: 0, last: 0, due: 0, ok: 0, tot: 0 };
   if (hd.last !== d) { hd.n++; hd.last = d; hd.due = d + AGAIN[Math.min(hd.n - 1, 3)]; state.day.hp = (state.day.hp || 0) + 1; }
   // Counted only when the passage was heard to the end without the text; the who-question only after its verse was played.
-  const counted = qs.filter((q) => heardAll && (q.kind !== 'who' || q.heard)), ok = counted.filter((q) => q.chosen === q.right).length;
+  const counted = qs.filter((q) => heardAll && (q.kind === 'which' ? q.heard && !q.failed : q.kind !== 'who' || q.heard)), ok = counted.filter((q) => q.chosen === q.right).length;
   if (counted.length) { hd.ok += ok; hd.tot += counted.length; bump(3, counted.length); bump(2, ok); }
   (hd as typeof hd & { self?: number }).self = self;
   state.heard[kk] = hd;
   // Follow step: the whole surah heard to the end without the text, with at least 2 of 3 answers right.
-  if (P.a === 1 && P.b === S.ayas && heardAll && counted.length && ok / counted.length >= 2 / 3) markFollow(P.s);
+  if (unitParam && P.a === 1 && P.b === S.ayas && heardAll && counted.length >= 2 && ok / counted.length >= 2 / 3) markFollow(P.s);
   save();
 }
 
-document.addEventListener('audioended', () => { if (step === 'q' && qs[qi]?.kind === 'who') { qs[qi].heard = true; render(); } });
-document.addEventListener('audioerror', () => { if (step === 'q' && qs[qi]?.kind === 'who') { qs[qi].heard = true; render(); } });
+document.addEventListener('audioended', () => { if (step === 'q' && (qs[qi]?.kind === 'who' || qs[qi]?.kind === 'which')) { qs[qi].heard = true; render(); } });
+document.addEventListener('audioerror', () => { if (step === 'q' && (qs[qi]?.kind === 'who' || qs[qi]?.kind === 'which')) { qs[qi].failed = true; qs[qi].heard = true; render(); } });
 document.addEventListener('click', async (e) => {
   const b = (e.target as HTMLElement).closest<HTMLElement>('[data-a]'); if (!b || !$('#ladder')) return;
   const a = b.dataset.a!;

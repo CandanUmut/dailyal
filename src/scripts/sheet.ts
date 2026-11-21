@@ -13,7 +13,7 @@ import { meaning, grammarLabel, roleLabel } from './cardview';
 import { trText, trName } from './trans';
 import { place } from './srs';
 import { badge } from './chrome';
-import { t, pick, lang } from './i18n';
+import { t, pick, lang, enRef, stemKey, placeFlag, quizGloss } from './i18n';
 import { esc, base, toast, $ } from './util';
 
 type Use = { s: number; v: number; w: number; gloss: string; V: Verse };
@@ -27,17 +27,17 @@ async function placesOf(ix: number) {
 }
 
 /** Up to n other places where the word is translated differently: your surahs first, then short verses. */
-export async function otherUses(ix: number, not: { s: number; v: number } | null, n = 4): Promise<Use[]> {
+export async function otherUses(ix: number, not: { s: number; v: number; gloss?: string } | null, n = 3): Promise<Use[]> {
   const my = new Set(state.my.length ? state.my : MY_DEFAULT);
   const all = (await placesOf(ix)).filter((p) => !not || p.s !== not.s || p.v !== not.v);
   all.sort((a, b) => Number(my.has(b.s)) - Number(my.has(a.s)) || Number(b.s >= 78) - Number(a.s >= 78) || a.len - b.len);
   const cand = all.slice(0, 40), surahsNeeded = [...new Set(cand.map((p) => p.s))].slice(0, 10);
   const loaded = new Map(await Promise.all(surahsNeeded.map(async (s) => [s, await surah(s)] as const)));
-  const seen = new Set<string>(), out: Use[] = [];
+  const seen = new Set<string>(not?.gloss ? [stemKey(not.gloss)] : []), out: Use[] = [];
   for (const p of cand) {
     const vs = loaded.get(p.s); if (!vs) continue;
-    const V = vs[p.v - 1], g = pick(V.w[p.w][1], V.w[p.w][2]);
-    const key = g.toLocaleLowerCase().replace(/[^\p{L}\s]/gu, '').trim();
+    const V = vs[p.v - 1], g = quizGloss(V.w[p.w]);
+    const key = stemKey(g);
     if (!g || seen.has(key)) continue;
     seen.add(key); out.push({ s: p.s, v: p.v, w: p.w, gloss: g, V });
     if (out.length === n) break;
@@ -45,6 +45,8 @@ export async function otherUses(ix: number, not: { s: number; v: number } | null
   return out;
 }
 
+/** The first sense of a root meaning: up to the first full stop or semicolon (round-2 review: walls of text). */
+const firstSense = (s: string) => { const x = s.replace(/\s+/g, ' ').trim(), m = /^(.{20,160}?)[.;](\s|$)/.exec(x); return m ? { short: m[1] + '.', more: m[1].length + 2 < x.length } : firstPart(x, 160); };
 const firstPart = (s: string, max = 260) => { const x = s.replace(/\s+/g, ' ').trim(); return x.length <= max ? { short: x, more: false } : { short: x.slice(0, x.lastIndexOf(' ', max)) + ' …', more: true }; };
 
 export async function openWordSheet(s: number, v: number, i: number) {
@@ -54,19 +56,19 @@ export async function openWordSheet(s: number, v: number, i: number) {
   const lix = lemma ? all.indexOf(lemma) : -1;
   const affixes = w[0].map((x) => all[x]).filter((x) => x.k !== 'l');
   let h = `<div class="sheet-ar" lang="ar">${esc(V.t[i])}</div>`;
-  h += `<div class="layer"><div class="lh">${t('shHere')}</div><p class="big-mean">${esc(pick(w[1], w[2])) || '—'}</p>${gr ? `<p class="note">${esc(gr)}</p>` : ''}<p class="src">${t('srcAk')} · ${s}:${v}</p></div>`;
+  h += `<div class="layer"><div class="lh">${t('shHere')}</div><p class="big-mean">${esc(pick(w[1], w[2])) || '—'}</p>${enRef(w[1], w[2]) ? `<p class="note">${esc(enRef(w[1], w[2]))}</p>` : ''}${placeFlag(w) ? `<p class="note bad">${esc(placeFlag(w))}</p>` : ''}${gr ? `<p class="note">${esc(gr)}</p>` : ''}<p class="src">${t('srcAk')} · ${s}:${v}</p></div>`;
   if (affixes.length) h += `<div class="layer"><div class="lh">${t('shParts')}</div><div class="chips">${affixes.map((x) => `<span class="chip static"><span class="ar" style="font-size:20px">${esc(x.ar.split(' · ')[0])}</span>&nbsp;${esc(meaning(x).split(/,| \(/)[0])}</span>`).join('')}</div></div>`;
   if (lemma) {
     const R = lemma.root ? rs[lemma.root] : null, m = lemma.root ? rm[lemma.root] : null;
     h += `<div class="layer"><div class="lh">${t('shDict')}</div><p><a class="wlink ar" style="font-size:30px" href="${base()}words/?id=${encodeURIComponent(lemma.id)}">${esc(lemma.ar)}</a> <span class="note">${esc(roleLabel(lemma))} · ${t('times', { n: lemma.n })}${k[lix] ? ' · ✓' : ''}</span></p>`;
-    if (m && pick(m.tr, m.en)) { const fp = firstPart(pick(m.tr, m.en)); h += `<p class="lh2">${t('shRootMean')} <span class="ar" style="font-size:20px">${esc(R!.ar)}</span></p><p class="root-mean" data-full="${esc(pick(m.tr, m.en))}">${esc(fp.short)}</p>${fp.more ? `<button class="linkbtn" data-a="sh-more">${t('shMore')}</button>` : ''}<p class="src">${t('shRootSrc')}</p>`; }
+    if (m && pick(m.tr, m.en)) { const fp = firstSense(pick(m.tr, m.en)); h += `<p class="lh2">${t('shRootMean')} <span class="ar" style="font-size:20px">${esc(R!.ar)}</span></p><p class="root-mean" data-full="${esc(pick(m.tr, m.en))}">${esc(fp.short)}</p>${fp.more ? `<button class="linkbtn" data-a="sh-more">${t('shMore')}</button>` : ''}<p class="src">${t('shRootSrc')}</p>`; }
     if (!state.r[lemma.id]) h += `<div class="stackb"><button class="btn quiet" data-a="sh-learn" data-id="${esc(lemma.id)}">${t('addWord')}</button></div>`;
     h += `</div><div class="layer" id="sh-uses"><div class="lh">${t('shOther')}</div><p class="note">…</p></div>`;
-    if (R && R.items.length > 1) h += `<div class="layer"><div class="lh">${t('shFamily', { n: R.items.length })}</div><div class="chips">${R.items.filter((x) => x !== lix).slice(0, 8).map((x) => `<a class="chip" href="${base()}words/?id=${encodeURIComponent(all[x].id)}"><span class="ar" style="font-size:20px">${esc(all[x].ar)}</span>&nbsp;<span class="note">${esc((meaning(all[x]) || '').split(',')[0])}</span></a>`).join('')}</div><p class="src"><a href="${base()}library/roots/?r=${encodeURIComponent(lemma.root!)}">${t('shRootPage')}</a></p></div>`;
+    if (R && R.items.length > 1) h += `<div class="layer"><div class="lh">${t('shFamily', { n: R.items.length })}</div><div class="chips">${R.items.filter((x) => x !== lix).slice(0, 8).map((x) => `<a class="chip" href="${base()}words/?id=${encodeURIComponent(all[x].id)}"><span class="ar" style="font-size:20px">${esc(all[x].ar)}</span>&nbsp;<span class="note">${esc((meaning(all[x]) || '').split(',')[0])}</span></a>`).join('')}</div><p><a class="lnk" href="${base()}library/roots/?r=${encodeURIComponent(lemma.root!)}">${t('shRootPage')}</a></p></div>`;
   }
   show(h);
   if (lix >= 0) {
-    const uses = await otherUses(lix, { s, v });
+    const uses = await otherUses(lix, { s, v, gloss: pick(w[1], w[2]) });
     const el = $('#sh-uses'); if (!el) return;
     el.innerHTML = `<div class="lh">${t('shOther')}</div>` + (uses.length ? `<p class="note">${t('shOtherSub')}</p>` + uses.map((u) => `<div class="use">${verseHtml(u.V, null, { mark: u.w })}<p><b>${esc(u.gloss)}</b> <span class="ref">${u.s}:${u.v}</span></p><p class="tl note">${esc(trText(u.V))}</p><div class="row" style="justify-content:flex-end;gap:8px">${playBtn(u.s, u.v, t('play'), 'sm')}<a class="btn quiet" href="${base()}listen/?v=${u.s}:${u.v}">${t('listen')}</a></div></div>`).join('') + `<p class="src">${t('srcAk')} · ${esc(trName())}</p>` : `<p class="note">${t('shOnly')}</p>`);
   }
@@ -95,5 +97,13 @@ document.addEventListener('click', (e) => {
   else if (a === 'sh-learn') { place(b.dataset.id!, false); save(); badge(); toast(t('added')); b.remove(); }
   else if (a === 'play') toggle(b);
 }, true);
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+document.addEventListener('keydown', (e) => {
+  const s = $('#sheet'); if (!s) return;
+  if (e.key === 'Escape') { close(); return; }
+  if (e.key === 'Tab') { // keep focus inside the open sheet
+    const f = [...s.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')]; if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+});
 void lang;
