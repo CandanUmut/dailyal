@@ -165,6 +165,23 @@ Built (direction approved by Umut: "the direction is fine … just the word sele
 | Small bugs (corpus id "مَٰلِك2" visible; Day-30 seed without unit progress) | **Fixed.** |
 | Al-Fatiha in one sitting ≈ 40 minutes | **For Umut:** should a unit suggest a daily stopping point? Units already span several days. |
 
+## 5h. v3: the daily lesson (2026-11-21, after Umut tried round 2)
+
+Umut: "very hard to understand what I am doing, where I am … overwhelming … I couldn't finish one day … it opens a word and expects me to know it and say easy." He asked for the proposed simpler version.
+
+- **One lesson a day, about 10 minutes, always in one surah.** The course is Al-Fatiha, then the short surahs most recited in prayer, then the rest of Juz 30. Each lesson covers one verse.
+- **Teach before testing.** The steps are:
+  1. Hear the verse with its text and meaning.
+  2. Meet at most 5 new words, one at a time. Nothing is asked.
+  3. Practise them by **choosing** the meaning. A wrong answer comes back once.
+  4. Hear the verse without the text, then see it again.
+  5. Review earlier words by choosing.
+  6. "Done for today".
+- **No self-grading** ("Easy / Missed") anywhere in the daily path.
+- **Focus mode:** no tab bar in a lesson; ✕ exits; "Next" stays in thumb reach.
+- **Today:** where you are, one button, and a short course view. **Words:** the words from your lessons, with review. **You:** days, words and verses learned.
+- The reader, search, word sheet, roots, phrases and passages stay for free exploring. They are not in the daily path.
+
 ## 6. The critic
 
 - A separate agent, given only the app (running at 390 × 844), `docs/PLAN.md` and a persona. It is told to be honest and specific, not kind.

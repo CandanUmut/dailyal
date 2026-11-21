@@ -1,35 +1,33 @@
-// Today (round 2): one path through your prayer surahs. The current unit with its next step, then review,
-// then passages due again, then the path. Progress numbers live on the You page.
-import { state, rollDay } from './store';
-import { items, surahs } from './data';
-import { dueItems, newItems } from './srs';
-import { mySurahItems } from './coverage';
-import { unitOrder, unitStatus, stepUrl, stepName, STEPS } from './units';
+// Today (v3, after Umut's feedback): where you are, and one button for today's lesson. Nothing else competes.
+import { state } from './store';
+import { surahs, surah } from './data';
+import { nextLesson, course, doneToday, lessonsDays, learnedCount } from './lesson';
 import { t, lang } from './i18n';
-import { $, base, esc } from './util';
+import { $, base, esc, dayNum } from './util';
 
 (async () => {
-  rollDay();
-  const [all, ss, order, boost] = await Promise.all([items(), surahs(), unitOrder(), mySurahItems()]);
-  const name = (n: number) => (lang() === 'tr' ? ss[n - 1].tr : ss[n - 1].tname);
-  const statuses = await Promise.all(order.slice(0, 14).map(unitStatus));
-  const cur = statuses.find((s) => !s.done.follow) || statuses[0];
-  const d = new Date();
-  let h = `<span class="eyebrow">${d.toLocaleDateString(lang() === 'tr' ? 'tr-TR' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</span><h1 class="h1">${t('yourPath')}</h1>`;
-  // Current unit
-  let firstV = 1; for (let v = 1; v <= cur.S.ayas; v++) if (!state.heard[`${cur.n}:${v}`]) { firstV = v; break; }
-  const next = cur.next || 'follow';
-  h += `<article class="unit"><a class="unit-link" href="${base()}unit/?s=${cur.n}"><div class="unitar" lang="ar">${esc(cur.S.ar)}</div><p class="unitname">${esc(name(cur.n))} · ${esc(lang() === 'tr' ? cur.S.trMean || '' : cur.S.enMean || cur.S.en)} <span class="note">· ${t('verses_n', { n: cur.S.ayas })}</span></p></a>`;
-  h += `<ol class="steps">${STEPS.map((s) => `<li class="${cur.done[s] ? 'done' : s === next ? 'now' : ''}"><i></i><span>${stepName(s)}</span></li>`).join('')}</ol>`;
-  h += `<a class="btn pri cta" href="${next === 'meet' || next === 'follow' ? `${base()}unit/?s=${cur.n}` : stepUrl(cur.n, next, firstV)}">${t('continueStep', { step: stepName(next) })}</a></article>`;
-  // Review (spaced) and passages due again (narrow listening)
-  const due = dueItems(all).length, nw = newItems(all, boost).length;
-  if (!state.placed) h += `<a class="task" href="${base()}place/"><div><b>${t('tPlace')}</b><span class="d">${t('tPlaceD')}</span></div><span class="go">›</span></a>`;
-  if (due + nw) h += `<a class="task" href="${base()}words/"><div><b>${t('reviewRow', { n: due + nw })}</b><span class="d">${t('dueNew', { d: due, n: nw, m: Math.max(1, Math.round((due + nw) * 0.3)) })}</span></div><span class="go">›</span></a>`;
-  const t0 = state.day.d || 0, dueP = Object.entries(state.heard).filter(([k2, hd]) => k2.startsWith('P') && hd.due <= t0 && hd.last < t0);
-  if (dueP.length) { const m = /^P(\d+):(\d+)-(\d+)$/.exec(dueP[0][0])!; h += `<a class="task" href="${base()}listen/ladder/?p=${m[1]}:${m[2]}-${m[3]}"><div><b>${t('tPassage', { ref: `${esc(name(+m[1]))} ${m[1]}:${m[2]}–${m[3]}` })}</b><span class="d">${t('tPassageD', { n: dueP.length })}</span></div><span class="go">›</span></a>`; }
-  // The path
-  h += `<div class="thread sec">${statuses.map((s) => { const k = s.done.follow ? 'full' : STEPS.some((x) => s.done[x]) ? 'half' : ''; return `<a class="bead ${k}" href="${base()}unit/?s=${s.n}"><i></i><div><b>${esc(name(s.n))}</b> <span class="ar" style="font-size:19px">${esc(s.S.ar)}</span><span class="note" style="display:block">${s.done.follow ? t('followed') : s.next && k ? stepName(s.next) : t('verses_n', { n: s.S.ayas })}</span></div></a>`; }).join('')}</div>`;
-  h += `<p class="cap">${t('pathCap')}</p>`;
+  const [ss, L, order] = await Promise.all([surahs(), nextLesson(), course()]);
+  const name = (n: number) => esc(lang() === 'tr' ? ss[n - 1].tr : ss[n - 1].tname);
+  const days = lessonsDays(), today = doneToday();
+  let h = `<span class="eyebrow">${new Date().toLocaleDateString(lang() === 'tr' ? 'tr-TR' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}${days ? ` · ${t('tdDay', { n: days + (today ? 0 : 1) })}` : ''}</span>`;
+  if (!days) h += `<h1 class="h1">${t('tdWelcomeT')}</h1><div class="welcome"><p>${t('tdWelcome1')}</p><ol><li>${t('tdWelcome2')}</li><li>${t('tdWelcome3')}</li><li>${t('tdWelcome4')}</li></ol><p class="note" style="margin-top:8px">${t('tdWelcome5')}</p></div>`;
+  if (!L) { $('#today')!.innerHTML = h + `<h1 class="h1">${t('lsAllDone')}</h1>`; return; }
+  const S = ss[L.s - 1], doneV = Object.keys(state.lv).filter((k) => k.startsWith(`${L.s}:`)).length;
+  h += `<article class="unit sec"><div class="unitar" lang="ar">${esc(S.ar)}</div><p class="unitname">${name(L.s)} · ${esc(lang() === 'tr' ? S.trMean || '' : S.enMean || S.en)}</p>`;
+  h += `<div class="bar" role="img" aria-label="${t('tdVerses', { k: doneV, n: S.ayas })}"><span style="width:${(100 * doneV) / S.ayas}%"></span></div><p class="note" style="text-align:center">${t('tdVerses', { k: doneV, n: S.ayas })}</p>`;
+  if (today) {
+    h += `<p class="ok" style="text-align:center;margin-top:10px"><b>${t('tdDoneToday')}</b></p><p class="note" style="text-align:center">${t('tdTomorrow', { name: name(L.s), v: L.v })}</p>`;
+    h += `<div class="stackb"><a class="btn quiet" href="${base()}lesson/">${t('tdOneMore')}</a></div>`;
+  } else {
+    h += `<p style="text-align:center;margin-top:10px">${t('tdNext', { v: L.v })}${L.teach.length ? ` · ${t('tdNewWords', { n: L.teach.length })}` : ''}</p>`;
+    h += `<div class="stackb"><a class="btn pri big" href="${base()}lesson/">${t('tdStart')}</a></div><p class="note" style="text-align:center">${t('tdTime')}</p>`;
+  }
+  h += '</article>';
+  if (days) h += `<p class="note sec" style="text-align:center">${t('tdLearned', { w: learnedCount(), v: Object.keys(state.lv).length })}</p>`;
+  // The course, briefly: where you are among the surahs.
+  const idx = order.indexOf(L.s), around = order.slice(Math.max(0, idx - 1), idx + 4);
+  h += `<div class="thread sec">${await Promise.all(around.map(async (n) => { const vs = await surah(n), dv = vs.filter((v) => state.lv[`${n}:${v.n}`]).length, k = dv === vs.length ? 'full' : dv ? 'half' : ''; return `<div class="bead ${k}"><i></i><div><b>${name(n)}</b> <span class="ar" style="font-size:19px">${esc(ss[n - 1].ar)}</span><span class="note" style="display:block">${t('tdVerses', { k: dv, n: vs.length })}</span></div></div>`; })).then((x) => x.join(''))}</div>`;
+  h += `<p class="cap">${t('tdCourse')}</p>`;
   $('#today')!.innerHTML = h;
+  void dayNum;
 })();
