@@ -13,7 +13,8 @@
 | 2.1 | Fixes from the Phase 2 review (PLAN §5d) | **Done**, tests pass |
 | 3.1 | Fixes from the Phase 3 review (PLAN §5e) | **Done**, tests pass |
 | 3 | Listening ladder: passages of 2–4 verses and whole short surahs from your surahs, text off first, questions (what was said, who does it), self-report, then the text; narrow listening at 1, 3, 7, 14 days; results per passage; Today shows due passages | **Done** (`docs/reviews/phase-3.md`) |
-| 4–6 | See `docs/PLAN.md` §5 | Not started |
+| 4 (sourced part) | Sections from Tanzil metadata in the reader (with known share) and as passage boundaries in the ladder; grammar-only person cues per verse ("we · you"); search (Arabic, meanings, surahs, 2:255); long surahs load 40 verses at a time. The topic/context cards wait for a source (G11) | **Built**, tests pass; critic review next |
+| 5–6 | See `docs/PLAN.md` §5 | Not started |
 
 Each phase ends with phone-size screenshots, test results and a PR.
 

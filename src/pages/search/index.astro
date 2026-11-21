@@ -1,0 +1,34 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base title="Search" tab="library">
+  <div id="search"><label for="q" class="eyebrow" id="ql"></label><input id="q" type="search" autocomplete="off" style="width:100%;min-height:52px;font:inherit;padding:0 12px;border-radius:8px;border:1px solid var(--rule-strong);background:var(--card);color:var(--ink);margin-top:6px"><div id="res" aria-live="polite"></div></div>
+</Base>
+<script>
+  // Search (Phase 4): dictionary forms and their meanings, surah names, and verse references like 2:255. Runs offline.
+  import { items, surahs } from '../../scripts/data';
+  import { meaning } from '../../scripts/cardview';
+  import { t, lang } from '../../scripts/i18n';
+  import { $, base, esc } from '../../scripts/util';
+  const bare = (s: string) => s.replace(/[ً-ٰٟۖ-ۭـ]/g, '').replace(/[ٱأإآ]/g, 'ا').replace(/ى/g, 'ي');
+  const low = (s: string) => s.toLocaleLowerCase(lang() === 'tr' ? 'tr-TR' : 'en-GB');
+  $('#ql')!.textContent = t('search'); $<HTMLInputElement>('#q')!.placeholder = t('searchPh');
+  const initial = new URLSearchParams(location.search).get('q') || '';
+  (async () => {
+    const [all, ss] = await Promise.all([items(), surahs()]);
+    const run = (q: string) => {
+      q = q.trim(); if (!q) { $('#res')!.innerHTML = ''; return; }
+      let h = '';
+      const ref = /^(\d{1,3})\s*[:.]\s*(\d{1,3})$/.exec(q);
+      if (ref && ss[+ref[1] - 1] && +ref[2] <= ss[+ref[1] - 1].ayas) h += `<ul class="list sec"><li><a href="${base()}listen/?v=${+ref[1]}:${+ref[2]}"><b>${t('sVerse')} ${+ref[1]}:${+ref[2]}</b><span class="go" style="margin-left:auto">›</span></a></li></ul>`;
+      const isAr = /[؀-ۿ]/.test(q), qb = bare(q), ql = low(q);
+      const words = all.filter((x) => x.k !== 'ph' && (isAr ? bare(x.ar).includes(qb) : low(meaning(x)).includes(ql) || (x.senses && [...x.senses.tr, ...x.senses.en].some(([g]) => low(g).includes(ql))))).sort((a, b) => Number(isAr && bare(b.ar) === qb) - Number(isAr && bare(a.ar) === qb)).slice(0, 30);
+      const sur = ss.filter((s) => (isAr ? bare(s.ar).includes(qb) : [s.tr, s.tname, s.en, s.trMean || '', s.enMean || ''].some((x) => low(x).includes(ql)))).slice(0, 10);
+      if (sur.length) h += `<div class="sec"><div class="sh">${t('sSurahs')}</div><ul class="list">${sur.map((s) => `<li><a href="${base()}surahs/read/?n=${s.n}"><span class="ref" style="width:28px">${s.n}</span><span style="flex:1"><b>${esc(lang() === 'tr' ? s.tr : s.tname)}</b></span><span class="ar" style="font-size:22px">${esc(s.ar)}</span></a></li>`).join('')}</ul></div>`;
+      if (words.length) h += `<div class="sec"><div class="sh">${t('sWords')}</div><ul class="list">${words.map((x) => `<li><a href="${base()}words/?id=${encodeURIComponent(x.id)}"><span class="ar" style="font-size:24px;min-width:100px;text-align:right">${esc(x.ar)}</span><span style="flex:1">${esc(meaning(x))}<span class="note" style="display:block">${t('times', { n: x.n })}</span></span></a></li>`).join('')}</ul></div>`;
+      $('#res')!.innerHTML = h || `<p class="note sec">${t('searchNone')}</p>`;
+    };
+    const inp = $<HTMLInputElement>('#q')!; inp.value = initial; run(initial);
+    inp.addEventListener('input', () => run(inp.value));
+  })();
+</script>

@@ -38,6 +38,18 @@ export function grammarLabel(tag: string | undefined) {
   const [asp, per, pass] = tag.split('|'), L = lang() === 'tr' ? 1 : 0;
   return [PERS[per]?.[L], ASP[asp]?.[L], pass === '1' ? (L ? 'edilgen' : 'passive') : ''].filter(Boolean).join(' · ');
 }
+/** Who appears in a verse, from grammar only (Phase 4): the persons of its verbs and pronouns, in order of first appearance.
+ *  This names grammatical persons ("we", "you"), never who they refer to — that would be commentary. */
+export function cuesOf(v: { w: [number[], string | null, string | null, string | null, string][] }, all: Item[]) {
+  const seen: string[] = [];
+  for (const w of v.w) {
+    const per = w[4]?.includes('|') ? w[4].split('|')[1] : '';
+    if (per && PERS[per] && !seen.includes(per)) seen.push(per);
+    for (const x of w[0]) { const it = all[x]; if (it.k === 'pr' && it.person && PERS[it.person] && !seen.includes(it.person)) seen.push(it.person); }
+  }
+  const L = lang() === 'tr' ? 1 : 0;
+  return [...new Set(seen.map((p) => PERS[p][L]))];
+}
 export const roleOf = (x: Item) => (x.id.includes('#') ? x.id.slice(x.id.indexOf('#') + 1) : x.pos);
 export const roleLabel = (x: Item) => { const r = ROLE[roleOf(x)]; return r ? (lang() === 'tr' ? r[1] : r[0]) : x.pos; };
 export function meaning(x: Item, tags?: Record<string, { ar: string; en: string }>) {

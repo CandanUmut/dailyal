@@ -4,7 +4,8 @@ import { surahs, surah, items, type Surah } from './data';
 import { overview, knownIdx } from './coverage';
 import { verseHtml, playBtn, toggle, playAll, speedChips, setSpeed } from './verse';
 import { state as st } from './store';
-import { meaning, grammarLabel } from './cardview';
+import { meaning, grammarLabel, cuesOf } from './cardview';
+import { wordKnown } from './coverage';
 import { trText, trName, rangeOnce } from './trans';
 import { t, pick, lang } from './i18n';
 import { $, base, esc } from './util';
@@ -23,7 +24,7 @@ async function list() {
 
 let sel: { v: number; i: number } | null = null;
 // Whole-surah listening: play every verse in order, text shown or hidden, then a short gist check.
-let hide = false, playing = 0, stop: (() => void) | null = null, done = false;
+let limit = 40, hide = false, playing = 0, stop: (() => void) | null = null, done = false;
 async function reader() {
   const [ss, vs, k, all] = await Promise.all([surahs(), surah(n), knownIdx(), items()]);
   const S = ss[n - 1];
@@ -36,10 +37,15 @@ async function reader() {
   h += '</div>';
   if (vs[0].b && vs[0].bt && !hide) h += `<p class="q basmala" lang="ar" style="margin-top:12px">${esc(vs[0].bt)}</p>`;
   const once = rangeOnce(vs);
+  // Sections (Tanzil metadata): header with the share of words you know in it.
+  const starts = vs.filter((v) => v.ruku).map((v) => v.n); let sec = 0;
   for (const V of vs) {
+    if (V.n > limit && !(playing && V.n <= playing) && !(sel && V.n <= sel.v)) { h += `<div class="stackb"><button class="btn" data-a="more">${t('more', { n: Math.min(40, vs.length - limit) })}</button></div>`; break; }
+    if (V.ruku && !hide && starts.length > 1) { sec++; const a = V.n, b = (starts[sec] || vs.length + 1) - 1, ws = vs.slice(a - 1, b).flatMap((x) => x.w.filter((w) => w[0].length)), kn = ws.filter((w) => wordKnown(w[0], k)).length; h += `<div class="sh sec" style="margin-top:22px">${t('section', { k: sec, a, b })} · ${t('known', { p: ws.length ? Math.round((kn / ws.length) * 100) : 0 })}</div>`; }
     if (hide) { h += `<div class="sec" style="margin-top:8px;border-top:1px solid var(--rule);padding-top:8px" data-v="${V.n}"><p class="${playing === V.n ? 'ok' : 'note'}">${playing === V.n ? '▶ ' : ''}${t('verseN', { n: V.n })}</p></div>`; continue; }
     h += `<div class="sec" style="margin-top:14px;border-top:1px solid var(--rule);padding-top:8px;${playing === V.n ? 'background:var(--sunk);' : ''}" data-v="${V.n}">${verseHtml(V, k, { sel: sel?.v === V.n ? sel.i : undefined })}`;
     if (sel?.v === V.n) { const w = V.w[sel.i]; h += `<div class="gloss"><span class="ar">${esc(V.t[sel.i])}</span> &nbsp;<b>${esc(pick(w[1], w[2])) || '—'}</b>${grammarLabel(w[4]) ? `<div class="note">${esc(grammarLabel(w[4]))}</div>` : ''}<div class="ref">${w[0].map((x) => `<a class="wlink" href="${base()}words/?id=${encodeURIComponent(all[x].id)}"><span class="ar">${esc(all[x].ar)}</span></a> ${esc(meaning(all[x]))}`).join(' · ')}</div></div>`; }
+    const cues = cuesOf(V, all); if (cues.length) h += `<p class="note">${esc(t('cues', { list: cues.join(' · ') }))}</p>`;
     h += `<div class="row" style="justify-content:space-between;align-items:flex-start;margin-top:4px"><p class="tl" style="flex:1">${esc(once.get(V.n) || '')}</p>${playBtn(n, V.n, t('play'), 'sm')}</div>`;
     h += `<a class="btn quiet" style="margin-top:6px" href="${base()}listen/?v=${n}:${V.n}">${t('listen')} ${n}:${V.n}</a></div>`;
   }
@@ -52,6 +58,7 @@ document.addEventListener('click', (e) => {
   if (a === 'play') { toggle(b); return; }
   if (a === 'speed') { setSpeed(+b.dataset.v!); st.set.speed = +b.dataset.v!; save(); reader(); return; }
   if (a === 'hide') { hide = !hide; reader(); return; }
+  if (a === 'more') { limit += 40; reader(); return; }
   if (a === 'all') {
     if (stop) { stop(); stop = null; playing = 0; reader(); return; }
     done = false;

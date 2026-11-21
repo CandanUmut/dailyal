@@ -6,7 +6,7 @@ import { state, save, bump, rollDay, MY_DEFAULT } from './store';
 import { surah, surahs, vreq, items, type Verse, type Surah, type Item } from './data';
 import { knownIdx, verseShare } from './coverage';
 import { verseHtml, playAll, speedChips, setSpeed, reciterName, toggle } from './verse';
-import { meaning, grammarLabel, personOf, PERSON_OPTIONS } from './cardview';
+import { meaning, grammarLabel, personOf, PERSON_OPTIONS, cuesOf } from './cardview';
 import { trText, trName, checkSet, similar, rangeOnce } from './trans';
 import { playBtn } from './verse';
 import { t, pick, lang, num } from './i18n';
@@ -24,8 +24,12 @@ export async function passages() {
   for (const n of state.my.length ? state.my : MY_DEFAULT) {
     const S = ss[n - 1], share = (a: number, b: number) => { let s = 0; for (let v = a; v <= b; v++) s += verseShare(vr[S.start + v - 1], k); return s / (b - a + 1); };
     // Middle step (Phase 3 review): every surah is split into passages of 2–3 verses; short surahs can also be heard whole.
-    const parts = Math.max(1, Math.round(S.ayas / 3)), size = S.ayas / parts;
-    for (let i = 0; i < parts; i++) { const a = Math.round(i * size) + 1, b = Math.round((i + 1) * size); if (b - a + 1 < S.ayas || S.ayas <= 3) out.push({ s: n, a, b, share: share(a, b), whole: false }); }
+    // Passages never cross a section boundary (Tanzil metadata, Phase 4).
+    const vsN = await surah(n), starts = vsN.filter((v) => v.ruku).map((v) => v.n).concat(S.ayas + 1);
+    for (let si = 0; si + 1 < starts.length; si++) {
+      const A = starts[si], B = starts[si + 1] - 1, len = B - A + 1, parts = Math.max(1, Math.round(len / 3)), size = len / parts;
+      for (let i = 0; i < parts; i++) { const a = A + Math.round(i * size), b = A + Math.round((i + 1) * size) - 1; if (b - a + 1 < S.ayas || S.ayas <= 3) out.push({ s: n, a, b, share: share(a, b), whole: false }); }
+    }
     if (S.ayas <= SHORT && S.ayas > 3) out.push({ s: n, a: 1, b: S.ayas, share: share(1, S.ayas), whole: true });
   }
   return out;
@@ -100,6 +104,7 @@ function render() {
       if (v.b && v.bt) h += `<p class="q basmala" lang="ar">${esc(v.bt)}</p>`;
       h += `<div data-v="${v.n}" style="border-top:1px solid var(--rule);padding-top:6px;margin-top:8px">${verseHtml(v, k, { sel: sel?.v === v.n ? sel.i : undefined })}`;
       if (sel?.v === v.n) { const w = v.w[sel.i], gr = grammarLabel(w[4]); h += `<div class="gloss"><span class="ar">${esc(v.t[sel.i])}</span> <b>${esc(pick(w[1], w[2])) || '—'}</b>${gr ? `<div class="note">${esc(gr)}</div>` : ''}<div class="ref">${w[0].map((x) => `${esc(all[x].ar)} ${esc(meaning(all[x]))}`).join(' · ')}</div></div>`; }
+      const cues = cuesOf(v, all); if (cues.length) h += `<p class="note">${esc(t('cues', { list: cues.join(' · ') }))}</p>`;
       h += once.has(v.n) ? `<p class="tl">${esc(once.get(v.n)!)}</p></div>` : '</div>';
     }
     const hd = state.heard[key(P)];
