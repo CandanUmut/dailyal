@@ -155,7 +155,7 @@ for (let s = 1; s <= 114; s++) {
   j(`s/${s}.json`, vs);
 }
 
-const flagged = items.slice(0, 1000).filter((x) => x.gl && (NEG_TR.test(x.gl.tr || '') || NEG_EN.test(x.gl.en || ''))).map((x) => `${x.r} ${x.ar} | ${x.gl.tr} | ${x.gl.en}`);
+const flagged = items.slice(0, 1000).filter((x) => x.gl && !x.id.includes('#') && (NEG_TR.test(x.gl.tr || '') || NEG_EN.test(x.gl.en || ''))).map((x) => `${x.r} ${x.ar} | ${x.gl.tr} | ${x.gl.en}`);
 console.log(`meaning check: ${flagged.length} of the top 1000 still look negated`);
 // ---------- Phrases (Phase 2): the most repeated runs of 3–7 words, from the Tanzil text as aligned above ----------
 // Spelling variants (e.g. ءَامَنُوا۟ / ءَامَنُوٓا۟) are merged by a key without marks; the most common written form is shown.

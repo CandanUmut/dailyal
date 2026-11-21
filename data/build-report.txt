@@ -1,18 +1,9 @@
 alignment problems: 0
 
-meanings that still look negated (top 1000): 15
-17 لَا | yoktur | not
-25 مَا | yoktur | Not
-43 لَم | hiç | not
-46 لَا | yapmayın | (Do) not
-119 إِن | değildir | Not
-122 لَن | asla | never
+meanings that still look negated (top 1000): 6
 292 أُدْخِلَ | bizi katmasını | will admit
-308 لَوْلَآ | değil miydi? | Why not
 314 ٱسْتَغْفَرَ | ve bağışlanmasını dileseydi | and asked forgiveness
-317 أَلَآ | iyi bilin ki | No doubt
 341 يَحْزُن | seni üzmesin | grieve you
-351 لَوْلَآ | eğer | if not
 642 أَغْنَىٰ | zengin etmedi mi? | so He made self-sufficient
 781 يُنظَرُ | göz açtırmayın bana | give me respite
 957 تَذْكِرَة | bir hatırlatmadır | (is) a reminder
