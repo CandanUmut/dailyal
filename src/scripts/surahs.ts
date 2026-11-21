@@ -3,11 +3,9 @@ import { state, save, MY_DEFAULT } from './store';
 import { surahs, surah, items, type Surah } from './data';
 import { overview, knownIdx } from './coverage';
 import { verseHtml, playBtn, toggle, playAll, speedChips, setSpeed } from './verse';
-import { state as st, bump } from './store';
-import { checkTr, similar } from './trans';
-import { shuffle } from './util';
+import { state as st } from './store';
 import { meaning, grammarLabel } from './cardview';
-import { trText, trName } from './trans';
+import { trText, trName, rangeOnce } from './trans';
 import { t, pick, lang } from './i18n';
 import { $, base, esc } from './util';
 
@@ -25,17 +23,7 @@ async function list() {
 
 let sel: { v: number; i: number } | null = null;
 // Whole-surah listening: play every verse in order, text shown or hidden, then a short gist check.
-let hide = false, heardAll = false, playing = 0, stop: (() => void) | null = null, done = false, gist: { opts: string[]; right: string; chosen?: string } | null = null, selfR = -1;
-async function makeGist() {
-  const [vs, ss] = await Promise.all([surah(n), surahs()]);
-  const right = checkTr(shuffle(vs.filter((v) => (checkTr(v).text || '').length > 20))[0] || vs[0]).text, opts = [right];
-  // Wrong options share some words with the right one (Phase 2 review: random surahs were a giveaway).
-  const cands: { x: string; sim: number }[] = [];
-  for (const other of shuffle([...Array(37)].map((_, i) => 78 + i).filter((o) => o !== n)).slice(0, 12)) for (const ov of await surah(other)) { const x = checkTr(ov).text; if (x && x.length > 20) cands.push({ x, sim: similar(right, x) }); }
-  cands.sort((a, b) => b.sim - a.sim);
-  for (const c of cands) { if (opts.length === 3) break; if (c.sim < 0.4 && opts.every((o) => similar(o, c.x) < 0.4)) opts.push(c.x); }
-  void ss; gist = { right, opts: shuffle(opts) };
-}
+let hide = false, playing = 0, stop: (() => void) | null = null, done = false;
 async function reader() {
   const [ss, vs, k, all] = await Promise.all([surahs(), surah(n), knownIdx(), items()]);
   const S = ss[n - 1];
@@ -43,17 +31,16 @@ async function reader() {
   h += `<p class="sub">${esc(lang() === 'tr' ? S.trMean || '' : S.enMean || S.en)} · ${t('verses', { n: S.ayas })}</p>`;
   h += `<button class="chip" style="margin-top:10px" data-a="my" data-n="${n}" aria-pressed="${state.my.includes(n)}">${state.my.includes(n) ? '★ ' + t('inMy') : '☆ ' + t('addMy')}</button><p class="src" style="margin-top:8px">${t('ctxSrc')}</p>`;
   h += `<div class="card sec"><b>${t('wholeTitle')}</b><p class="note">${t('wholeSub')}</p><div class="chips" style="margin-top:8px"><button class="chip" data-a="hide" aria-pressed="${hide}">${t('hideText')}</button></div>${speedChips()}<div class="stackb"><button class="btn pri" data-a="all">${playing ? t('stopAll') : t('playAll')}</button></div>`;
-  if (done && gist) {
-    h += `<p style="margin-top:14px"><b>${t('gistQ')}</b></p>` + gist.opts.map((o, i) => `<button class="opt ${gist!.chosen ? (o === gist!.right ? 'right' : o === gist!.chosen ? 'wrong' : '') : ''}" data-a="gist" data-i="${i}" ${gist!.chosen ? 'disabled' : ''}>${esc(o)}</button>`).join('');
-    if (gist.chosen) h += `<p class="${gist.chosen === gist.right ? 'ok' : 'bad'}" style="margin-top:8px">${gist.chosen === gist.right ? t('correct') : t('wrong')}${hide && heardAll ? '' : ' ' + t('gistPractice')}</p><p style="margin-top:10px"><b>${t('selfQ')}</b></p><div class="chips">${[t('none'), t('some'), t('most'), t('all')].map((x, i) => `<button class="chip" data-a="selfR" data-v="${i}" aria-pressed="${selfR === i}">${x}</button>`).join('')}</div>`;
-  }
+  // The check for a whole surah lives in the ladder (same-surah questions); here we only point to it (Phase 3 review).
+  if (done) h += `<p class="sec">${t('wholeDone')}</p><div class="stackb"><a class="btn" href="${base()}listen/ladder/${S.ayas <= 8 && S.ayas > 3 ? `?p=${n}:1-${S.ayas}` : ''}">${t('ladder')} ›</a></div>`;
   h += '</div>';
   if (vs[0].b && vs[0].bt && !hide) h += `<p class="q basmala" lang="ar" style="margin-top:12px">${esc(vs[0].bt)}</p>`;
+  const once = rangeOnce(vs);
   for (const V of vs) {
     if (hide) { h += `<div class="sec" style="margin-top:8px;border-top:1px solid var(--rule);padding-top:8px" data-v="${V.n}"><p class="${playing === V.n ? 'ok' : 'note'}">${playing === V.n ? '▶ ' : ''}${t('verseN', { n: V.n })}</p></div>`; continue; }
     h += `<div class="sec" style="margin-top:14px;border-top:1px solid var(--rule);padding-top:8px;${playing === V.n ? 'background:var(--sunk);' : ''}" data-v="${V.n}">${verseHtml(V, k, { sel: sel?.v === V.n ? sel.i : undefined })}`;
     if (sel?.v === V.n) { const w = V.w[sel.i]; h += `<div class="gloss"><span class="ar">${esc(V.t[sel.i])}</span> &nbsp;<b>${esc(pick(w[1], w[2])) || '—'}</b>${grammarLabel(w[4]) ? `<div class="note">${esc(grammarLabel(w[4]))}</div>` : ''}<div class="ref">${w[0].map((x) => `<a class="wlink" href="${base()}words/?id=${encodeURIComponent(all[x].id)}"><span class="ar">${esc(all[x].ar)}</span></a> ${esc(meaning(all[x]))}`).join(' · ')}</div></div>`; }
-    h += `<div class="row" style="justify-content:space-between;align-items:flex-start;margin-top:4px"><p class="tl" style="flex:1">${esc(trText(V))}</p>${playBtn(n, V.n, t('play'), 'sm')}</div>`;
+    h += `<div class="row" style="justify-content:space-between;align-items:flex-start;margin-top:4px"><p class="tl" style="flex:1">${esc(once.get(V.n) || '')}</p>${playBtn(n, V.n, t('play'), 'sm')}</div>`;
     h += `<a class="btn quiet" style="margin-top:6px" href="${base()}listen/?v=${n}:${V.n}">${t('listen')} ${n}:${V.n}</a></div>`;
   }
   h += `<p class="src" style="margin-top:14px">${esc(trName())} · ${t('srcAk')}</p>`;
@@ -67,12 +54,10 @@ document.addEventListener('click', (e) => {
   if (a === 'hide') { hide = !hide; reader(); return; }
   if (a === 'all') {
     if (stop) { stop(); stop = null; playing = 0; reader(); return; }
-    done = false; gist = null; selfR = -1;
-    surahs().then((ss) => { stop = playAll(n, 1, ss[n - 1].ayas, (v) => { playing = v; reader().then(() => document.querySelector(`[data-v="${v}"]`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })); }, async (ok) => { stop = null; playing = 0; done = true; heardAll = ok; await makeGist(); reader(); }); });
+    done = false;
+    surahs().then((ss) => { stop = playAll(n, 1, ss[n - 1].ayas, (v) => { playing = v; reader().then(() => document.querySelector(`[data-v="${v}"]`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })); }, async () => { stop = null; playing = 0; done = true; reader(); }); });
     return;
   }
-  if (a === 'gist' && gist && !gist.chosen) { gist.chosen = gist.opts[+b.dataset.i!]; if (hide && heardAll) { bump(3); if (gist.chosen === gist.right) bump(2); } save(); reader(); return; }
-  if (a === 'selfR') { const v = +b.dataset.v!; if (selfR < 0) { bump(4, v); bump(5); } else bump(4, v - selfR); selfR = v; save(); reader(); return; }
   if (a === 'my') { const x = +b.dataset.n!; state.my = state.my.includes(x) ? state.my.filter((y) => y !== x) : [...state.my, x].sort((p, q) => p - q); save(); n ? reader() : list(); }
   if (a === 'word') { const v = +b.closest<HTMLElement>('[data-v]')!.dataset.v!, i = +b.dataset.i!; sel = sel && sel.v === v && sel.i === i ? null : { v, i }; reader(); }
 });

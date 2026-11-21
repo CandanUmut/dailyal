@@ -11,7 +11,8 @@
 | 1.1 | Fixes from the Phase 1 review (`docs/reviews/phase-1.md`; decisions in PLAN §5c) | **Done**, tests pass |
 | 2 | Ear and parts (`docs/reviews/phase-2.md`) | **Done** |
 | 2.1 | Fixes from the Phase 2 review (PLAN §5d) | **Done**, tests pass |
-| 3 | Listening ladder: passages of 2–4 verses and whole short surahs from your surahs, text off first, questions (what was said, who does it), self-report, then the text; narrow listening at 1, 3, 7, 14 days; results per passage; Today shows due passages | **Built**, tests pass; critic review running |
+| 3.1 | Fixes from the Phase 3 review (PLAN §5e) | **Done**, tests pass |
+| 3 | Listening ladder: passages of 2–4 verses and whole short surahs from your surahs, text off first, questions (what was said, who does it), self-report, then the text; narrow listening at 1, 3, 7, 14 days; results per passage; Today shows due passages | **Done** (`docs/reviews/phase-3.md`) |
 | 4–6 | See `docs/PLAN.md` §5 | Not started |
 
 Each phase ends with phone-size screenshots, test results and a PR.
@@ -32,3 +33,5 @@ Each phase ends with phone-size screenshots, test results and a PR.
 - **2026-11-20**: R0 found that growing review gaps do not beat equal gaps in the long term. The doubling is kept only as a design choice (fewer misses while learning), and is now labelled that way.
 - **Waiting for Umut** (these would change how the app behaves): (1) in Listen, hear the verse once **without** the text before seeing it (predict, then check); (2) switch reciters on later re-listens, to vary the conditions.
 - **2026-11-21**: Correction. On 2026-11-21 I reported the Turkish card meanings as fixed after Phase 1.1. The Phase 2 critic showed they were only partly fixed. Now improved (144 of 156 top verbs are plain), still not perfect (G17).
+- **2026-11-21**: Correction. The figure "144 of 156 verbs plain" (PLAN §5d) measured only the shape of the gloss. A Turkish reading of a sample by the Phase 3 critic found 16/30 verbs and 12/30 nouns dictionary-like. PLAN now says so.
+- **Waiting for Umut**: G17, Turkish word meanings. Açık Kuran gives meanings per place, not dictionary entries, and no open Turkish Quran dictionary has been found. Options: (A) keep choosing from Açık Kuran's per-place meanings (as now); (B) Claude writes Turkish dictionary meanings for the top ~1,000 items from the sourced English corpus gloss + Açık Kuran's root meaning, labelled "Fahm çevirisi", each checked by a second agent, for Umut to review; (C) keep looking for a source.

@@ -110,7 +110,7 @@ Each phase: build → tests + 390 px screenshots → **critic review** → re-pl
 
 | Review point | Decision |
 |---|---|
-| Turkish meanings still often not dictionary-like | **Improved, not solved.** The Turkish gloss is now chosen from all places of the word: plain past forms of up to 3 words (else present) for verbs, no "-dır", "bir …" or pronoun-first glosses for nouns. Top-500 verbs in a plain form: 144 of 156 (was about 66). Nouns ending in "-dır": 0 (was 41). The rest stay in G17. |
+| Turkish meanings still often not dictionary-like | **Improved, not solved.** The Turkish gloss is now chosen from all places of the word: plain past forms of up to 3 words (else present) for verbs, no "-dır", "bir …" or pronoun-first glosses for nouns. Top-500 verbs whose gloss *has the shape* of a plain form: 144 of 156; nouns ending in "-dır": 0. **Correction (Phase 3 review):** that is a form check, not a meaning check. Read by a Turkish speaker, a sample of 30 verbs and 30 nouns gave only 16 and 12 dictionary-like meanings (e.g. وَعَدَ = "yapıldı"). Still open: G17. |
 | Ear-first could be revealed without playing; few words qualified | **Fixed.** The verse must be played first. Any place in Al-Fatiha or Juz 30 (up to 5) can be used, your surahs first. |
 | Who-question asked with the text on screen | **Fixed.** It moved to the hear-only step, after the check, with only the verb shown. |
 | Joined-word wrong options gave the answer away | **Fixed.** Wrong options now drop a joined part, or swap a pronoun for one with the same first letter (ـهُ / ـهَا / ـهُمْ). |
@@ -119,6 +119,22 @@ Each phase: build → tests + 390 px screenshots → **critic review** → re-pl
 | Today never offered Phase 2 | **Fixed.** One rotating practice a day (joined words, whole surah by ear, phrases); the self-report sits next to the check results. |
 | Leftovers: placement 150 cards, "çal", English in Turkish mode | **Fixed.** Placement is about 40 words and stops after 12 unknown in a row; an English fallback in Turkish mode is labelled "(İng.)". |
 | Listening ladder with the text off first, narrow-listening sets, results per passage | **Phase 3** (next). |
+
+## 5e. Changes after the Phase 3 review (`reviews/phase-3.md`, 2026-11-21) — Phase 3.1
+
+| Review point | Decision |
+|---|---|
+| Ladder questions used other surahs (answer given by the surah name) | **Fixed.** Wrong options come only from the same surah; options containing the surah's name are dropped. A whole surah asks "what came right after this?" (sequence, same surah). |
+| Self-report asked after the score | **Fixed.** Asked before any question; kept per passage; the score page says plainly when feeling and result disagree. |
+| Who-question printed the verb; always قُلْ | **Fixed.** No text: you play that one verse again, then answer. Commands (قُلْ) are skipped. It counts only after the verse was played. |
+| Options mixed translators under one label | **Fixed.** One translator per question (the reader's, or a per-verse one for all options when the reader's joins verses), labelled correctly. |
+| Joined Diyanet ranges repeated under every verse | **Fixed.** Shown once, under the last verse of the range (ladder and reader). |
+| "Muúammad" (264×) in Sahih International | **Fixed** at packing: an encoding error in the source text (ú→ḥ, î→Ḥ, ê→Ṣ, §→ṣ), recorded in `data/acikkuran/LICENSE.md`. |
+| Today ticked the wrong task after a passage | **Fixed.** Separate counters for verses and passages. |
+| No middle step: short surahs were only whole | **Fixed.** Every surah is split into passages of 2–3 verses; short surahs (4–8 verses) can also be heard whole. |
+| Ear-first unlocked by play-then-pause | **Fixed.** Unlocks only when the verse has played to the end. |
+| Reader's whole-surah check used other surahs | **Removed.** The reader keeps the playback and points to the ladder for the check. |
+| Turkish meanings (G17) block every meaning question | **Open — needs Umut's decision** (see PROGRESS). |
 
 ## 6. The critic
 

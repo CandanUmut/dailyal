@@ -5,9 +5,10 @@
 import { state, save, bump, rollDay, MY_DEFAULT } from './store';
 import { surah, surahs, vreq, items, type Verse, type Surah, type Item } from './data';
 import { knownIdx, verseShare } from './coverage';
-import { verseHtml, playAll, speedChips, setSpeed, reciterName } from './verse';
+import { verseHtml, playAll, speedChips, setSpeed, reciterName, toggle } from './verse';
 import { meaning, grammarLabel, personOf, PERSON_OPTIONS } from './cardview';
-import { trText, trName, checkTr, similar } from './trans';
+import { trText, trName, checkSet, similar, rangeOnce } from './trans';
+import { playBtn } from './verse';
 import { t, pick, lang, num } from './i18n';
 import { $, base, esc, shuffle, dayNum } from './util';
 
@@ -22,29 +23,45 @@ export async function passages() {
   const out: (Passage & { share: number; whole: boolean })[] = [];
   for (const n of state.my.length ? state.my : MY_DEFAULT) {
     const S = ss[n - 1], share = (a: number, b: number) => { let s = 0; for (let v = a; v <= b; v++) s += verseShare(vr[S.start + v - 1], k); return s / (b - a + 1); };
-    if (S.ayas <= SHORT) out.push({ s: n, a: 1, b: S.ayas, share: share(1, S.ayas), whole: true });
-    else for (let a = 1; a <= S.ayas; a += 3) { const b = Math.min(S.ayas, a + 2); out.push({ s: n, a, b, share: share(a, b), whole: false }); }
+    // Middle step (Phase 3 review): every surah is split into passages of 2–3 verses; short surahs can also be heard whole.
+    const parts = Math.max(1, Math.round(S.ayas / 3)), size = S.ayas / parts;
+    for (let i = 0; i < parts; i++) { const a = Math.round(i * size) + 1, b = Math.round((i + 1) * size); if (b - a + 1 < S.ayas || S.ayas <= 3) out.push({ s: n, a, b, share: share(a, b), whole: false }); }
+    if (S.ayas <= SHORT && S.ayas > 3) out.push({ s: n, a: 1, b: S.ayas, share: share(1, S.ayas), whole: true });
   }
   return out;
 }
 
 let P: Passage, S: Surah, vs: Verse[], all: Item[], k: Uint8Array;
-let step: 'ctx' | 'listen' | 'q' | 'self' | 'text' = 'ctx', playing = 0, stop: (() => void) | null = null, heardAll = false, plays = 0;
-type Q = { kind: 'said' | 'who'; prompt?: string; opts: string[]; right: string; chosen?: string };
+let step: 'ctx' | 'listen' | 'self' | 'q' | 'score' | 'text' = 'ctx', playing = 0, stop: (() => void) | null = null, heardAll = false, plays = 0;
+type Q = { kind: 'said' | 'after' | 'who'; prompt?: string; verse?: number; by?: string; opts: string[]; right: string; chosen?: string; heard?: boolean };
 let qs: Q[] = [], qi = 0, self = -1, sel: { v: number; i: number } | null = null;
 
 async function buildQuestions() {
+  // Wrong options only from the same surah (Phase 3 review: other surahs were given away by the surah name).
   const inP = vs.filter((v) => v.n >= P.a && v.n <= P.b), outP = vs.filter((v) => v.n < P.a || v.n > P.b);
-  const pool = outP.length >= 4 ? outP : outP.concat(await surah(P.s < 114 ? P.s + 1 : P.s - 1));
+  const names = [S.tr, S.tname, S.trMean || '', S.enMean || ''].filter((x) => x && x.length > 3).map((x) => x.toLocaleLowerCase());
+  const named = (x: string) => names.some((nm) => x.toLocaleLowerCase().includes(nm));
   qs = [];
-  for (const v of shuffle(inP).slice(0, Math.min(2, inP.length))) {
-    const right = checkTr(v).text, opts = [right];
-    const cands = [...new Set(pool.map((x) => checkTr(x).text).filter((x) => x && x !== right))].map((x) => ({ x, sim: similar(right, x) })).filter((c) => c.sim < 0.4).sort((a, b) => Math.abs(0.22 - a.sim) - Math.abs(0.22 - b.sim));
-    for (const c of cands) { if (opts.length === 3) break; if (opts.every((o) => similar(o, c.x) < 0.4) && !inP.some((y) => checkTr(y).text === c.x)) opts.push(c.x); }
-    if (opts.length === 3) qs.push({ kind: 'said', right, opts: shuffle(opts) });
+  const whole = P.a === 1 && P.b === S.ayas;
+  if (!whole && outP.length >= 2) {
+    for (const v of shuffle(inP).slice(0, Math.min(2, inP.length))) {
+      const set = checkSet([v, ...outP]), right = set.texts[0];
+      if (named(right)) continue;
+      const cands = set.texts.slice(1).map((x) => ({ x, sim: similar(right, x) })).filter((c) => c.x && c.x !== right && c.sim < 0.4 && !named(c.x)).sort((a, b) => Math.abs(0.22 - a.sim) - Math.abs(0.22 - b.sim));
+      const opts = [right]; for (const c of cands) { if (opts.length === 3) break; if (opts.every((o) => similar(o, c.x) < 0.4)) opts.push(c.x); }
+      if (opts.length === 3) qs.push({ kind: 'said', right, by: trName(set.id), opts: shuffle(opts) });
+    }
+  } else if (inP.length >= 3) {
+    // Whole surah (or a passage with no verses outside it): "what came right after …?" — sequence, same surah only.
+    const set = checkSet(inP), texts = set.texts;
+    for (const i of shuffle([...Array(inP.length - 1).keys()]).slice(0, 2)) {
+      const right = texts[i + 1], others = shuffle(texts.filter((x, j) => j !== i && j !== i + 1 && x !== right)).slice(0, 2);
+      if (others.length === 2) qs.push({ kind: 'after', prompt: texts[i], right, by: trName(set.id), opts: shuffle([right, ...others]) });
+    }
   }
-  const verbs = inP.flatMap((v) => v.w.map((w, i) => ({ v, i, p: personOf(w[4]) })).filter((x) => x.p));
-  if (verbs.length) { const vb = verbs.find((x) => /^(1|2)/.test(x.v.w[x.i][4].split('|')[1])) || verbs[0]; qs.push({ kind: 'who', prompt: vb.v.t[vb.i], right: vb.p, opts: shuffle([vb.p, ...shuffle(PERSON_OPTIONS().filter((x) => x !== vb.p)).slice(0, 2)]) }); }
+  // Who: one verse, played again on its own, no text shown; commands (قُلْ) are skipped because they are always "you".
+  const verbs = inP.flatMap((v) => v.w.map((w, i) => ({ v, i, p: personOf(w[4]), asp: w[4].split('|')[0] })).filter((x) => x.p && x.asp !== 'IMPV'));
+  if (verbs.length) { const vb = shuffle(verbs)[0]; qs.push({ kind: 'who', verse: vb.v.n, right: vb.p, opts: shuffle([vb.p, ...shuffle(PERSON_OPTIONS().filter((x) => x !== vb.p)).slice(0, 2)]) }); }
   qi = 0;
 }
 
@@ -59,23 +76,31 @@ function render() {
     h += `<h1 class="h1">${t('p3')}</h1><p class="sub">${t('ladderListenSub')}</p>${speedChips()}<p class="note">${esc(t('reciter', { r: reciterName() }))}</p>`;
     h += `<div class="stackb"><button class="btn pri" data-a="play" style="min-height:60px">${stop ? t('stopAll') : plays ? t('playAgain') : t('playPassage')}</button></div>`;
     if (playing) h += `<p class="ok" style="margin-top:10px">▶ ${t('verseN', { n: playing })}</p>`;
-    if (plays && !stop) h += `<div class="stackb"><button class="btn" data-a="toq">${t('toQuestions')}</button></div>`;
+    if (plays && !stop) h += `<div class="stackb"><button class="btn" data-a="toself">${t('toQuestions')}</button></div>`;
+  } else if (step === 'self') {
+    // Asked before any score is shown (Phase 3 review), so it can be compared honestly with the checks.
+    h += `<p style="margin-top:12px"><b>${t('selfQ')}</b></p><div class="chips" style="margin-top:8px">${[t('none'), t('some'), t('most'), t('all')].map((x, i) => `<button class="chip" data-a="self" data-v="${i}" aria-pressed="${self === i}">${x}</button>`).join('')}</div>`;
   } else if (step === 'q') {
     const q = qs[qi];
-    h += `<h1 class="h1">${qi + 1} / ${qs.length}</h1><p><b>${q.kind === 'said' ? t('saidQ') : t('whoHeardQ')}</b>${q.prompt ? ` <span class="ar" style="font-size:24px">${esc(q.prompt)}</span>` : ''}</p><div style="margin-top:10px">`;
-    h += q.opts.map((o, i) => `<button class="opt ${q.chosen ? (o === q.right ? 'right' : o === q.chosen ? 'wrong' : '') : ''}" data-a="ans" data-i="${i}" ${q.chosen ? 'disabled' : ''}>${esc(o)}</button>`).join('') + '</div>';
-    if (q.kind === 'said') h += `<p class="src" style="margin-top:6px">${esc(trName(checkTrId()))} · Açık Kuran</p>`;
+    h += `<h1 class="h1">${qi + 1} / ${qs.length}</h1>`;
+    if (q.kind === 'said') h += `<p><b>${t('saidQ')}</b></p>`;
+    else if (q.kind === 'after') h += `<p><b>${t('afterQ')}</b></p><p class="tl" style="margin:6px 0 4px">“${esc(q.prompt!)}”</p>`;
+    else { h += `<p><b>${t('whoVerseQ', { n: q.verse! })}</b></p><div class="player">${playBtn(P.s, q.verse!, t('play'))}</div>`; if (!q.heard) { $('#ladder')!.innerHTML = h + `<p class="note" style="margin-top:10px">${t('playFirst')}</p>`; return; } }
+    h += '<div style="margin-top:10px">' + q.opts.map((o, i) => `<button class="opt ${q.chosen ? (o === q.right ? 'right' : o === q.chosen ? 'wrong' : '') : ''}" data-a="ans" data-i="${i}" ${q.chosen ? 'disabled' : ''}>${esc(o)}</button>`).join('') + '</div>';
+    if (q.by) h += `<p class="src" style="margin-top:6px">${esc(q.by)} · Açık Kuran</p>`;
     if (q.chosen) h += `<p class="${q.chosen === q.right ? 'ok' : 'bad'}" style="margin-top:10px">${q.chosen === q.right ? t('correct') : t('wrong')}</p><div class="stackb"><button class="btn pri" data-a="nextq">${t('next')}</button></div>`;
-  } else if (step === 'self') {
-    const ok = qs.filter((q) => q.chosen === q.right).length;
-    h += `<h1 class="h1">${t('ladderScore', { ok, n: qs.length })}</h1>${heardAll ? '' : `<p class="note">${t('gistPractice')}</p>`}<p style="margin-top:12px"><b>${t('selfQ')}</b></p><div class="chips" style="margin-top:8px">${[t('none'), t('some'), t('most'), t('all')].map((x, i) => `<button class="chip" data-a="self" data-v="${i}" aria-pressed="${self === i}">${x}</button>`).join('')}</div>`;
+  } else if (step === 'score') {
+    const ok = qs.filter((q) => q.chosen === q.right).length, share = qs.length ? ok / qs.length : 0;
+    const gap = self >= 2 && share < 0.5 ? t('selfHigh') : self <= 1 && share >= 0.67 && qs.length ? t('selfLow') : '';
+    h += `<h1 class="h1">${t('ladderScore', { ok, n: qs.length })}</h1>${heardAll ? '' : `<p class="note">${t('gistPractice')}</p>`}${gap ? `<p class="sec">${gap}</p>` : ''}<div class="stackb"><button class="btn pri" data-a="totext">${t('ladderText')}</button></div>`;
   } else {
     h += `<h1 class="h1">${t('ladderText')}</h1><p class="sub">${t('tapWord')}</p>`;
-    for (const v of vs.filter((x) => x.n >= P.a && x.n <= P.b)) {
+    const inP = vs.filter((x) => x.n >= P.a && x.n <= P.b), once = rangeOnce(inP);
+    for (const v of inP) {
       if (v.b && v.bt) h += `<p class="q basmala" lang="ar">${esc(v.bt)}</p>`;
       h += `<div data-v="${v.n}" style="border-top:1px solid var(--rule);padding-top:6px;margin-top:8px">${verseHtml(v, k, { sel: sel?.v === v.n ? sel.i : undefined })}`;
       if (sel?.v === v.n) { const w = v.w[sel.i], gr = grammarLabel(w[4]); h += `<div class="gloss"><span class="ar">${esc(v.t[sel.i])}</span> <b>${esc(pick(w[1], w[2])) || '—'}</b>${gr ? `<div class="note">${esc(gr)}</div>` : ''}<div class="ref">${w[0].map((x) => `${esc(all[x].ar)} ${esc(meaning(all[x]))}`).join(' · ')}</div></div>`; }
-      h += `<p class="tl">${esc(trText(v))}</p></div>`;
+      h += once.has(v.n) ? `<p class="tl">${esc(once.get(v.n)!)}</p></div>` : '</div>';
     }
     const hd = state.heard[key(P)];
     h += `<p class="src">${esc(trName())} · ${t('srcAk')}</p><p class="note" style="margin-top:8px">${t('again3', { n: AGAIN[Math.min((hd?.n || 1) - 1, 3)] })}</p>`;
@@ -83,29 +108,35 @@ function render() {
   }
   $('#ladder')!.innerHTML = h;
 }
-const checkTrId = () => { const v = vs.find((x) => x.n === P.a)!; return checkTr(v).id; };
 
 function record() {
   rollDay();
   const kk = key(P), d = dayNum(), hd = state.heard[kk] || { n: 0, last: 0, due: 0, ok: 0, tot: 0 };
-  if (hd.last !== d) { hd.n++; hd.last = d; hd.due = d + AGAIN[Math.min(hd.n - 1, 3)]; state.day.heard++; }
-  if (heardAll) { const ok = qs.filter((q) => q.chosen === q.right).length; hd.ok += ok; hd.tot += qs.length; bump(3, qs.length); bump(2, ok); }
+  if (hd.last !== d) { hd.n++; hd.last = d; hd.due = d + AGAIN[Math.min(hd.n - 1, 3)]; state.day.hp = (state.day.hp || 0) + 1; }
+  // Counted only when the passage was heard to the end without the text; the who-question only after its verse was played.
+  const counted = qs.filter((q) => heardAll && (q.kind !== 'who' || q.heard)), ok = counted.filter((q) => q.chosen === q.right).length;
+  if (counted.length) { hd.ok += ok; hd.tot += counted.length; bump(3, counted.length); bump(2, ok); }
+  (hd as typeof hd & { self?: number }).self = self;
   state.heard[kk] = hd; save();
 }
 
+document.addEventListener('audioended', () => { if (step === 'q' && qs[qi]?.kind === 'who') { qs[qi].heard = true; render(); } });
+document.addEventListener('audioerror', () => { if (step === 'q' && qs[qi]?.kind === 'who') { qs[qi].heard = true; render(); } });
 document.addEventListener('click', async (e) => {
   const b = (e.target as HTMLElement).closest<HTMLElement>('[data-a]'); if (!b || !$('#ladder')) return;
   const a = b.dataset.a!;
   if (a === 'speed') { setSpeed(+b.dataset.v!); save(); }
+  else if (b.dataset.a === 'play' && step === 'q' && b.classList.contains('play')) { toggle(b); return; }
   else if (a === 'go') { step = 'listen'; await buildQuestions(); }
   else if (a === 'play' || a === 'playtext') {
     if (stop) { stop(); stop = null; playing = 0; }
     else { stop = playAll(P.s, P.a, P.b, (v) => { playing = v; render(); }, (ok) => { stop = null; playing = 0; if (ok && a === 'play') heardAll = true; if (a === 'play') plays++; render(); }); }
   }
-  else if (a === 'toq') { if (stop) { stop(); stop = null; } step = qs.length ? 'q' : 'self'; }
+  else if (a === 'toself') { if (stop) { stop(); stop = null; } step = 'self'; }
+  else if (a === 'self') { const v = +b.dataset.v!; if (self < 0) { bump(4, v); bump(5); } else bump(4, v - self); self = v; save(); step = qs.length ? 'q' : 'score'; if (!qs.length) record(); }
   else if (a === 'ans') { const q = qs[qi]; if (!q.chosen) q.chosen = q.opts[+b.dataset.i!]; }
-  else if (a === 'nextq') { if (qi + 1 < qs.length) qi++; else { step = 'self'; record(); } }
-  else if (a === 'self') { const v = +b.dataset.v!; if (self < 0) { bump(4, v); bump(5); } else bump(4, v - self); self = v; save(); step = 'text'; }
+  else if (a === 'nextq') { if (qi + 1 < qs.length) qi++; else { step = 'score'; record(); } }
+  else if (a === 'totext') step = 'text';
   else if (a === 'word') { const v = +b.closest<HTMLElement>('[data-v]')!.dataset.v!, i = +b.dataset.i!; sel = sel && sel.v === v && sel.i === i ? null : { v, i }; }
   else return;
   render();

@@ -21,3 +21,18 @@ export function checkTr(v: Verse): { id: string; text: string } {
 const norm = (s: string) => s.toLocaleLowerCase().replace(/^\(\d+\s*-\s*\d+\)\s*/, '').replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter((w) => w.length > 2);
 /** Word-overlap similarity (Jaccard) between two translations: near-twins (like 109:2 and 109:4) are not fair options. */
 export function similar(a: string, b: string) { const A = new Set(norm(a)), B = new Set(norm(b)); let i = 0; for (const x of A) if (B.has(x)) i++; return A.size + B.size - i ? i / (A.size + B.size - i) : 1; }
+
+/** One translator for a whole question (Phase 3 review: options mixed Elmalılı and Diyanet under one label).
+ *  Uses the reader's translation if none of these verses is a joined range in it, else a per-verse one for all. */
+export function checkSet(vs: Verse[]): { id: string; texts: string[] } {
+  const id = trId();
+  if (vs.every((v) => { const x = textOf(v, id); return x && !isRange(x); })) return { id, texts: vs.map((v) => textOf(v, id)!) };
+  for (const alt of lang() === 'tr' ? ['15', '27'] : ['32', '113']) if (vs.every((v) => { const x = textOf(v, alt); return x && !isRange(x); })) return { id: alt, texts: vs.map((v) => textOf(v, alt)!) };
+  return { id, texts: vs.map((v) => (textOf(v, id) || '').replace(/^\(\d+\s*-\s*\d+\)\s*/, '')) };
+}
+/** For showing translations under each verse: a joined range ("(1-5) …") is shown once, under the last verse it covers. */
+export function rangeOnce(vs: Verse[]): Map<number, string> {
+  const out = new Map<number, string>();
+  vs.forEach((v, i) => { const x = trText(v), next = vs[i + 1]; if (isRange(x) && next && trText(next) === x) return; out.set(v.n, x); });
+  return out;
+}

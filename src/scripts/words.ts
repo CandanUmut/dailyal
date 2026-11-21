@@ -60,10 +60,14 @@ function session() {
 let boost = new Set<string>();
 async function render() { $('#words')!.innerHTML = s ? session() : await landing(boost); }
 
+// Ear-first unlocks only when the verse has played to the end (Phase 3 review: play-then-pause unlocked it).
+const unlockEar = async () => { if (s && s.queue[0]?.ear && !s.queue[0].heard && !earPlayed) { earPlayed = true; await render(); } };
+document.addEventListener('audioended', unlockEar);
+document.addEventListener('audioerror', unlockEar);
 document.addEventListener('click', async (e) => {
   const b = (e.target as HTMLElement).closest<HTMLElement>('[data-a]'); if (!b) return;
   const a = b.dataset.a!;
-  if (a === 'play') { toggle(b); if (s && s.queue[0]?.ear && !s.queue[0].heard) { earPlayed = true; await render(); } return; }
+  if (a === 'play') { toggle(b); return; }
   if (a === 'start') start(dueItems(all).concat(deck ? newPhrases(all) : newItems(all, boost)));
   else if (a === 'stop') s = null;
   else if (a === 'heard') { const it = s!.queue[0], [es, ev, ew] = it.ear!.split(':').map(Number); earVerse = verseHtml((await surah(es))[ev - 1], null, { mark: ew - 1 }); it.heard = true; }

@@ -7,7 +7,7 @@ import { knownIdx, pickVerse, wordKnown } from './coverage';
 import { place } from './srs';
 import { verseHtml, playBtn, toggle, reciterName, speedChips, setSpeed } from './verse';
 import { meaning, grammarLabel, personOf, PERSON_OPTIONS } from './cardview';
-import { trText, trName, checkTr, similar } from './trans';
+import { trText, trName, checkSet, similar } from './trans';
 import { badge } from './chrome';
 import { t, pick, lang } from './i18n';
 import { $, base, esc, shuffle, dayNum, toast } from './util';
@@ -37,13 +37,11 @@ async function load(s: number, v: number) {
   const verbs = V.w.map((w, i) => ({ i, p: personOf(w[4]) })).filter((x) => x.p);
   who = null;
   if (verbs.length) { const vb = verbs.find((x) => /^(1|2)/.test(V.w[x.i][4].split('|')[1])) || verbs[0]; who = { word: vb.i, right: vb.p, who: 1, opts: shuffle([vb.p, ...shuffle(PERSON_OPTIONS().filter((x) => x !== vb.p)).slice(0, 2)]) }; }
-  // Check: this verse's own text, and two clearly different texts from nearby verses.
-  const mine = checkTr(V), seenTexts = [mine.text], others: string[] = [];
-  const near = ss.filter((x) => x.n !== V.n).sort((a, b) => Math.abs(a.n - V.n) - Math.abs(b.n - V.n));
-  const extra = await surah(s < 114 ? s + 1 : s - 1);
-  // Fair but not easy (Phase 2 review): prefer texts that share some words with the right one (0.1–0.4 overlap).
-  const cand = [...new Set(near.concat(extra).map((x) => checkTr(x).text).filter((o) => o && o !== mine.text))]
-    .map((o) => ({ o, sim: similar(mine.text, o) })).filter((c) => c.sim < 0.4).sort((a, b) => Math.abs(0.22 - a.sim) - Math.abs(0.22 - b.sim));
+  // Check: this verse's own text and two others, all from ONE translator (Phase 3 review), sharing some words (fair, not easy).
+  const near = ss.filter((x) => x.n !== V.n).sort((a, b) => Math.abs(a.n - V.n) - Math.abs(b.n - V.n)).slice(0, 14);
+  const extra = near.length >= 6 ? [] : await surah(s < 114 ? s + 1 : s - 1);
+  const set = checkSet([V, ...near, ...extra]), mine = { id: set.id, text: set.texts[0] }, seenTexts = [mine.text], others: string[] = [];
+  const cand = [...new Set(set.texts.slice(1).filter((o) => o && o !== mine.text))].map((o) => ({ o, sim: similar(mine.text, o) })).filter((c) => c.sim < 0.4).sort((a, b) => Math.abs(0.22 - a.sim) - Math.abs(0.22 - b.sim));
   for (const c of cand) { if (seenTexts.some((y) => similar(y, c.o) >= 0.4)) continue; others.push(c.o); seenTexts.push(c.o); if (others.length === 2) break; }
   check = { right: mine.text, by: trName(mine.id), opts: shuffle([mine.text, ...others]) };
 }
