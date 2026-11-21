@@ -6,13 +6,13 @@ import { surah, surahs, items, type Verse, type Item, type Surah } from './data'
 import { knownIdx, pickVerse, wordKnown } from './coverage';
 import { place } from './srs';
 import { verseHtml, playBtn, toggle, reciterName, speedChips, setSpeed } from './verse';
-import { meaning, grammarLabel } from './cardview';
+import { meaning, grammarLabel, personOf, PERSON_OPTIONS } from './cardview';
 import { trText, trName, checkTr, similar } from './trans';
 import { badge } from './chrome';
 import { t, pick, lang } from './i18n';
 import { $, base, esc, shuffle, dayNum, toast } from './util';
 
-type Q = { word: number; opts: string[]; right: string; chosen?: string };
+type Q = { word: number; opts: string[]; right: string; chosen?: string; who?: 1 };
 let S: Surah, V: Verse, all: Item[], k: Uint8Array, sv = { s: 1, v: 1 };
 let pass = 1, sel = -1, showTr = false, readTr = false, ctxOpen = false, fill: Q[] = [], fi = 0, heard3 = false, audioFail = false;
 let check: { opts: string[]; right: string; by: string; chosen?: string } | null = null, self = -1;
@@ -33,6 +33,9 @@ async function load(s: number, v: number) {
     const others = shuffle(pool.filter((g) => g !== c.g && similar(g, c.g) < 0.34)).slice(0, 2);
     return { word: c.i, right: c.g, opts: shuffle([c.g, ...others]) };
   }).filter((q) => q.opts.length === 3);
+  // "Who is doing it?": one verb in the verse, answered from its person ending (I, we, you, he, they).
+  const verbs = V.w.map((w, i) => ({ i, p: personOf(w[4]) })).filter((x) => x.p);
+  if (verbs.length) { const vb = verbs.find((x) => /^(1|2)/.test(V.w[x.i][4].split('|')[1])) || verbs[0]; fill.push({ word: vb.i, right: vb.p, who: 1, opts: shuffle([vb.p, ...shuffle(PERSON_OPTIONS().filter((x) => x !== vb.p)).slice(0, 2)]) }); }
   // Check: this verse's own text, and two clearly different texts from nearby verses.
   const mine = checkTr(V), seenTexts = [mine.text], others: string[] = [];
   const near = ss.filter((x) => x.n !== V.n).sort((a, b) => Math.abs(a.n - V.n) - Math.abs(b.n - V.n));
@@ -76,7 +79,7 @@ function pass1() {
 }
 function pass2() {
   const q = fill[fi];
-  let h = verseHtml(V, null, { mark: q.word }) + `<p style="margin-top:10px"><b>${t('fillQ')}</b> <span class="ar" style="font-size:22px">${esc(V.t[q.word])}</span></p><div style="margin-top:10px">`;
+  let h = verseHtml(V, null, { mark: q.word }) + `<p style="margin-top:10px"><b>${q.who ? t('whoQ') : t('fillQ')}</b> <span class="ar" style="font-size:22px">${esc(V.t[q.word])}</span></p><div style="margin-top:10px">`;
   h += q.opts.map((o, i) => `<button class="opt ${q.chosen ? (o === q.right ? 'right' : o === q.chosen ? 'wrong' : '') : ''}" data-a="fill" data-i="${i}" ${q.chosen ? 'disabled' : ''}>${esc(o)}</button>`).join('') + '</div>';
   if (q.chosen) { const gr = grammarLabel(V.w[q.word][4]); h += `<p class="${q.chosen === q.right ? 'ok' : 'bad'}" style="margin-top:10px">${q.chosen === q.right ? t('correct') : t('wrong')}${gr ? ` <span class="note">(${esc(gr)})</span>` : ''}</p><div class="stackb"><button class="btn pri" data-a="next">${fi + 1 < fill.length ? t('nextFill') : t('nextHear')}</button></div>`; }
   return h;

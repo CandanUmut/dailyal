@@ -29,14 +29,24 @@ export function setSpeed(x: number) { state.set.speed = x; if (audio) audio.play
 export const playBtn = (s: number, v: number, label: string, cls = '') => `<button class="play ${cls}" data-a="play" data-s="${s}" data-v="${v}" aria-label="${esc(label)}" aria-pressed="false">${ICON_PLAY}</button>`;
 
 /** Verse text from Tanzil, unchanged, one button per word. Known words get the thin underline. */
-export function verseHtml(v: Verse, k: Uint8Array | null, opts: { sel?: number; mark?: number; gaps?: Set<number>; markItem?: number } = {}) {
+export function verseHtml(v: Verse, k: Uint8Array | null, opts: { sel?: number; mark?: number; gaps?: Set<number>; markItem?: number; range?: [number, number] } = {}) {
   const words = v.t.map((tw, i) => {
     const w = v.w[i]; const cls = ['w'];
-    if (opts.mark === i || (opts.markItem != null && w[0].includes(opts.markItem))) cls.push('this');
+    if (opts.mark === i || (opts.markItem != null && w[0].includes(opts.markItem)) || (opts.range && i >= opts.range[0] && i < opts.range[0] + opts.range[1])) cls.push('this');
     else if (k && wordKnown(w[0], k)) cls.push('k');
     if (opts.sel === i) cls.push('sel');
     if (opts.gaps?.has(i)) cls.push('gap');
     return `<button class="${cls.join(' ')}" data-a="word" data-i="${i}">${esc(tw)}</button>`;
   }).join(' ');
   return `<p class="q" lang="ar">${words} <span class="end" aria-label="verse ${v.n}">۝${arNum(v.n)}</span></p>`;
+}
+
+/** Play verses from..to of a surah one after another (whole-surah listening). Returns a stop function. */
+export function playAll(s: number, from: number, to: number, onVerse: (v: number) => void, onEnd: (heardAll: boolean) => void) {
+  if (audio) audio.pause();
+  const a = new Audio(); let v = from, stopped = false;
+  const next = () => { if (stopped) return; if (v > to) { onEnd(true); return; } onVerse(v); a.src = audioUrl(s, v); a.playbackRate = state.set.speed || 1; a.play().catch(() => { stopped = true; onEnd(false); }); v++; };
+  a.onended = next; a.onerror = () => { stopped = true; onEnd(false); };
+  next();
+  return () => { stopped = true; a.pause(); };
 }

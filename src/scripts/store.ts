@@ -10,7 +10,7 @@ export type State = {
   v: 1;
   r: Record<string, Rec>;
   heard: Record<string, Heard>;
-  day: { d: number; nw: number; done: number; heard: number };
+  day: { d: number; nw: number; done: number; heard: number; np?: number };
   set: { newPerDay: number; theme: string; lang: string; reciter: string; en: number; tr?: number; speed?: number };
   my: number[];
   placed: number;

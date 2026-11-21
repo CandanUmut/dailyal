@@ -30,6 +30,9 @@ export const ROLE: Record<string, [string, string]> = {
 /** Who is acting in a verb, and when: from the corpus features of that exact word (e.g. 'IMPF|1S|0' → "I · present"). */
 const PERS: Record<string, [string, string]> = { '1S': ['I', 'ben'], '1P': ['we', 'biz'], '2MS': ['you (one man)', 'sen (erkek)'], '2FS': ['you (one woman)', 'sen (kadın)'], '2D': ['you two', 'siz ikiniz'], '2MD': ['you two', 'siz ikiniz'], '2MP': ['you (all)', 'siz'], '2FP': ['you (women)', 'siz (kadınlar)'], '3MS': ['he / it', 'o (eril)'], '3FS': ['she / it', 'o (dişil)'], '3MD': ['they two', 'o ikisi'], '3FD': ['they two', 'o ikisi'], '3D': ['they two', 'o ikisi'], '3MP': ['they', 'onlar'], '3FP': ['they (women)', 'onlar (kadınlar)'] };
 const ASP: Record<string, [string, string]> = { PERF: ['past', 'geçmiş zaman'], IMPF: ['present / future', 'şimdiki-geniş zaman'], IMPV: ['command', 'emir'] };
+/** The person of a verb tag in the reader's language ('IMPF|1S|0' → 'I'), for "who is doing it?" questions. */
+export const personOf = (tag: string | undefined) => { const per = tag?.split('|')[1]; return per && PERS[per] ? PERS[per][lang() === 'tr' ? 1 : 0] : ''; };
+export const PERSON_OPTIONS = () => ['1S', '1P', '2MS', '2MP', '3MS', '3FS', '3MP'].map((k) => PERS[k][lang() === 'tr' ? 1 : 0]);
 export function grammarLabel(tag: string | undefined) {
   if (!tag || !tag.includes('|')) return '';
   const [asp, per, pass] = tag.split('|'), L = lang() === 'tr' ? 1 : 0;
@@ -51,7 +54,8 @@ const PREFIX_MEAN: Record<string, [string, string]> = {
   'p:sa': ['will (future)', '-ecek (gelecek)'], 'p:ya': ['O! (calling)', 'Ey!'], 'p:ha': ['O! (calling, with ayyuhā)', 'Ey! (ayyuhā ile)'], 'p:ta': ['by (in oaths: by Allah)', 'andolsun (yeminde)'],
 };
 
-export async function cardBack(x: Item) {
+export async function cardBack(x: Item): Promise<string> {
+  if (x.k === 'ph') return phraseBack(x);
   const [rs, rm, k, all] = await Promise.all([roots(), rootMeans(), knownIdx(), items()]);
   const L = lang();
   let h = `<p class="mean">${esc(meaning(x)) || '—'}</p>`;
@@ -61,6 +65,7 @@ export async function cardBack(x: Item) {
     const R = rs[x.root], m = rm[x.root];
     const fam = R.items.filter((i) => all[i].id !== x.id).slice(0, 6).map((i) => `<a class="chip ar" style="font-size:20px" href="${base()}words/?id=${encodeURIComponent(all[i].id)}">${esc(all[i].ar)}${k[i] ? ' ✓' : ''}</a>`).join('');
     h += `<div class="sec"><div class="sh">${t('root')} <a href="${base()}library/roots/?r=${encodeURIComponent(x.root)}"><span class="ar" style="font-size:20px">${esc(R.ar)}</span></a> · ${t('family', { n: R.items.length, c: R.n })}</div>`;
+    if (R.tw && L === 'tr') h += `<p style="margin:6px 0"><b>Türkçede:</b> ${esc(R.tw)} <span class="src">(Açık Kuran)</span></p>`;
     if (m) h += `<p class="note root-mean clamp">${esc(pick(m.tr, m.en))}</p>`;
     if (fam) h += `<div class="chips" style="margin-top:10px">${fam}</div>`;
     h += '</div>';
@@ -76,4 +81,14 @@ export async function cardBack(x: Item) {
     h += `<p class="src" style="margin-top:8px">${t('srcAk')}</p></div>`;
   }
   return h;
+}
+
+/** Back of a phrase card: word-by-word meanings in order, how often it occurs, and where, with the translation. */
+async function phraseBack(x: Item) {
+  let h = `<p class="mean">${esc(pick(x.gl?.tr, x.gl?.en)) || '—'}</p><p class="note" style="text-align:center">${t('phraseTimes', { n: x.n })}</p><div class="sec"><div class="sh">${t('heardIn')}</div>`;
+  for (const ref of x.ex.slice(0, 2)) {
+    const [s, v, w] = ref.split(':').map(Number), V = (await surah(s))[v - 1];
+    h += `<div style="margin-top:6px">${verseHtml(V, null, { range: [w - 1, x.len || 3] })}<div class="row" style="justify-content:space-between"><span class="ref">${s}:${v}</span>${playBtn(s, v, t('play'), 'sm')}</div><p class="tl note">${esc(trText(V))}</p></div>`;
+  }
+  return h + `<p class="src" style="margin-top:8px">${t('phraseSrc')}</p></div>`;
 }

@@ -95,7 +95,8 @@ const items = ranked.map((id, rank) => {
     const tr = mostCommon(trPool.map((x) => x.g.tr)), en = mostCommon(pool.map((x) => x.g.en));
     if (tr || en) it.gl = { tr: tr?.text ?? null, en: en?.text ?? null, base: best };
     // Other meanings: from near-base places only, counted.
-    const near = scored.filter((x) => x.sc >= best - 1);
+    // Function words (split by role) have no base form: count their meanings across all places.
+    const near = code.includes('#') ? scored : scored.filter((x) => x.sc >= best - 1);
     const senses = (lang) => { const m = new Map(); for (const x of near) { const g = x.g[lang]; if (g) m.set(g, (m.get(g) || 0) + 1); } return [...m].sort((a, b) => b[1] - a[1]).slice(0, 4); };
     const st = senses('tr'), se = senses('en'); if (st.length > 1 || se.length > 1) it.senses = { tr: st, en: se };
   }
@@ -116,7 +117,7 @@ const roots = {}, rootMeans = {};
 for (const it of items) if (it.root) {
   const R = roots[it.root] || (roots[it.root] = { ar: [...lemmaRootAr(it.root)].join(' '), n: 0, items: [] });
   R.n += it.n; R.items.push(it.r - 1);
-  const a = akRoots[R.ar.replace(/ /g, '')] || akRoots[R.ar.replace(/ /g, '').replace(/ء/g, 'أ')]; if (a && R.akCount == null) { rootMeans[it.root] = { tr: a.tr, en: a.en }; R.akCount = a.count; R.mean = 1; }
+  const a = akRoots[R.ar.replace(/ /g, '')] || akRoots[R.ar.replace(/ /g, '').replace(/ء/g, 'أ')]; if (a && R.akCount == null) { rootMeans[it.root] = { tr: a.tr, en: a.en }; R.akCount = a.count; R.mean = 1; const tw = /Türkçe['’]ye girmiş türevler\s*:\s*([^\n]+)/i.exec(a.tr || ''); if (tw) R.tw = tw[1].trim().replace(/[,\s]+$/, ''); }
 }
 function lemmaRootAr(bw) { return [...bw].map((c) => ({ "'": 'ء', '>': 'أ', '&': 'ؤ', '<': 'إ', '}': 'ئ', A: 'ا', b: 'ب', p: 'ة', t: 'ت', v: 'ث', j: 'ج', H: 'ح', x: 'خ', d: 'د', '*': 'ذ', r: 'ر', z: 'ز', s: 'س', $: 'ش', S: 'ص', D: 'ض', T: 'ط', Z: 'ظ', E: 'ع', g: 'غ', f: 'ف', q: 'ق', k: 'ك', l: 'ل', m: 'م', n: 'ن', h: 'ه', w: 'و', Y: 'ى', y: 'ي' })[c] ?? c); }
 
@@ -155,6 +156,24 @@ for (let s = 1; s <= 114; s++) {
 
 const flagged = items.slice(0, 1000).filter((x) => x.gl && (NEG_TR.test(x.gl.tr || '') || NEG_EN.test(x.gl.en || ''))).map((x) => `${x.r} ${x.ar} | ${x.gl.tr} | ${x.gl.en}`);
 console.log(`meaning check: ${flagged.length} of the top 1000 still look negated`);
+// ---------- Phrases (Phase 2): the most repeated runs of 3–7 words, from the Tanzil text as aligned above ----------
+// Spelling variants (e.g. ءَامَنُوا۟ / ءَامَنُوٓا۟) are merged by a key without marks; the most common written form is shown.
+const bare = (w) => w.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, '').replace(/[ٱأإآ]/g, 'ا');
+const grams = new Map();
+for (const V of verses) for (let n = 3; n <= 7; n++) for (let i = 0; i + n <= V.t.length; i++) {
+  const key = V.t.slice(i, i + n).map(bare).join(' '), e = grams.get(key) || { n: 0, len: n, forms: new Map(), at: [] };
+  e.n++; const f = V.t.slice(i, i + n).join(' '); e.forms.set(f, (e.forms.get(f) || 0) + 1); if (e.at.length < 3) e.at.push(`${V.s}:${V.v}:${i + 1}`); grams.set(key, e);
+}
+let phr = [...grams].filter(([, e]) => e.n >= 5);
+phr = phr.filter(([k, e]) => !phr.some(([k2, e2]) => e2.len > e.len && k2.includes(k) && e2.n >= e.n * 0.8));
+phr.sort((a, b) => b[1].n * b[1].len - a[1].n * a[1].len);
+const phrases = phr.slice(0, 300).map(([, e], i) => {
+  const ar = [...e.forms].sort((a, b) => b[1] - a[1])[0][0], [s, v, w] = e.at[0].split(':').map(Number);
+  const ws = verseMap.get(`${s}:${v}`).cw.slice(w - 1, w - 1 + e.len), g = ws.map((W) => gloss(W));
+  return { id: `ph:${i + 1}`, ar, n: e.n, len: e.len, at: e.at, gl: g.every(Boolean) ? { tr: g.map((x) => x.tr).filter(Boolean).join(' · '), en: g.map((x) => x.en).filter(Boolean).join(' · ') } : null };
+});
+j('phrases.json', phrases);
+console.log(`phrases ${phrases.length} (repeated 5+ times; ${phrases.filter((p) => p.gl).length} with word meanings)`);
 const withGloss = items.filter((x) => x.gl).length, wordsWithAk = Object.keys(akWords).length;
 console.log(`items ${items.length} (${withGloss} with a meaning); roots ${Object.keys(roots).length}; Açık Kuran words ${wordsWithAk}/77429; translations tr ${Object.keys(trTR).length}, en ${Object.keys(trEN).length}`);
 writeFileSync('data/build-report.txt', `alignment problems: ${problems.length}\n${problems.join('\n')}\nmeanings that still look negated (top 1000): ${flagged.length}\n${flagged.join('\n')}\nitems ${items.length}, with meaning ${withGloss}\nAçık Kuran words ${wordsWithAk}/77429\n`);

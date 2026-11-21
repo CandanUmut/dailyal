@@ -30,7 +30,7 @@ async function checkPage(p, scheme, name) {
   const small = await p.evaluate(() => [...document.querySelectorAll('main a, main button, nav a, main select, main label.btn')].filter((e) => { const b = e.getBoundingClientRect(); const st = getComputedStyle(e); return b.width && b.height && (b.height < 47.5 || b.width < 47.5) && st.display !== 'inline' && st.visibility !== 'hidden'; }).map((e) => (e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 30)));
   if (small.length) errors.push(`${scheme} ${name}: tap targets under 48px: ${small.slice(0, 5).join(' | ')}`);
 }
-const routes = ['', 'words/', 'words/?id=l%3Arab~', 'listen/?v=1:2', 'surahs/', 'surahs/read/?n=112', 'library/', 'library/roots/', 'library/roots/?r=rHm', 'library/pronouns/', 'library/how/', 'place/', 'settings/', 'about/'];
+const routes = ['', 'words/', 'words/?id=l%3Arab~', 'listen/?v=1:2', 'surahs/', 'surahs/read/?n=112', 'library/', 'library/roots/', 'library/roots/?r=rHm', 'library/pronouns/', 'library/how/', 'library/role/?r=NEG', 'library/role/?r=P', 'words/parts/', 'words/?deck=phrases', 'place/', 'settings/', 'about/'];
 for (const [scheme, locale] of [['light', 'en-GB'], ['dark', 'tr-TR']]) {
   const p = await page(scheme, locale);
   for (const r of routes) {
@@ -53,6 +53,9 @@ await p.tap('[data-a=play]'); await p.waitForSelector('[data-a=check]'); await p
 await p.goto(ROOT + 'words/'); await p.waitForTimeout(600);
 await p.tap('[data-a=start]'); await p.tap('[data-a=show]'); await p.waitForTimeout(400); await p.screenshot({ path: `${OUT}/flow-words.png`, fullPage: true });
 for (let i = 0; i < 10; i++) { await p.tap(`[data-a=grade][data-v="${i % 3}"]`); if (await p.$('[data-a=show]')) await p.tap('[data-a=show]'); else break; }
+await p.goto(ROOT + 'words/?deck=phrases'); await p.waitForTimeout(600); await p.tap('[data-a=start]'); await p.tap('[data-a=show]'); await p.waitForTimeout(400); await p.screenshot({ path: `${OUT}/flow-phrase.png`, fullPage: true }); await p.tap('[data-a=grade][data-v="2"]');
+await p.goto(ROOT + 'words/parts/'); await p.waitForTimeout(800); await p.tap('[data-a=pick] >> nth=0'); await p.screenshot({ path: `${OUT}/flow-parts.png`, fullPage: true });
+await p.goto(ROOT + 'surahs/read/?n=112'); await p.waitForTimeout(600); await p.tap('[data-a=hide]'); await p.tap('[data-a=all]'); await p.waitForSelector('[data-a=gist]'); await p.tap('[data-a=gist] >> nth=0'); await p.screenshot({ path: `${OUT}/flow-whole.png`, fullPage: true });
 const st = await p.evaluate(() => JSON.parse(localStorage.getItem('fahm-v1')));
 await p.goto(ROOT); await p.waitForTimeout(900); await p.screenshot({ path: `${OUT}/flow-today-after.png`, fullPage: true });
 console.log(`placement: "${placeText.replace(/\s+/g, ' ').slice(0, 80)}"; items started ${Object.keys(st.r).length}; heard ${JSON.stringify(st.heard)}; answered today ${st.day.done}`);
