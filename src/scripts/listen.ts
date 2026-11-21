@@ -50,7 +50,7 @@ async function load(s: number, v: number) {
 
 function header() {
   const where = pass === 3 && self < 0 ? t('listen') : `${t('listen')} · ${esc(lang() === 'tr' ? S.tr : S.tname)} ${sv.s}:${sv.v}`;
-  return `<span class="eyebrow">${where}</span><div class="passes">${[t('p1'), t('p2'), t('p3')].map((x, i) => `<span class="${i + 1 === pass ? 'on' : i + 1 < pass ? 'done' : ''}">${i + 1} · ${x}</span>`).join('')}</div>`;
+  return `${pass === 1 ? `<a class="btn quiet" style="width:100%;margin-bottom:10px" href="${base()}listen/ladder/">${t('ladderLink')} ›</a>` : ''}<span class="eyebrow">${where}</span><div class="passes">${[t('p1'), t('p2'), t('p3')].map((x, i) => `<span class="${i + 1 === pass ? 'on' : i + 1 < pass ? 'done' : ''}">${i + 1} · ${x}</span>`).join('')}</div>`;
 }
 function context() {
   const type = S.type === 'Meccan' ? t('meccan') : t('medinan');

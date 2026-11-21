@@ -32,7 +32,7 @@ export async function mySurahItems() {
 export async function pickVerse(exclude = new Set<string>()) {
   const [vr, ss, k] = await Promise.all([vreq(), surahs(), knownIdx()]);
   const t = dayNum(), my = new Set(state.my.length ? state.my : MY_DEFAULT);
-  const due = Object.entries(state.heard).filter(([key, h]) => h.due <= t && h.last < t && !exclude.has(key)).sort((a, b) => a[1].due - b[1].due);
+  const due = Object.entries(state.heard).filter(([key, h]) => !key.startsWith('P') && h.due <= t && h.last < t && !exclude.has(key)).sort((a, b) => a[1].due - b[1].due);
   if (due.length) { const [s, v] = due[0][0].split(':').map(Number); return { s, v, why: 'again' as const }; }
   let best: { s: number; v: number; score: number; share: number } | null = null;
   ss.forEach((s, si) => {

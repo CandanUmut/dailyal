@@ -17,6 +17,10 @@ import { $, base, esc } from './util';
   let n = 1;
   if (!state.placed) h += `<a class="task" href="${base()}place/"><span class="n">${n++}</span><div><b>${t('tPlace')}</b><span class="d">${t('tPlaceD')}</span></div><span class="go">›</span></a>`;
   h += `<a class="task" href="${base()}listen/?v=${nv.s}:${nv.v}"><span class="n">${heardToday ? '✓' : n++}</span><div>${heardToday ? `<span class="d">${t('heardToday', { n: state.day.heard })}</span>` : ''}<b>${t(heardToday ? 'tListenMore' : 'tListen', { ref: `${esc(name)} ${nv.s}:${nv.v}` })}</b><span class="d">${t('tListenD', { why: nv.why === 'again' ? t('whyAgain') : nv.why === 'follow' ? t('whyFollow') : t('whyStretch') })}</span></div><span class="go">›</span></a>`;
+  // Passages due again (narrow listening, Phase 3)
+  const dueP = Object.entries(state.heard).filter(([k2, hd]) => k2.startsWith('P') && hd.due <= (state.day.d || 0) && hd.last < (state.day.d || 0));
+  if (dueP.length) { const [k2] = dueP[0], m = /^P(\d+):(\d+)-(\d+)$/.exec(k2)!; const S2 = ss[+m[1] - 1]; h += `<a class="task" href="${base()}listen/ladder/?p=${m[1]}:${m[2]}-${m[3]}"><span class="n">${n++}</span><div><b>${t('tPassage', { ref: `${esc(lang() === 'tr' ? S2.tr : S2.tname)} ${m[1]}:${m[2]}–${m[3]}` })}</b><span class="d">${t('tPassageD', { n: dueP.length })}</span></div><span class="go">›</span></a>`; }
+  else h += `<a class="task" href="${base()}listen/ladder/"><span class="n">${n++}</span><div><b>${t('ladder')}</b><span class="d">${t('tLadderD')}</span></div><span class="go">›</span></a>`;
   if (nw) h += `<a class="task" href="${base()}words/"><span class="n">${n++}</span><div><b>${t('tNew', { n: nw })}</b><span class="d">${t('tNewD', { m: Math.max(1, Math.round(nw * 0.5)) })}</span></div><span class="go">›</span></a>`;
   if (due) h += `<a class="task" href="${base()}words/"><span class="n">${n++}</span><div><b>${t('tReview', { n: due })}</b><span class="d">${t('tReviewD', { d: due, m: Math.max(1, Math.round(due * 0.25)) })}</span></div><span class="go">›</span></a>`;
   h += '</div>';

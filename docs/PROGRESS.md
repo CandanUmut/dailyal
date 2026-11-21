@@ -11,7 +11,8 @@
 | 1.1 | Fixes from the Phase 1 review (`docs/reviews/phase-1.md`; decisions in PLAN §5c) | **Done**, tests pass |
 | 2 | Ear and parts (`docs/reviews/phase-2.md`) | **Done** |
 | 2.1 | Fixes from the Phase 2 review (PLAN §5d) | **Done**, tests pass |
-| 3–6 | See `docs/PLAN.md` §5 | Next: Phase 3 (listening ladder) |
+| 3 | Listening ladder: passages of 2–4 verses and whole short surahs from your surahs, text off first, questions (what was said, who does it), self-report, then the text; narrow listening at 1, 3, 7, 14 days; results per passage; Today shows due passages | **Built**, tests pass; critic review running |
+| 4–6 | See `docs/PLAN.md` §5 | Not started |
 
 Each phase ends with phone-size screenshots, test results and a PR.
 

@@ -1,9 +1,8 @@
 alignment problems: 0
 
-meanings that still look negated (top 1000): 4
-314 ٱسْتَغْفَرَ | bağışlanmasını dilerler | and asked forgiveness
+meanings that still look negated (top 1000): 3
 419 غَٰفِل | umursamaz | (are) unaware
 642 أَغْنَىٰ | zengin etmedi mi? | so He made self-sufficient
 957 تَذْكِرَة | bir hatırlatmadır | (is) a reminder
-items 4941, with meaning 3753
-Açık Kuran words 47143/77429
+items 4941, with meaning 4293
+Açık Kuran words 64580/77429
