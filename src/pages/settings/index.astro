@@ -5,7 +5,7 @@ import T from '../../components/T.astro';
 <Base title="Settings" tab="settings">
   <h1 class="h1"><T en="Settings" tr="Ayarlar" /></h1>
   <div class="field"><label for="lang"><T en="Language" tr="Dil" /></label><select id="lang"><option value="auto" data-en="Same as the device" data-tr="Cihazın dili">Same as the device</option><option value="en">English</option><option value="tr">Türkçe</option></select></div>
-  <div class="field"><label for="trtr"><T en="Turkish translation" tr="Türkçe meal" /></label><select id="trtr"><option value="11">Diyanet İşleri</option><option value="15">Elmalılı Hamdi Yazır (sadeleştirilmiş)</option><option value="27">Süleyman Ateş</option></select><p class="note"><T en="Diyanet gives one text for some groups of verses; the listening check then uses Elmalılı for those verses." tr="Diyanet bazı ayet gruplarına tek metin verir; dinleme kontrolü o ayetlerde Elmalılı mealini kullanır." /></p></div>
+  <div class="field"><label for="trtr"><T en="Turkish translation" tr="Türkçe meal" /></label><select id="trtr"><option value="15">Elmalılı Hamdi Yazır (sadeleştirilmiş)</option><option value="11">Diyanet İşleri</option><option value="27">Süleyman Ateş</option></select><p class="note"><T en="Diyanet gives one text for some groups of verses; the listening check then uses Elmalılı for those verses." tr="Diyanet bazı ayet gruplarına tek metin verir; dinleme kontrolü o ayetlerde Elmalılı mealini kullanır." /></p></div>
   <div class="field"><label for="tren"><T en="English translation" tr="İngilizce meal" /></label><select id="tren"><option value="32">Sahih International</option><option value="113">M. A. S. Abdel Haleem</option></select></div>
   <div class="field"><label for="theme"><T en="Theme" tr="Tema" /></label><select id="theme"><option value="auto" data-en="Same as the device" data-tr="Cihaza göre">Same as the device</option><option value="light" data-en="Light" data-tr="Açık">Light</option><option value="dark" data-en="Dark" data-tr="Koyu">Dark</option></select></div>
   <div class="field"><label for="npd"><T en="New words per day" tr="Günde yeni kelime" /></label><select id="npd"><option>3</option><option>5</option><option>8</option><option>10</option><option>15</option><option>20</option></select></div>
@@ -23,7 +23,7 @@ import T from '../../components/T.astro';
   sel('rec').innerHTML = Object.entries(RECITERS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
   const localize = () => { const L = document.documentElement.lang === 'tr' ? 'tr' : 'en'; document.querySelectorAll<HTMLOptionElement>('option[data-en]').forEach((o) => { o.textContent = o.dataset[L]!; }); };
   localize();
-  sel('trtr').value = String(state.set.tr || 11); sel('tren').value = String(state.set.en || 32);
+  sel('trtr').value = String(state.set.tr || 15); sel('tren').value = String(state.set.en || 32);
   sel('trtr').onchange = () => { state.set.tr = +sel('trtr').value; save(); };
   sel('tren').onchange = () => { state.set.en = +sel('tren').value; save(); };
   sel('lang').value = state.set.lang; sel('theme').value = state.set.theme; sel('npd').value = String(state.set.newPerDay); sel('rec').value = state.set.reciter;

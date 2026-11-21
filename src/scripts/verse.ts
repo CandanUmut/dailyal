@@ -20,7 +20,7 @@ export function toggle(b: HTMLElement) {
   audio.onplay = () => setIcon(b, true); audio.onpause = () => setIcon(b, false);
   audio.onended = () => { setIcon(b, false); b.dispatchEvent(new CustomEvent('audioended', { bubbles: true })); };
   audio.onerror = () => { setIcon(b, false); b.dispatchEvent(new CustomEvent('audioerror', { bubbles: true })); };
-  audio.playbackRate = state.set.speed || 1; audio.currentTime = 0; audio.play().catch(() => setIcon(b, false));
+  audio.playbackRate = state.set.speed || 1; audio.currentTime = 0; audio.play().catch(() => { setIcon(b, false); b.dispatchEvent(new CustomEvent('audioerror', { bubbles: true })); });
 }
 function setIcon(b: HTMLElement, playing: boolean) { b.innerHTML = playing ? ICON_PAUSE : ICON_PLAY; b.setAttribute('aria-pressed', String(playing)); }
 export const SPEEDS = [1, 0.85, 0.7];

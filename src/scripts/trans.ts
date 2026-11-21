@@ -3,7 +3,7 @@ import { state } from './store';
 import { lang } from './i18n';
 import { TRANSLATORS, isRange, type Verse } from './data';
 
-export const trId = () => String(lang() === 'tr' ? state.set.tr || 11 : state.set.en || 32);
+export const trId = () => String(lang() === 'tr' ? state.set.tr || 15 : state.set.en || 32);
 export const trName = (id = trId()) => TRANSLATORS[id]?.name || '';
 const textOf = (v: Verse, id: string) => (v[TRANSLATORS[id].field] as string | null | undefined) || null;
 /** The reader's chosen translation of this verse (falls back to the other language if missing). */

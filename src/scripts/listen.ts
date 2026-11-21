@@ -14,7 +14,7 @@ import { $, base, esc, shuffle, dayNum, toast } from './util';
 
 type Q = { word: number; opts: string[]; right: string; chosen?: string; who?: 1 };
 let S: Surah, V: Verse, all: Item[], k: Uint8Array, sv = { s: 1, v: 1 };
-let pass = 1, sel = -1, showTr = false, readTr = false, ctxOpen = false, fill: Q[] = [], fi = 0, heard3 = false, audioFail = false;
+let pre = true, preHeard = false, pass = 1, sel = -1, showTr = false, readTr = false, ctxOpen = false, fill: Q[] = [], fi = 0, heard3 = false, audioFail = false;
 let check: { opts: string[]; right: string; by: string; chosen?: string } | null = null, self = -1, who: Q | null = null;
 const seen = new Set<string>();
 const AGAIN = [1, 3, 7, 14];
@@ -24,7 +24,7 @@ async function load(s: number, v: number) {
   sv = { s, v }; seen.add(`${s}:${v}`);
   [S, all, k] = await Promise.all([surahs().then((x) => x[s - 1]), items(), knownIdx()]);
   const ss = await surah(s); V = ss[v - 1];
-  pass = 1; sel = -1; showTr = false; readTr = false; fi = 0; check = null; self = -1; heard3 = false; audioFail = false;
+  pre = true; preHeard = false; pass = 1; sel = -1; showTr = false; readTr = false; fi = 0; check = null; self = -1; heard3 = false; audioFail = false;
   // Choose meanings: up to 3 words that carry a dictionary form, preferring ones you are learning.
   // Options are meanings of other words in this surah that are clearly different (not near-twins).
   const pool = [...new Set(ss.flatMap((x) => x.w.map((w) => pick(w[1], w[2]))).filter(Boolean))];
@@ -61,6 +61,8 @@ function share() { const ws = V.w.filter((w) => w[0].length), kn = ws.filter((w)
 const player = () => `<div class="player">${playBtn(sv.s, sv.v, t('play'))}<div style="flex:1">${speedChips()}<p class="note" style="margin:4px 0 0">${esc(t('reciter', { r: reciterName() }))}</p></div></div>`;
 
 function pass1() {
+  // Hear first (Umut, 2026-11-21): the verse plays once without the text; then the text appears.
+  if (pre) return context() + `<h2 class="h2" style="margin-top:8px">${t('hearFirst')}</h2><p class="sub">${t('hearFirstSub')}</p>` + player() + `<div class="stackb"><button class="btn pri" data-a="reveal" ${preHeard ? '' : 'disabled'}>${t('showText')}</button>${preHeard ? '' : `<p class="note">${t('playFirst')}</p>`}</div>`;
   let h = context() + (V.b && V.bt ? `<p class="q basmala" lang="ar">${esc(V.bt)}</p>` : '') + verseHtml(V, k, { sel });
   h += `<p class="cap">${share()} ${t('tapWord')}</p>`;
   if (sel >= 0) {
@@ -115,8 +117,8 @@ function finishVerse(ok: boolean) {
   state.heard[key] = h; save();
 }
 
-document.addEventListener('audioended', () => { if (pass === 3 && !heard3) { heard3 = true; render(); } });
-document.addEventListener('audioerror', () => { if (pass === 3 && !heard3) { audioFail = true; render(); } });
+document.addEventListener('audioended', () => { if (pass === 1 && pre && !preHeard) { preHeard = true; render(); } if (pass === 3 && !heard3) { heard3 = true; render(); } });
+document.addEventListener('audioerror', () => { if (pass === 1 && pre && !preHeard) { preHeard = true; render(); } if (pass === 3 && !heard3) { audioFail = true; render(); } });
 document.addEventListener('toggle', (e) => { if ((e.target as HTMLElement).matches?.('[data-ctx]')) ctxOpen = (e.target as HTMLDetailsElement).open; }, true);
 document.addEventListener('click', async (e) => {
   const b = (e.target as HTMLElement).closest<HTMLElement>('[data-a]'); if (!b) return;
@@ -124,6 +126,7 @@ document.addEventListener('click', async (e) => {
   if (a === 'play') { toggle(b); return; }
   if (a === 'speed') { setSpeed(+b.dataset.v!); save(); render(); return; }
   if (a === 'word' && pass === 1) sel = +b.dataset.i! === sel ? -1 : +b.dataset.i!;
+  else if (a === 'reveal') pre = false;
   else if (a === 'tr') { showTr = !showTr; if (showTr) readTr = true; }
   else if (a === 'learn') { place(b.dataset.id!, false); save(); badge(); toast(t('added')); }
   else if (a === 'next') { if (pass === 1) pass = fill.length ? 2 : 3; else if (pass === 2) { if (fi + 1 < fill.length) fi++; else pass = 3; } }
