@@ -68,7 +68,7 @@ Each phase: build → tests + 390 px screenshots → **critic review** → re-pl
 |---|---|---|---|
 | **R0** | Research: learning-method sources (`learning.md`); data checks (word alignment between Tanzil, corpus and Açık Kuran) | 0.5 | Every *(verify)* above is either sourced or removed |
 | **1. Foundation** | Data pipeline + alignment test. Astro app (Uu base). Placement sweep. Today (listening check first). Words (all items ranked, senses with counts). Listen (verse level, 3 passes, meaning for each place, listening check). My surahs + context cards. Roots. Library: how it works, person markers. EN/TR. Offline. Tests. | 2.5 | A learner can do a full 15-minute day on a phone |
-| **2. Ear and parts** | Audio-first review; Parts drills; phrase cards; Turkish loanword links; recitation-joining lesson; lessons on particles, prepositions, negation, إنّ, كان | 2 | Critic can split common joined words and recognise phrases by ear |
+| **2. Ear and parts** | Ear-first review (hear a short verse from your surahs, then recall the marked word); whole-surah listening for My surahs; "who speaks / to whom?" questions from person markers; Parts drills; phrase cards (180 phrases repeated 8+ times); Turkish loanword links; lessons on particles, prepositions, negation, إنّ, كان | 2 | Critic can split common joined words and follow a short surah by ear |
 | **3. Listening ladder** | Passage and short-surah listening; reciter/speed choice; listening checks; narrow-listening sets; self-report vs check | 2 | Listening checks recorded; ladder works across days |
 | **4. Context** | Surah map from metadata + translations; "before you listen" cards; who-is-speaking markers (sourced only) | 1.5 | Every passage in Listen has a sourced context card |
 | **5. Breadth and personal** | Up to 2,000 lemmas; My surahs; search; progress export/import | 1.5 | Learner can steer the program to what they hear |
@@ -91,6 +91,20 @@ Each phase: build → tests + 390 px screenshots → **critic review** → re-pl
 | 10. Inconsistent sizes and the "day 30" simulation | **Taken.** All items are ranked; new items per day is a setting. Umut's own weekly use is the real test; the critic's "day 30" only checks that the app behaves. |
 | Translations | **Taken.** The About page notes the bracketed interpretations in Saheeh. A second English translation is offered. The Diyanet edition is to be named (G12). |
 | Alignment | **Taken.** The build fails if Tanzil, the corpus and Açık Kuran disagree on the word count of any verse, and it lists every mismatch. |
+
+## 5c. Changes after the Phase 1 review (`reviews/phase-1.md`, 2026-11-21) — Phase 1.1
+
+| Review point | Decision |
+|---|---|
+| Word cards taught wrong or negated meanings (هَدَى = "doğru yola iletmez") | **Fixed.** Meanings now come from places where the word is in its base form (verbs: past, "he", active, not after a negation; nouns: no prefix or ending), preferring a plain past form in Turkish. هَدَى = "doğru yola iletti", أَرْسَلَ = "gönderdi", قَالَ = "dedi". Function words are split by role (مَا "not" vs مَا "what") and show their role first. A build check reports meanings that still look negated (6 of the top 1,000, listed in `data/build-report.txt`). A truly dictionary-style Turkish source would still be better: **open (G17)**. |
+| The listening check could be passed without listening | **Fixed.** Each verse is checked against its own text (Diyanet's joined ranges fall back to Elmalılı for the check). Near-twin options (word overlap ≥ 40%) are dropped. The options appear only after the audio has played to the end. No surah name or verse number is shown during the check. If the translation was read earlier, or the audio failed, the check is practice only and is not counted. |
+| "Meaning here" lost who is speaking | **Fixed.** Every verb shows person and tense from the corpus ("ben · şimdiki-geniş zaman"). |
+| The numbers flattered | **Fixed.** An item counts as known only after a correct recall on a later day than first seen; placement words are checked first. Today calls the figure "dictionary-form coverage" and explains it. |
+| Bugs (self-report counted twice, raw corpus codes, context card closing, Turkish numbers and endings, "çal", "Boşluk", mixed English) | **Fixed.** |
+| Card layout (grade buttons below the fold, random examples) | **Fixed.** Grade buttons stay in reach; examples come from your own surahs first, each with its translation. |
+| Tap targets under 48 px | **Fixed**, and the e2e test now checks width too. |
+| Ear-first review, whole-surah listening, "who speaks?" questions | **Phase 2** (below). |
+| One Turkish translation for both reading and the check | **Waiting for Umut**: which Turkish translation should be the default (Settings now offers Diyanet, Elmalılı (sadeleştirilmiş), Süleyman Ateş). |
 
 ## 6. The critic
 

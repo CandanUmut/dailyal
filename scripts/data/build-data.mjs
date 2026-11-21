@@ -30,7 +30,7 @@ const tags = JSON.parse(readFileSync(`${SRC}/qac-tagset.json`, 'utf8')).tags;
 const akWords = existsSync(`${AK}/words.json`) ? JSON.parse(readFileSync(`${AK}/words.json`, 'utf8')) : {};
 const akRoots = existsSync(`${AK}/roots.json`) ? JSON.parse(readFileSync(`${AK}/roots.json`, 'utf8')) : {};
 const akTr = (a) => (existsSync(`${AK}/translation-${a}.json`) ? JSON.parse(readFileSync(`${AK}/translation-${a}.json`, 'utf8')) : {});
-const trTR = akTr(11), trEN = akTr(32);
+const trTR = akTr(11), trEN = akTr(32), trElm = akTr(15), trAtes = akTr(27), trHaleem = akTr(113);
 const akSurahs = existsSync(`${AK}/surahs.json`) ? JSON.parse(readFileSync(`${AK}/surahs.json`, 'utf8')) : [];
 
 // ---------- Verses and alignment ----------
@@ -60,6 +60,17 @@ const ranked = [...count.keys()].sort((a, b) => count.get(b) - count.get(a) || (
 const idx = new Map(ranked.map((id, i) => [id, i]));
 
 const gloss = (W) => akWords[`${W.s}:${W.v}:${W.w}`];
+const NEG_EN = /\b(not|n't|never|nor|no)\b/i, NEG_TR = /(değil|\b\w+(m[ae]z|m[ae]d[ıi]|m[ae]y[ıi]n|m[ae]s[ıi]n|m[ae]m[ıi]ş)\b)/i;
+const PAST_TR = /(d|t)[ıiuü](lar|ler)?$/i;
+const prevWord = (W) => words.get(`${W.s}:${W.v}:${W.w - 1}`);
+/** The gloss carries a negation from the context (a preceding negative particle, or 'not' in the English gloss). */
+const negated = (W, g) => prevWord(W)?.pos === 'NEG' || NEG_EN.test(g.en || '');
+function baseScore(W, lem) {
+  let s = W.items.length === 1 ? 1 : 0;
+  if (W.pos === 'V') { s += W.f.asp === 'PERF' ? 3 : W.f.asp === 'IMPF' ? 1 : -2; if (W.f.per === '3MS') s += 2; if (W.f.pass) s -= 2; if (W.f.pfx) s -= 1; if (W.f.asp === 'PERF' && W.f.per === '3MS' && W.f.sfx) s -= 1; }
+  else { if (!W.f.pfx) s += 1; if (!W.f.sfx) s += 1; if (W.f.kase === 'NOM') s += 1; }
+  return s;
+}
 const mostCommon = (arr) => { const m = new Map(); for (const x of arr) if (x) m.set(x, (m.get(x) || 0) + 1); let best = null, n = 0; for (const [k, c] of m) if (c > n) { best = k; n = c; } return best ? { text: best, n, of: arr.filter(Boolean).length } : null; };
 const verseLen = new Map(verses.map((V) => [V.key, V.cw.length]));
 const top500 = new Set(ranked.slice(0, 500));
@@ -70,14 +81,22 @@ const items = ranked.map((id, rank) => {
   if (kind === 'l') { it.ar = lemmaForm.get(id); it.root = lemmaRoot.get(id) || null; it.pos = lemmaPos.get(id); }
   else if (kind === 'p') { it.ar = PREFIX_FORM[code]; it.pos = 'PFX'; }
   else { it.ar = PRONOUN_FORM[code]; it.pos = 'PRON'; it.person = code; }
-  // Meaning: the most common Açık Kuran gloss among words that are just this item (no prefix, no suffix).
+  // Meaning (fixed after the Phase 1 review): Açık Kuran glosses a word in its context, so the same dictionary form
+  // appears as "does not guide", "We sent", "do not kill". We pick the gloss from places where the word is in its
+  // base form: verbs in the past tense, 3rd person masculine singular ("he did"), active, not after a negation;
+  // nouns without prefixes or endings. Then the most common gloss in that pool.
   if (kind === 'l') {
-    const pure = list.filter((W) => W.items.length === 1);
-    const pool = pure.length >= 2 ? pure : list;
-    const tr = mostCommon(pool.map((W) => gloss(W)?.tr)), en = mostCommon(pool.map((W) => gloss(W)?.en));
-    if (tr || en) it.gl = { tr: tr?.text ?? null, en: en?.text ?? null, pure: pool === pure };
-    // Top senses across all places, with counts (the review found one meaning per word misleading).
-    const senses = (lang) => { const m = new Map(); for (const W of pure.length ? pure : list) { const g = gloss(W)?.[lang]; if (g) m.set(g, (m.get(g) || 0) + 1); } return [...m].sort((a, b) => b[1] - a[1]).slice(0, 4); };
+    const scored = list.map((W) => ({ W, g: gloss(W), sc: baseScore(W, code) })).filter((x) => x.g && !negated(x.W, x.g));
+    const best = Math.max(-9, ...scored.map((x) => x.sc));
+    const pool = scored.filter((x) => x.sc === best);
+    // For past-tense verbs, prefer a Turkish gloss that is itself a plain past form (…dı/di/du/dü/tı/ti…), not a relative clause.
+    const isPastVerb = pool.length && pool[0].W.pos === 'V' && pool[0].W.f.asp === 'PERF';
+    const trPool = isPastVerb && pool.some((x) => PAST_TR.test(x.g.tr || '')) ? pool.filter((x) => PAST_TR.test(x.g.tr || '')) : pool;
+    const tr = mostCommon(trPool.map((x) => x.g.tr)), en = mostCommon(pool.map((x) => x.g.en));
+    if (tr || en) it.gl = { tr: tr?.text ?? null, en: en?.text ?? null, base: best };
+    // Other meanings: from near-base places only, counted.
+    const near = scored.filter((x) => x.sc >= best - 1);
+    const senses = (lang) => { const m = new Map(); for (const x of near) { const g = x.g[lang]; if (g) m.set(g, (m.get(g) || 0) + 1); } return [...m].sort((a, b) => b[1] - a[1]).slice(0, 4); };
     const st = senses('tr'), se = senses('en'); if (st.length > 1 || se.length > 1) it.senses = { tr: st, en: se };
   }
   // Examples: up to 3 short verses, preferring ones made of common words.
@@ -87,6 +106,8 @@ const items = ranked.map((id, rank) => {
   cands.sort((a, b) => b.score - a.score);
   for (const c of cands.slice(0, 3)) ex.push(`${c.W.s}:${c.W.v}:${c.W.w}`);
   it.ex = ex;
+  const heard = list.filter((W) => W.s === 1 || W.s >= 78).slice(0, 2).map((W) => `${W.s}:${W.v}:${W.w}`);
+  if (heard.length) it.ex30 = heard;
   return it;
 });
 
@@ -120,15 +141,21 @@ for (let s = 1; s <= 114; s++) {
     b: V.basmala ? 1 : 0,
     ...(V.basmala ? { bt: V.basmala } : {}),
     t: V.t,
-    w: V.cw.map((W) => { const g = gloss(W); return [W.items.map((i) => idx.get(i)), g?.tr ?? null, g?.en ?? null, W.root ?? null]; }),
+    w: V.cw.map((W) => { const g = gloss(W); return [W.items.map((i) => idx.get(i)), g?.tr ?? null, g?.en ?? null, W.root ?? null, W.pos === 'V' ? [W.f.asp, W.f.per, W.f.pass].join('|') : W.pos]; }),
     tr: trTR[V.key] ?? null,
     en: trEN[V.key] ?? null,
+    // Per-verse alternatives (Diyanet joins some verses into one text): Elmalılı (sadeleştirilmiş), Süleyman Ateş, Abdel Haleem.
+    t15: trElm[V.key] ?? null,
+    t27: trAtes[V.key] ?? null,
+    e113: trHaleem[V.key] ?? null,
     ruku: rukuStarts.includes(V.key) ? 1 : 0,
   }));
   j(`s/${s}.json`, vs);
 }
 
+const flagged = items.slice(0, 1000).filter((x) => x.gl && (NEG_TR.test(x.gl.tr || '') || NEG_EN.test(x.gl.en || ''))).map((x) => `${x.r} ${x.ar} | ${x.gl.tr} | ${x.gl.en}`);
+console.log(`meaning check: ${flagged.length} of the top 1000 still look negated`);
 const withGloss = items.filter((x) => x.gl).length, wordsWithAk = Object.keys(akWords).length;
 console.log(`items ${items.length} (${withGloss} with a meaning); roots ${Object.keys(roots).length}; Açık Kuran words ${wordsWithAk}/77429; translations tr ${Object.keys(trTR).length}, en ${Object.keys(trEN).length}`);
-writeFileSync('data/build-report.txt', `alignment problems: ${problems.length}\n${problems.join('\n')}\nitems ${items.length}, with meaning ${withGloss}\nAçık Kuran words ${wordsWithAk}/77429\n`);
+writeFileSync('data/build-report.txt', `alignment problems: ${problems.length}\n${problems.join('\n')}\nmeanings that still look negated (top 1000): ${flagged.length}\n${flagged.join('\n')}\nitems ${items.length}, with meaning ${withGloss}\nAçık Kuran words ${wordsWithAk}/77429\n`);
 if (problems.length) process.exitCode = 1;

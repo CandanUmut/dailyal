@@ -18,6 +18,7 @@ export const PREFIX_FORM = { al: 'ٱل', wa: 'وَ', fa: 'فَ', bi: 'بِ', la:
 // Duals are not split by gender. Forms are the standard paradigm; still to be checked against a cited grammar (gap G8 in docs/CONTENT_GAPS.md).
 const person = (p) => (p.endsWith('D') ? p[0] + 'D' : p);
 export const PRONOUN_FORM = { '1S': 'أَنَا · ـِي، ـنِي', '1P': 'نَحْنُ · ـنَا', '2MS': 'أَنْتَ · ـكَ', '2FS': 'أَنْتِ · ـكِ', '2D': 'أَنْتُمَا · ـكُمَا', '2MP': 'أَنْتُمْ · ـكُمْ', '2FP': 'أَنْتُنَّ · ـكُنَّ', '3MS': 'هُوَ · ـهُ', '3FS': 'هِيَ · ـهَا', '3D': 'هُمَا · ـهُمَا', '3MP': 'هُمْ · ـهُمْ', '3FP': 'هُنَّ · ـهُنَّ' };
+const CONTENT = new Set(['N', 'PN', 'ADJ', 'V', 'IMPN']);
 const isObjectOnVerb = (bw) => /^(h|k)/.test(bw) || /^niy/.test(bw);
 
 /** @returns {{ words: Map<string, {s:number,v:number,w:number,items:string[],root:string|null,pos:string,parts:string[]}>, lemmaForm: Map<string,string>, lemmaRoot: Map<string,string|null>, lemmaPos: Map<string,string> }} */
@@ -30,22 +31,27 @@ export function readCorpus(file) {
     const [s, v, w] = loc.slice(1, -1).split(':').map(Number);
     const key = `${s}:${v}:${w}`;
     let W = words.get(key);
-    if (!W) words.set(key, (W = { s, v, w, items: [], root: null, pos: '', parts: [], stemPos: '' }));
+    if (!W) words.set(key, (W = { s, v, w, items: [], root: null, pos: '', parts: [], stemPos: '', f: { pfx: 0, sfx: 0 } }));
     W.parts.push(ar(form));
     const f = feat.split('|');
     if (f[0] === 'PREFIX') {
+      W.f.pfx++;
       const id = prefixId(f[1]);
       if (id) W.items.push('p:' + id);
     } else if (f[0] === 'SUFFIX') {
+      W.f.sfx++;
       const m = /^PRON:(\w+)/.exec(f[1]);
       if (m && (W.stemPos !== 'V' || isObjectOnVerb(form))) W.items.push('pr:' + person(m[1]));
     } else {
       const lem = f.find((x) => x.startsWith('LEM:'))?.slice(4);
       const root = f.find((x) => x.startsWith('ROOT:'))?.slice(5) ?? null;
       W.stemPos = tag; W.pos = tag;
+      // Stem features used to pick a base-form meaning and to show who is acting: aspect, person, voice, case.
+      if (!W.f.asp) { W.f.asp = f.find((x) => x === 'PERF' || x === 'IMPF' || x === 'IMPV') || ''; W.f.per = f.find((x) => /^[123][MF]?[SDP]$/.test(x)) || ''; W.f.pass = f.includes('PASS') ? 1 : 0; W.f.kase = f.find((x) => x === 'NOM' || x === 'ACC' || x === 'GEN') || ''; }
       if (root) W.root = root;
       if (lem) {
-        const id = 'l:' + lem;
+        // Function words are split by role: مَا as "not" (NEG) and as "what" (REL) are different things to learn.
+        const id = 'l:' + lem + (CONTENT.has(tag) ? '' : '#' + tag);
         W.items.push(id);
         if (!lemmaForm.has(id)) { lemmaForm.set(id, ar(lem)); lemmaRoot.set(id, root); lemmaPos.set(id, tag); }
       } else if (tag === 'PRON') {

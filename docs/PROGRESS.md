@@ -8,7 +8,8 @@
 | Plan | `docs/PLAN.md`, reviewed by the critic (`docs/reviews/plan-review.md`) | **Done**; review decisions in PLAN §5b |
 | R0 | Learning-method sources (`docs/research/learning.md`) | **Done**; PLAN §2 rewritten from it. Two behaviour changes are waiting for Umut (see below) |
 | 1 | Foundation: data pipeline, app (Today, Placement, Words, Listen, Surahs, Library), EN/TR, offline, tests | **Built, tests pass**; waiting for the full Açık Kuran download, then the Phase 1 critic review |
-| 2–6 | See `docs/PLAN.md` §5 | Not started |
+| 1.1 | Fixes from the Phase 1 review (`docs/reviews/phase-1.md`; decisions in PLAN §5c) | **Done**, tests pass |
+| 2–6 | See `docs/PLAN.md` §5 | Next: Phase 2 (ear and parts) |
 
 Each phase ends with phone-size screenshots, test results and a PR.
 

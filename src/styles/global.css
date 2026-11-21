@@ -55,7 +55,7 @@ main { padding-top: 18px; }
 /* Arabic */
 .ar { font-family: 'Amiri', serif; direction: rtl; unicode-bidi: isolate; }
 .q { font-family: 'Amiri Quran', 'Amiri', serif; direction: rtl; text-align: right; font-size: 30px; line-height: 2.2; word-spacing: 2px; }
-.q .w { display: inline-block; min-height: 48px; padding: 0 3px; border-radius: 6px; background: none; border: 0; font: inherit; line-height: inherit; cursor: pointer; color: var(--ink); }
+.q .w { display: inline-block; min-height: 48px; min-width: 48px; text-align: center; padding: 0 3px; border-radius: 6px; background: none; border: 0; font: inherit; line-height: inherit; cursor: pointer; color: var(--ink); }
 .q .w.k { text-decoration: underline; text-decoration-color: var(--rule-strong); text-decoration-thickness: 1.5px; text-underline-offset: 15px; }
 .q .w.this { text-decoration: underline; text-decoration-color: var(--rubric); text-decoration-thickness: 2px; text-underline-offset: 15px; }
 .q .w.sel { background: var(--rubric-soft); }
@@ -96,7 +96,7 @@ main { padding-top: 18px; }
 .opt.right { border-color: var(--known); background: var(--known-soft); }
 .opt.wrong { border-color: var(--missed); background: var(--missed-soft); }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { display: inline-flex; align-items: center; min-height: 48px; padding: 0 14px; border-radius: 24px; border: 1px solid var(--rule-strong); background: var(--card); cursor: pointer; font-size: 15px; }
+.chip { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; min-width: 48px; padding: 0 14px; border-radius: 24px; border: 1px solid var(--rule-strong); background: var(--card); cursor: pointer; font-size: 15px; }
 .chip[aria-pressed='true'] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .tag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 10px; border: 1px solid var(--rule-strong); color: var(--ink-soft); }
 .tag.new { border-color: var(--rubric); color: var(--rubric); }
@@ -107,7 +107,9 @@ main { padding-top: 18px; }
 .meter { height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; flex: 1; }
 .meter span { display: block; height: 100%; background: var(--ink); }
 .sess { display: flex; align-items: center; gap: 12px; }
-.back { min-height: 48px; padding: 0 10px 0 0; background: none; border: 0; color: var(--ink-soft); cursor: pointer; }
+.back { display: inline-flex; align-items: center; min-height: 48px; padding: 0 10px 0 0; background: none; border: 0; color: var(--ink-soft); cursor: pointer; text-decoration: none; }
+.wlink { display: inline-flex; align-items: center; min-height: 48px; min-width: 48px; font-size: 22px; text-decoration: none; }
+.grade.sticky { position: sticky; bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--paper); padding: 8px 0; z-index: 2; }
 .passes { display: flex; gap: 4px; margin: 8px 0 14px; }
 .passes span { flex: 1; text-align: center; font-size: 13px; padding: 10px 2px; border-bottom: 2px solid var(--rule); color: var(--ink-soft); }
 .passes .on { border-color: var(--rubric); color: var(--ink); font-weight: 700; }

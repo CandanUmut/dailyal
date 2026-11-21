@@ -12,7 +12,7 @@ const plain = (h) => (h == null ? null : String(h).replace(/<br\s*\/?>/gi, '\n')
 const surahs = read('surahs.json').data;
 writeFileSync(join(OUT, 'surahs.json'), JSON.stringify(surahs.map(({ id, name, name_en, name_original, name_translation_tr, name_translation_en, verse_count, page_number }) => ({ id, name, name_en, name_original, name_translation_tr, name_translation_en, verse_count, page_number }))));
 
-for (const a of [11, 32, 113]) {
+for (const a of [11, 32, 15, 27, 113]) {
   const dir = join(RAW, `translation-${a}`); if (!existsSync(dir)) continue;
   const out = {}; let author = null;
   for (const f of readdirSync(dir)) for (const v of read(join(`translation-${a}`, f)).data.verses) {

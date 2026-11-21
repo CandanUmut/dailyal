@@ -2,7 +2,8 @@
 import { dayNum, toast } from './util';
 export const KEY = 'fahm-v1';
 /** A review record: box b (0 = learning), due day, number of reviews n, misses m. */
-export type Rec = { b: number; due: number; n: number; m?: number; p?: 1 };
+/** f: the day it was first seen; c: confirmed = recalled correctly on a later day than f (only then does it count as known). */
+export type Rec = { b: number; due: number; n: number; m?: number; p?: 1; f?: number; c?: 1 };
 /** A listened verse: times heard, last day, next day to hear again, listening-check results [ok, total]. */
 export type Heard = { n: number; last: number; due: number; ok: number; tot: number };
 export type State = {
@@ -10,7 +11,7 @@ export type State = {
   r: Record<string, Rec>;
   heard: Record<string, Heard>;
   day: { d: number; nw: number; done: number; heard: number };
-  set: { newPerDay: number; theme: string; lang: string; reciter: string; en: number; speed?: number };
+  set: { newPerDay: number; theme: string; lang: string; reciter: string; en: number; tr?: number; speed?: number };
   my: number[];
   placed: number;
   /** hist[day] = [first-try answers, first-try misses, listening checks ok, listening checks total, self-report sum, self-report count] */
@@ -34,4 +35,5 @@ export function save() {
 export function rollDay() { const t = dayNum(); if (state.day.d !== t) state.day = { d: t, nw: 0, done: 0, heard: 0 }; }
 export function bump(i: number, k = 1) { const t = dayNum(), h = state.hist[t] || (state.hist[t] = [0, 0, 0, 0, 0, 0]); h[i] = (h[i] || 0) + k; }
 /** An item counts as known once it has been recalled at least once and is not currently missed. */
-export const isKnown = (id: string) => { const r = state.r[id]; return !!r && r.b >= 1; };
+/** Known = recalled correctly on a later day than first seen (the Phase 1 review found same-day grades flattered the numbers). */
+export const isKnown = (id: string) => { const r = state.r[id]; return !!r && r.b >= 1 && r.c === 1; };

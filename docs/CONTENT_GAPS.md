@@ -20,3 +20,4 @@ Things that are not verified yet. Nothing here goes into the app until it is clo
 | G14 | ~~Learning-method citations~~ **Closed**: checked in `research/learning.md` | — |
 | G15 | Short meanings of prefixes and pronouns (`src/scripts/cardview.ts`: PREFIX_MEAN, PERSON) are written from knowledge | Check against how Açık Kuran renders words that carry them, and against the corpus tagset; write `docs/research/particles.md` |
 | G16 | No study found on teaching Arabic roots to adult learners (does it speed vocabulary growth?) | Keep watching; measure in our own data |
+| G17 | Turkish (and English) dictionary-style meaning per lemma. Açık Kuran gives meanings per place; we pick base-form places, but a real dictionary entry would be better | Find an open Turkish Quran dictionary, or have meanings checked by a person |

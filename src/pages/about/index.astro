@@ -3,22 +3,37 @@ import Base from '../../layouts/Base.astro';
 import { u } from '../../lib/url';
 ---
 <Base title="About" tab="library">
-  <a class="back" href={u('library/')}>‹ Library / Kitaplık</a>
-  <article class="prose">
-    <h1 class="h1">About and sources · Hakkında ve kaynaklar</h1>
-    <p class="l-en">A free, non-commercial daily program for understanding the Quran when you hear it. No ads, no account; your progress stays on your device. It teaches language: word meanings and sourced translations. It gives no commentary (tafsir) of its own.</p>
-    <p class="l-tr">Kur'an'ı duyduğunda anlamak için ücretsiz, ticari olmayan bir günlük program. Reklam yok, hesap yok; ilerlemen cihazında kalır. Dil öğretir: kelime anlamları ve kaynaklı mealler. Kendine ait bir tefsir sunmaz.</p>
-    <h2>Quran text · Kur'an metni</h2>
-    <p>Tanzil Quran Text (Uthmani), Copyright (C) 2007-2021 Tanzil Project, License: Creative Commons Attribution 3.0. Used verbatim. <a href="https://tanzil.net">tanzil.net</a> · metadata (surah type, revelation order, sections): Tanzil Quran Metadata, CC BY 3.0.</p>
-    <h2>Word analysis · Kelime çözümlemesi</h2>
-    <p>Quranic Arabic Corpus (morphology, version 0.4), Copyright (C) 2011 Kais Dukes, GNU General Public License. <a href="https://corpus.quran.com">corpus.quran.com</a>. Dictionary forms, roots and word parts; the frequency counts are ours, made from it.</p>
-    <h2>Word meanings and translations · Kelime anlamları ve mealler</h2>
-    <p><a href="https://acikkuran.com">Açık Kuran</a> (acikkuran.com), an open-source, non-profit project: word-by-word meanings in Turkish and English, root meanings, and the translations Diyanet İşleri (Kur'an-ı Kerim Türkçe Meali) and Sahih International. Shared under CC BY-NC-SA 4.0. Words in brackets in a translation are the translators' own additions.</p>
-    <h2>Recitation · Kıraat</h2>
-    <p>Audio streamed from <a href="https://everyayah.com">everyayah.com</a>: Mishary Alafasy, Mahmoud Khalil Al-Husary, Mohamed Siddiq Al-Minshawi, Abdul Basit.</p>
-    <h2>Fonts · Yazı tipleri</h2>
+  <a class="back" href={u('library/')}>‹ <span class="l-en">Library</span><span class="l-tr">Kitaplık</span></a>
+  <article class="prose l-en">
+    <h1 class="h1">About and sources</h1>
+    <p>A free, non-commercial daily program for understanding the Quran when you hear it. No ads, no account; your progress stays on your device. It teaches language: word meanings and sourced translations. It gives no commentary (tafsir) of its own.</p>
+    <h2>Quran text</h2>
+    <p>Tanzil Quran Text (Uthmani), Copyright (C) 2007-2021 Tanzil Project, licence Creative Commons Attribution 3.0, used verbatim: <a href="https://tanzil.net">tanzil.net</a>. Surah type, revelation order and sections: Tanzil Quran Metadata (CC BY 3.0).</p>
+    <h2>Word analysis</h2>
+    <p>Quranic Arabic Corpus (morphology, version 0.4), Copyright (C) 2011 Kais Dukes, GNU General Public License: <a href="https://corpus.quran.com">corpus.quran.com</a>. Dictionary forms, roots and word parts. The frequency counts are ours, made from it.</p>
+    <h2>Word meanings and translations</h2>
+    <p><a href="https://acikkuran.com">Açık Kuran</a>, an open-source, non-profit project: word-by-word meanings in Turkish and English, root meanings, and the translations of Diyanet İşleri, Elmalılı Hamdi Yazır (simplified), Süleyman Ateş, Sahih International and M. A. S. Abdel Haleem. Licence CC BY-NC-SA 4.0. A word-by-word meaning follows the word's place in the verse; word cards use the meaning from places where the word is in its base form. Words in brackets in a translation are the translator's own additions.</p>
+    <h2>Recitation</h2>
+    <p>Streamed from <a href="https://everyayah.com">everyayah.com</a>: Mishary Alafasy, Mahmoud Khalil Al-Husary, Mohamed Siddiq Al-Minshawi, Abdul Basit.</p>
+    <h2>Fonts</h2>
     <p>Amiri Quran and Amiri (SIL Open Font License), Atkinson Hyperlegible Next, Literata.</p>
-    <h2>Licence · Lisans</h2>
+    <h2>Licence</h2>
     <p>Because the Açık Kuran data is CC BY-NC-SA 4.0, this program and its data are shared under the same licence: non-commercial, with credit, share-alike.</p>
+  </article>
+  <article class="prose l-tr">
+    <h1 class="h1">Hakkında ve kaynaklar</h1>
+    <p>Kur'an'ı duyduğunda anlamak için ücretsiz, ticari olmayan bir günlük program. Reklam yok, hesap yok; ilerlemen cihazında kalır. Dil öğretir: kelime anlamları ve kaynaklı mealler. Kendine ait bir tefsir sunmaz.</p>
+    <h2>Kur'an metni</h2>
+    <p>Tanzil Quran Text (Osmanî hat), Telif (C) 2007-2021 Tanzil Project, lisans Creative Commons Attribution 3.0, aynen kullanıldı: <a href="https://tanzil.net">tanzil.net</a>. Surelerin türü, iniş sırası ve bölümleri: Tanzil Quran Metadata (CC BY 3.0).</p>
+    <h2>Kelime çözümlemesi</h2>
+    <p>Quranic Arabic Corpus (morfoloji, sürüm 0.4), Telif (C) 2011 Kais Dukes, GNU General Public License: <a href="https://corpus.quran.com">corpus.quran.com</a>. Sözlük biçimleri, kökler ve kelime parçaları. Sıklık sayımları bize ait, bu veriden yapıldı.</p>
+    <h2>Kelime anlamları ve mealler</h2>
+    <p><a href="https://acikkuran.com">Açık Kuran</a>, açık kaynaklı, kâr amacı gütmeyen bir proje: Türkçe ve İngilizce kelime kelime anlamlar, kök anlamları ve Diyanet İşleri, Elmalılı Hamdi Yazır (sadeleştirilmiş), Süleyman Ateş, Sahih International ve M. A. S. Abdel Haleem mealleri. Lisans CC BY-NC-SA 4.0. Kelime anlamı, kelimenin ayetteki yerine göredir; kelime kartları, kelimenin yalın hâliyle geçtiği yerlerdeki anlamı kullanır. Meallerdeki parantez içi sözler mütercimin kendi eklemeleridir.</p>
+    <h2>Kıraat</h2>
+    <p><a href="https://everyayah.com">everyayah.com</a> üzerinden akış: Mişari Alafasi, Mahmud Halil el-Husari, Muhammed Sıddık el-Minşavi, Abdülbasit.</p>
+    <h2>Yazı tipleri</h2>
+    <p>Amiri Quran ve Amiri (SIL Open Font License), Atkinson Hyperlegible Next, Literata.</p>
+    <h2>Lisans</h2>
+    <p>Açık Kuran verisi CC BY-NC-SA 4.0 olduğu için bu program ve verisi de aynı lisansla paylaşılır: ticari değil, kaynak gösterilerek, aynı lisansla.</p>
   </article>
 </Base>

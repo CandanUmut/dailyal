@@ -17,7 +17,8 @@ export function toggle(b: HTMLElement) {
   if (btn && btn !== b) setIcon(btn, false);
   if (audio.src !== src) audio.src = src;
   btn = b;
-  audio.onplay = () => setIcon(b, true); audio.onpause = audio.onended = () => setIcon(b, false);
+  audio.onplay = () => setIcon(b, true); audio.onpause = () => setIcon(b, false);
+  audio.onended = () => { setIcon(b, false); b.dispatchEvent(new CustomEvent('audioended', { bubbles: true })); };
   audio.onerror = () => { setIcon(b, false); b.dispatchEvent(new CustomEvent('audioerror', { bubbles: true })); };
   audio.playbackRate = state.set.speed || 1; audio.currentTime = 0; audio.play().catch(() => setIcon(b, false));
 }

@@ -3,7 +3,8 @@ import { state, save, MY_DEFAULT } from './store';
 import { surahs, surah, items, type Surah } from './data';
 import { overview, knownIdx } from './coverage';
 import { verseHtml, playBtn, toggle } from './verse';
-import { meaning } from './cardview';
+import { meaning, grammarLabel } from './cardview';
+import { trText, trName } from './trans';
 import { t, pick, lang } from './i18n';
 import { $, base, esc } from './util';
 
@@ -29,11 +30,11 @@ async function reader() {
   if (vs[0].b && vs[0].bt) h += `<p class="q basmala" lang="ar" style="margin-top:12px">${esc(vs[0].bt)}</p>`;
   for (const V of vs) {
     h += `<div class="sec" style="margin-top:14px;border-top:1px solid var(--rule);padding-top:8px" data-v="${V.n}">${verseHtml(V, k, { sel: sel?.v === V.n ? sel.i : undefined })}`;
-    if (sel?.v === V.n) { const w = V.w[sel.i]; h += `<div class="gloss"><span class="ar">${esc(V.t[sel.i])}</span> &nbsp;<b>${esc(pick(w[1], w[2])) || '—'}</b><div class="ref">${w[0].map((x) => `<a href="${base()}words/?id=${encodeURIComponent(all[x].id)}"><span class="ar" style="font-size:18px">${esc(all[x].ar)}</span></a> ${esc(meaning(all[x]))}`).join(' · ')}</div></div>`; }
-    h += `<div class="row" style="justify-content:space-between;align-items:flex-start;margin-top:4px"><p class="tl" style="flex:1">${esc((lang() === 'tr' ? V.tr : V.en) || '')}</p>${playBtn(n, V.n, t('play'), 'sm')}</div>`;
+    if (sel?.v === V.n) { const w = V.w[sel.i]; h += `<div class="gloss"><span class="ar">${esc(V.t[sel.i])}</span> &nbsp;<b>${esc(pick(w[1], w[2])) || '—'}</b>${grammarLabel(w[4]) ? `<div class="note">${esc(grammarLabel(w[4]))}</div>` : ''}<div class="ref">${w[0].map((x) => `<a class="wlink" href="${base()}words/?id=${encodeURIComponent(all[x].id)}"><span class="ar">${esc(all[x].ar)}</span></a> ${esc(meaning(all[x]))}`).join(' · ')}</div></div>`; }
+    h += `<div class="row" style="justify-content:space-between;align-items:flex-start;margin-top:4px"><p class="tl" style="flex:1">${esc(trText(V))}</p>${playBtn(n, V.n, t('play'), 'sm')}</div>`;
     h += `<a class="btn quiet" style="margin-top:6px" href="${base()}listen/?v=${n}:${V.n}">${t('listen')} ${n}:${V.n}</a></div>`;
   }
-  h += `<p class="src" style="margin-top:14px">${lang() === 'tr' ? 'Meal: Diyanet İşleri' : 'Translation: Sahih International'} · ${t('srcAk')}</p>`;
+  h += `<p class="src" style="margin-top:14px">${esc(trName())} · ${t('srcAk')}</p>`;
   const y = window.scrollY; $('#surahs')!.innerHTML = h; window.scrollTo(0, y);
 }
 document.addEventListener('click', (e) => {

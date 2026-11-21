@@ -14,3 +14,10 @@ describe('review schedule', () => {
   it('placement "knew it" is checked again within 3–7 days', () => { place('l:y', true); const d = store.state.r['l:y'].due - dayNum(); expect(d).toBeGreaterThanOrEqual(3); expect(d).toBeLessThanOrEqual(7); });
   it('counts new words per day', () => { grade('l:a', 1, false); grade('l:b', 1, false); expect(store.state.day.nw).toBe(2); });
 });
+
+describe('known only after a later-day recall', () => {
+  beforeEach(() => replace(blank()));
+  it('a word graded easy on its first day is not yet confirmed', () => { grade('l:z', 2, false); expect(store.isKnown('l:z')).toBe(false); });
+  it('placement "knew it" is not confirmed until checked', () => { place('l:z', true); expect(store.isKnown('l:z')).toBe(false); });
+  it('a correct recall on a later day confirms it', () => { place('l:z', true); store.state.r['l:z'].f = dayNum() - 4; grade('l:z', 1, false); expect(store.isKnown('l:z')).toBe(true); });
+});

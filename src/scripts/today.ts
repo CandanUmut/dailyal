@@ -3,7 +3,7 @@ import { state, rollDay } from './store';
 import { items, surahs } from './data';
 import { dueItems, newItems, checks7 } from './srs';
 import { overview, pickVerse, mySurahItems, strip } from './coverage';
-import { t, lang } from './i18n';
+import { t, lang, num } from './i18n';
 import { $, base, esc } from './util';
 
 (async () => {
@@ -21,7 +21,7 @@ import { $, base, esc } from './util';
   if (due) h += `<a class="task" href="${base()}words/"><span class="n">${n++}</span><div><b>${t('tReview', { n: due })}</b><span class="d">${t('tReviewD', { d: due, m: Math.max(1, Math.round(due * 0.25)) })}</span></div><span class="go">›</span></a>`;
   h += '</div>';
   h += `<div class="sec"><div class="sh">${t('checks')}</div>${c.tot ? `<p class="big" style="font-size:30px">${t('checksN', { ok: c.ok, tot: c.tot })}</p>` : `<p class="note">${t('checksNone')}</p>`}</div>`;
-  h += `<div class="sec"><div class="sh">${t('follow')}</div><div class="row" style="align-items:baseline"><span class="big">${ov.full.toLocaleString()}</span><span class="sub">${t('versesAll', { t: ov.total.toLocaleString() })}</span></div><p class="cap">${t('shareWords', { p: (ov.share * 100).toFixed(1) })}</p></div>`;
+  h += `<div class="sec"><div class="sh">${t('follow')}</div><div class="row" style="align-items:baseline"><span class="big">${num(ov.full)}</span><span class="sub">${t('versesAll', { t: num(ov.total) })}</span></div><p class="cap">${t('shareWords', { p: num(ov.share * 100, 1) })}</p></div>`;
   h += `<div class="sec">${strip(ov.perSurah)}<p class="cap">${t('stripCap')}</p></div>`;
   $('#today')!.innerHTML = h;
 })();

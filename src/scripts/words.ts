@@ -3,7 +3,7 @@ import { state, rollDay } from './store';
 import { items, itemById, type Item } from './data';
 import { dueItems, newItems, grade, nextGap, missRate7 } from './srs';
 import { mySurahItems } from './coverage';
-import { cardBack } from './cardview';
+import { cardBack, roleLabel } from './cardview';
 import { toggle } from './verse';
 import { badge } from './chrome';
 import { t } from './i18n';
@@ -15,7 +15,7 @@ let back = '';
 const one = new URLSearchParams(location.search).get('id');
 
 function start(list: Item[]) { s = { queue: shuffle(list).map((c) => ({ c, again: false })), shown: false, done: 0, missed: 0 }; }
-const kindLabel = (c: Item) => (c.k === 'p' ? t('prefix') : c.k === 'pr' ? t('pronoun') : c.pos);
+const kindLabel = (c: Item) => (c.k === 'p' ? t('prefix') : c.k === 'pr' ? t('pronoun') : roleLabel(c));
 
 async function landing(boost: Set<string>) {
   rollDay();
@@ -35,7 +35,7 @@ function session() {
   h += `<p class="prompt-ar" lang="ar">${esc(c.ar)}</p>`;
   h += v.shown ? back : '';
   h += '</div>';
-  h += v.shown ? `<div class="grade"><button class="btn fail" data-a="grade" data-v="0">${t('missed')}<small>${t('tomorrow')}</small></button><button class="btn inc" data-a="grade" data-v="1">${t('effort')}<small>${it.again ? t('tomorrow') : t('days', { n: nextGap(c.id, 1) })}</small></button><button class="btn pass" data-a="grade" data-v="2">${t('easy')}<small>${it.again ? t('tomorrow') : t('days', { n: nextGap(c.id, 2) })}</small></button></div>`
+  h += v.shown ? `<div class="grade sticky"><button class="btn fail" data-a="grade" data-v="0">${t('missed')}<small>${t('tomorrow')}</small></button><button class="btn inc" data-a="grade" data-v="1">${t('effort')}<small>${it.again ? t('tomorrow') : t('days', { n: nextGap(c.id, 1) })}</small></button><button class="btn pass" data-a="grade" data-v="2">${t('easy')}<small>${it.again ? t('tomorrow') : t('days', { n: nextGap(c.id, 2) })}</small></button></div>`
     : `<div class="stackb"><button class="btn pri" data-a="show" style="min-height:60px">${t('show')}</button></div>`;
   return h;
 }

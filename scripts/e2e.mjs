@@ -27,7 +27,7 @@ async function checkPage(p, scheme, name) {
   await p.waitForTimeout(600);
   const over = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   if (over > 0) errors.push(`${scheme} ${name}: page scrolls sideways by ${over}px`);
-  const small = await p.evaluate(() => [...document.querySelectorAll('main a, main button, nav a, main select, main label.btn')].filter((e) => { const b = e.getBoundingClientRect(); const st = getComputedStyle(e); return b.width && b.height && b.height < 47.5 && st.display !== 'inline' && st.visibility !== 'hidden'; }).map((e) => (e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 30)));
+  const small = await p.evaluate(() => [...document.querySelectorAll('main a, main button, nav a, main select, main label.btn')].filter((e) => { const b = e.getBoundingClientRect(); const st = getComputedStyle(e); return b.width && b.height && (b.height < 47.5 || b.width < 47.5) && st.display !== 'inline' && st.visibility !== 'hidden'; }).map((e) => (e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 30)));
   if (small.length) errors.push(`${scheme} ${name}: tap targets under 48px: ${small.slice(0, 5).join(' | ')}`);
 }
 const routes = ['', 'words/', 'words/?id=l%3Arab~', 'listen/?v=1:2', 'surahs/', 'surahs/read/?n=112', 'library/', 'library/roots/', 'library/roots/?r=rHm', 'library/pronouns/', 'library/how/', 'place/', 'settings/', 'about/'];
@@ -49,7 +49,7 @@ await p.goto(ROOT + 'listen/?v=112:1'); await p.waitForTimeout(600);
 await p.tap('.q .w >> nth=1'); await p.screenshot({ path: `${OUT}/flow-listen-1.png`, fullPage: true });
 await p.tap('[data-a=next]');
 for (let i = 0; i < 4 && (await p.$('[data-a=fill]')); i++) { await p.tap('[data-a=fill] >> nth=0'); if (i === 0) await p.screenshot({ path: `${OUT}/flow-listen-2.png`, fullPage: true }); await p.tap('[data-a=next]'); }
-await p.tap('[data-a=check] >> nth=0'); await p.tap('[data-a=self][data-v="2"]'); await p.screenshot({ path: `${OUT}/flow-listen-3.png`, fullPage: true });
+await p.tap('[data-a=play]'); await p.waitForSelector('[data-a=check]'); await p.tap('[data-a=check] >> nth=0'); await p.tap('[data-a=self][data-v="2"]'); await p.tap('[data-a=self][data-v="3"]'); await p.screenshot({ path: `${OUT}/flow-listen-3.png`, fullPage: true });
 await p.goto(ROOT + 'words/'); await p.waitForTimeout(600);
 await p.tap('[data-a=start]'); await p.tap('[data-a=show]'); await p.waitForTimeout(400); await p.screenshot({ path: `${OUT}/flow-words.png`, fullPage: true });
 for (let i = 0; i < 10; i++) { await p.tap(`[data-a=grade][data-v="${i % 3}"]`); if (await p.$('[data-a=show]')) await p.tap('[data-a=show]'); else break; }

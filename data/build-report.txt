@@ -1,4 +1,11 @@
 alignment problems: 0
 
-items 4855, with meaning 3271
-Açık Kuran words 39625/77429
+meanings that still look negated (top 1000): 6
+292 أُدْخِلَ | bizi katmasını | will admit
+314 ٱسْتَغْفَرَ | ve bağışlanmasını dileseydi | and asked forgiveness
+341 يَحْزُن | seni üzmesin | grieve you
+642 أَغْنَىٰ | zengin etmedi mi? | so He made self-sufficient
+781 يُنظَرُ | göz açtırmayın bana | give me respite
+957 تَذْكِرَة | bir hatırlatmadır | (is) a reminder
+items 4941, with meaning 3742
+Açık Kuran words 47143/77429
