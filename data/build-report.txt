@@ -1,8 +1,6 @@
 alignment problems: 0
 
-meanings that still look negated (top 1000): 3
+meanings that still look negated (top 1000): 1
 419 غَٰفِل | umursamaz | (are) unaware
-642 أَغْنَىٰ | zengin etmedi mi? | so He made self-sufficient
-957 تَذْكِرَة | bir hatırlatmadır | (is) a reminder
-items 4941, with meaning 4473
-Açık Kuran words 70413/77429
+items 4941, with meaning 4812
+Açık Kuran words 77429/77429
